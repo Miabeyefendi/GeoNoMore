@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GeoNoMore - UI mockup</title>
+<style>
+/* GeoNoMore options. Düzen docs/Live design for location spoofing altındaki
+   tasarımdan birebir alındı. Tasarım koyu tema için satır içi renklerle
+   yazılmıştı; buraya değişkenlerle taşındı ki açık tema da çalışsın. */
+
+:root,
+:root[data-theme="dark"] {
+  --bg: #0b0b10;
+  --panel: #14141c;
+  --line: #262633;
+  --text: #e8e8f0;
+  --dim: #8a8aa0;
+  --blue: #3b82f6;
+  --purple: #7c3aed;
+  --orange: #f97316;
+  --red: #ef4444;
+  --go: #22c55e;
+  --mapbg: #1a1a24;
+  --zebra: rgba(255, 255, 255, .025);
+  --dangerline: #4a2020;
+  --warn: #c8a06a;
+  --bar: rgba(15, 15, 22, .95);
+  --float: rgba(20, 20, 28, .92);
+}
+
+:root[data-theme="light"] {
+  --bg: #f6f6fa;
+  --panel: #ffffff;
+  --line: #dedee8;
+  --text: #16161e;
+  --dim: #6a6a80;
+  --blue: #2563eb;
+  --purple: #6d28d9;
+  --orange: #ea6a08;
+  --red: #dc2626;
+  --go: #15803d;
+  --mapbg: #e8e8f0;
+  --zebra: rgba(0, 0, 0, .025);
+  --dangerline: #f0c4c4;
+  --warn: #8a5a12;
+  --bar: rgba(255, 255, 255, .95);
+  --float: rgba(255, 255, 255, .94);
+}
+
+* { box-sizing: border-box; }
+
+/* display veren bir kural (grid, flex) tarayıcının [hidden] kuralını yener.
+   Gizlediğimizi sandığımız kart ekranda kalıyordu, bu yüzden zorluyoruz. */
+[hidden] { display: none !important; }
+
+html, body { margin: 0; height: 100%; }
+
+body {
+  display: flex;
+  min-width: 1000px;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.5 "Segoe UI", system-ui, sans-serif;
+  overflow: hidden;
+}
+
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* --- sol menü ------------------------------------------------------------- */
+
+.side {
+  flex: 0 0 240px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px;
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+}
+
+.brandrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 6px 16px;
+}
+
+.logo {
+  flex: 0 0 auto;
+  width: auto;
+  height: 24px;
+}
+
+.brandrow .name { font-size: 15px; font-weight: 600; }
+
+.brandrow .ver {
+  margin-left: auto;
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  font-size: 10px;
+  color: var(--dim);
+}
+
+.sidehint {
+  margin: 0 0 14px;
+  padding: 0 4px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--dim);
+}
+
+.sidetabs { display: flex; flex-direction: column; gap: 2px; }
+
+.sidetabs button {
+  padding: 9px 12px;
+  background: none;
+  border: 0;
+  border-radius: 7px;
+  color: var(--dim);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.sidetabs button:hover { background: var(--panel); color: var(--text); }
+
+.sidetabs button.sel {
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: inset 2px 0 0 var(--purple);
+}
+
+/* --- ana sütun ------------------------------------------------------------ */
+
+.content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 40px;
+  background: var(--bar);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+}
+
+.runstate {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.runstate.on { color: var(--go); }
+
+.power {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: var(--go);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.power[aria-pressed="true"] { background: var(--red); }
+
+/* Simgeler karakter değil çizim: yazı tipine bağlı kalınca boş kutu çıkıyordu */
+.power i { display: block; box-sizing: border-box; }
+
+.power[aria-pressed="false"] i {
+  margin-left: 3px;
+  width: 0; height: 0;
+  border-left: 9px solid #fff;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+
+.power[aria-pressed="true"] i {
+  width: 10px; height: 11px;
+  border-left: 3px solid #fff;
+  border-right: 3px solid #fff;
+}
+
+.page { flex: 1 1 auto; padding: 28px 40px 24px; }
+h1 { margin: 0; font-size: 20px; font-weight: 600; }
+
+/* Baslik satiri. Arama kutusu haritanin USTUNDE, basligin hizasinda duruyor.
+   Harita icindeyken tiklamalar haritaya sizip nokta birakiyordu. */
+.pagehead {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  min-height: 34px;
+  margin-bottom: 22px;
+}
+
+.pagehead .searchbox { margin-left: auto; }
+
+/* --- kartlar -------------------------------------------------------------- */
+
+.card {
+  padding: 24px 26px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.cardtitle {
+  margin: 0 0 14px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.cardhead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+}
+
+.cardhead .cardtitle { margin: 0; white-space: nowrap; }
+.cardhead .hint { margin: 0; }
+
+.stack { display: flex; flex-direction: column; gap: 20px; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.cols-wide { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+.span2 { grid-column: 1 / -1; }
+
+/* --- alanlar -------------------------------------------------------------- */
+
+label {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 11px;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+input[type="text"], input[type="number"], input[type="time"],
+input[type="search"], textarea, select {
+  width: 100%;
+  padding: 9px 11px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+}
+
+textarea { resize: vertical; font-family: Consolas, monospace; font-size: 12.5px; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--purple); }
+input:disabled { color: var(--dim); }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+.gap { margin-bottom: 14px; }
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.check input { width: auto; accent-color: var(--purple); }
+.radios { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+
+.hint { margin: 12px 0 0; font-size: 12px; color: var(--dim); }
+.warnhint { color: var(--warn); }
+
+button {
+  padding: 8px 14px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+
+button:hover { border-color: var(--purple); }
+button.danger { color: var(--red); border-color: var(--dangerline); }
+
+.link {
+  margin-top: 12px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--blue);
+  cursor: pointer;
+}
+
+.link:hover { border: 0; text-decoration: underline; }
+
+.row { display: flex; gap: 10px; align-items: center; }
+.row input[type="text"] { flex: 1; }
+.grow { flex: 1; }
+
+/* Bölümlü düğmeler: kip anahtarı, gizlilik seviyesi, Basit/Gelişmiş */
+.seg { display: flex; gap: 6px; }
+
+.seg button {
+  flex: 1;
+  padding: 7px 14px;
+  background: var(--bg);
+  color: var(--dim);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+
+.seg button.sel {
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  border-color: transparent;
+  color: #fff;
+}
+
+.topbar .seg button { flex: 0 0 auto; }
+.side .seg { margin-bottom: 6px; }
+.side .seg button { padding: 7px 0; font-size: 12.5px; }
+
+/* --- harita --------------------------------------------------------------- */
+
+.map {
+  position: relative;
+  width: 100%;
+  height: min(62vh, 680px);
+  min-height: 400px;
+  overflow: hidden;
+  background: var(--mapbg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
+
+.map-tiles { position: absolute; inset: 0; }
+.map-tile { position: absolute; width: 256px; height: 256px; pointer-events: none; }
+
+.map-zone { position: absolute; border-radius: 50%; pointer-events: none; }
+.map-zone-outer { background: rgba(124, 58, 237, .18); border: 1px solid rgba(124, 58, 237, .7); }
+.map-zone-inner { background: rgba(249, 115, 22, .16); border: 1px dashed rgba(249, 115, 22, .8); }
+
+.map-route { position: absolute; inset: 0; pointer-events: none; }
+.route-line { fill: none; stroke: var(--blue); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; opacity: .85; }
+.route-dot { fill: var(--blue); stroke: #fff; stroke-width: 2; }
+.route-num { fill: #fff; font: 600 10px "Segoe UI", sans-serif; text-anchor: middle; }
+
+.map-pin {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  background: var(--orange);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .5);
+  pointer-events: none;
+}
+
+.map-attrib {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 2px 6px;
+  background: var(--bg);
+  opacity: .85;
+  color: var(--dim);
+  font-size: 10px;
+}
+
+.map-zoom {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: var(--bg);
+  opacity: .9;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.map-zoom-out { top: 44px; }
+
+.searchbox {
+  position: relative;
+  z-index: 3;
+  width: 340px;
+}
+
+.searchbox .row { gap: 6px; }
+.searchbox input { padding: 8px 10px; background: var(--float); font-size: 13px; }
+.searchbox button { padding: 8px 12px; background: var(--float); font-size: 12px; }
+
+.results {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  overflow: hidden;
+  background: var(--float);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.results button {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  color: var(--text);
+  font-size: 12px;
+  text-align: left;
+}
+
+.results button:last-child { border-bottom: 0; }
+.results button:hover { background: var(--bg); }
+.results .coords { display: block; margin-top: 1px; color: var(--dim); font-size: 10px; }
+
+.searchnote {
+  margin: 4px 0 0;
+  padding: 4px 6px;
+  background: var(--float);
+  border-radius: 4px;
+  font-size: 10px;
+  color: var(--warn);
+}
+
+/* --- rota noktaları ------------------------------------------------------- */
+
+.waypoints { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+
+.waypoint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px 4px 10px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  font-family: Consolas, monospace;
+  font-size: 11.5px;
+}
+
+.waypoint button { padding: 0 4px; background: none; border: 0; color: var(--dim); line-height: 1; }
+.waypoint button:hover { color: var(--red); border: 0; }
+.picking { box-shadow: 0 0 0 2px var(--purple); }
+
+/* --- site kuralları ------------------------------------------------------- */
+
+.rulehead, .rule {
+  display: grid;
+  grid-template-columns: 1fr 120px 1fr 30px;
+  gap: 10px;
+  align-items: center;
+}
+
+.rulehead {
+  margin-top: 12px;
+  font-size: 10px;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.rule { margin-top: 8px; }
+.rule .del, .sched .del { padding: 0; height: 34px; color: var(--dim); line-height: 1; }
+.rule .del:hover, .sched .del:hover { color: var(--red); border-color: var(--red); }
+
+.prefs {
+  margin: 6px 0 0;
+  padding: 10px 12px;
+  overflow-x: auto;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--dim);
+  font: 11.5px/1.7 Consolas, monospace;
+  white-space: pre;
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.group {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.group > .check { margin: 0; padding: 8px 10px; }
+.group > .check span { flex: 1; }
+.group .count { flex: 0 0 auto; color: var(--dim); font-size: 11px; }
+
+.group .toggle {
+  padding: 2px 8px;
+  background: transparent;
+  border: 0;
+  color: var(--dim);
+  font-size: 11px;
+}
+
+.group .toggle:hover { color: var(--text); }
+.group .members { padding: 0 10px 10px; border-top: 1px solid var(--line); }
+
+.domains {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.domain {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 2px 8px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  font-size: 11px;
+}
+
+.domain.own { border-color: var(--purple); }
+
+.domain button {
+  padding: 0 3px;
+  background: transparent;
+  border: 0;
+  color: var(--dim);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.domain button:hover { color: var(--red); }
+.addomain { display: flex; gap: 6px; }
+.addomain input { padding: 5px 8px; font-size: 12px; }
+.addomain button { padding: 5px 10px; font-size: 12px; }
+
+/* --- zamanlama ------------------------------------------------------------ */
+
+.schedhead, .sched {
+  display: grid;
+  grid-template-columns: 280px 140px 1fr 30px;
+  gap: 12px;
+  align-items: center;
+}
+
+.schedhead {
+  margin-top: 16px;
+  font-size: 10px;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.sched { margin-top: 8px; }
+/* Gun secilmemis satir calismiyor, oyle de gorunsun */
+.sched.off select, .sched.off input[type="time"] { color: var(--dim); }
+.days { display: flex; gap: 3px; }
+
+.days button {
+  flex: 1;
+  padding: 7px 0;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--dim);
+  font-size: 11px;
+}
+
+.days button.sel {
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  border-color: transparent;
+  color: #fff;
+}
+
+/* --- log ve geçmiş -------------------------------------------------------- */
+
+.logbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
+.logbar .check { margin: 0; }
+.logbar select { width: auto; min-width: 130px; }
+.logmsg { font-size: 12px; color: var(--blue); }
+
+.logbox {
+  max-height: 420px;
+  margin-top: 10px;
+  overflow: auto;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: Consolas, monospace;
+  font-size: 12px;
+}
+
+.logrow {
+  display: grid;
+  grid-template-columns: 105px 70px 150px 1fr;
+  gap: 10px;
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.timerow { grid-template-columns: 90px 170px 150px 1fr; }
+
+.logrow:nth-child(even) { background: var(--zebra); }
+.logrow .lt { color: var(--dim); }
+.logrow .ls { color: var(--blue); }
+.logrow .le { color: var(--orange); }
+.logrow .ld { color: var(--text); overflow-wrap: anywhere; }
+.logrow.err .le { color: var(--red); }
+.logempty { padding: 14px; color: var(--dim); font-family: "Segoe UI", system-ui, sans-serif; }
+
+/* --- hazır ayarlar -------------------------------------------------------- */
+
+.presets { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+
+.preset {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.preset .name { flex: 1; font-size: 12.5px; }
+.preset button { padding: 2px 9px; font-size: 12px; }
+.presetadd input { max-width: 220px; }
+.card.slim { padding: 12px 16px; }
+.presetadd input { padding: 5px 9px; font-size: 12px; }
+.presetadd button { padding: 5px 12px; font-size: 12px; }
+.card.slim .cardtitle { margin-bottom: 10px; }
+.preset .tag { font-size: 11px; color: var(--dim); }
+.preset.active { border-color: var(--purple); }
+.preset.empty .name { color: var(--dim); }
+
+
+/* ---- popup ---- */
+
+.popup * { box-sizing: border-box; }
+.popup {
+  width: 280px;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.45 "Segoe UI", system-ui, sans-serif;
+}
+.popup header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.popup /* Logo dikey; genisligi yuksekligi belirlesin, .popup ezilmesin */
+header .logo { flex: 0 0 auto; width: auto; height: 20px; }
+.popup .brand { font-weight: 600; letter-spacing: .2px; }
+.popup .state {
+  margin-left: auto;
+  margin-right: 2px;
+  font-size: 10px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+.popup .state.on { color: var(--go); }
+.popup .gear {
+  margin-left: 2px;
+  padding: 0 2px;
+  background: none;
+  border: 0;
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+}
+.popup .gear:hover { color: var(--text); }
+.popup main { padding: 10px 12px 0; }
+.popup .box {
+  padding: 10px;
+  margin-bottom: 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.popup .boxhead {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 6px;
+  font-size: 10px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+.popup .link {
+  margin-left: auto;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--blue);
+  cursor: pointer;
+  font: inherit;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.popup .link:hover { text-decoration: underline; }
+.popup .place {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.popup label {
+  display: block;
+  margin: 10px 0 3px;
+  font-size: 10px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.popup .field {
+  margin: 0;
+  padding: 6px 8px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.popup .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.popup .sub {
+  margin: 10px 0 0;
+  font-size: 11.5px;
+  color: var(--dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.popup select {
+  width: 100%;
+  padding: 7px 8px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+}
+.popup select:focus { outline: none; border-color: var(--purple); }
+.popup .box select + select { margin-top: 6px; }
+.popup .power {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  background: var(--go);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.popup .power[aria-pressed="true"] { background: var(--red); }
+.popup /* Simgeler karakter değil, .popup çizim. Yazı tipine bağlı kalınca boş kutu çıkıyordu. */
+.power i { display: block; box-sizing: border-box; }
+.popup .power[aria-pressed="false"] i {
+  margin-left: 3px;
+  width: 0;
+  height: 0;
+  border-left: 9px solid #fff;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+.popup .power[aria-pressed="true"] i {
+  width: 10px;
+  height: 11px;
+  border-left: 3px solid #fff;
+  border-right: 3px solid #fff;
+}
+.popup .power:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+.popup footer {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--line);
+}
+.popup .dot {
+  flex: 0 0 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--dim);
+}
+.popup .dot.on { background: var(--go); }
+.popup .sitename {
+  flex: 1;
+  overflow: hidden;
+  font-size: 11px;
+  color: var(--dim);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.popup .ovr {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 128px;
+  padding: 3px 4px;
+  font-size: 11px;
+}
+.popup .warn {
+  margin: 10px 12px 0;
+  padding: 10px;
+  background: var(--warnbg);
+  border: 1px solid var(--orange);
+  border-radius: 6px;
+}
+.popup .warn p { margin: 0 0 8px; font-size: 12px; }
+.popup .warn button {
+  width: 100%;
+  padding: 6px;
+  background: var(--orange);
+  color: #fff;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+
+
+/* ---- yalniz maket icin ---- */
+.mockbar {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; gap: 14px;
+  margin: 0 -28px 18px; padding: 12px 28px;
+  background: var(--panel); border-bottom: 1px solid var(--line);
+}
+.mockbar b { font-size: 14px; }
+.mockbar span { font-size: 12px; color: var(--dim); }
+.mockbar .pill {
+  padding: 3px 9px; border: 1px solid var(--line); border-radius: 20px;
+  font-size: 11px; color: var(--dim);
+}
+.panel { margin-bottom: 34px; padding-bottom: 26px; border-bottom: 1px dashed var(--line); }
+.panel:last-child { border-bottom: 0; }
+.panelname {
+  display: inline-block; margin: 0 0 10px; padding: 3px 10px;
+  background: var(--panel); border: 1px solid var(--purple); border-radius: 20px;
+  font-size: 11px; letter-spacing: .5px; text-transform: uppercase; color: var(--text);
+}
+.popup {
+  width: 280px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+}
+.popupwrap { display: flex; gap: 26px; align-items: flex-start; flex-wrap: wrap; }
+.popupwrap .hint { max-width: 420px; }
+.fakemap { position: relative; background: var(--mapbg); }
+.fakemap svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fakemap .grid { stroke: var(--line); stroke-width: 1; }
+.fakemap .road { stroke: var(--dim); stroke-width: 6; opacity: .35; fill: none; }
+.mocknote {
+  margin: 26px 0 0; padding: 12px 14px;
+  background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--orange);
+  border-radius: 6px; font-size: 12.5px; color: var(--dim);
+}
+
+</style>
+</head>
+<body>
+
+<div class="mockbar">
+  <b>GeoNoMore</b>
+  <span>Görsel maket. Hiçbir şey çalışmıyor, yalnız arayüzün nasıl göründüğünü gösterir.</span>
+  <span class="pill">dark</span>
+  <span class="pill">v4.4.0</span>
+</div>
+
+<h2 style="margin-top:0">Popup</h2>
+<div class="popupwrap">
+  
+<div class="popup">
+  <header>
+    <img class="logo" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgNzM3IDEyNTYiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6IHVybCgjbGluZWFyLWdyYWRpZW50LTIpOwogICAgICB9CgogICAgICAuY2xzLTIgewogICAgICAgIGZpbGw6ICMwNTNiNjM7CiAgICAgIH0KCiAgICAgIC5jbHMtMyB7CiAgICAgICAgZmlsbDogdXJsKCNsaW5lYXItZ3JhZGllbnQtNCk7CiAgICAgIH0KCiAgICAgIC5jbHMtNCB7CiAgICAgICAgZmlsbDogIzIxNjNkODsKICAgICAgfQoKICAgICAgLmNscy01IHsKICAgICAgICBmaWxsOiAjMWY1MDk5OwogICAgICB9CgogICAgICAuY2xzLTYgewogICAgICAgIGZpbGw6IHVybCgjbGluZWFyLWdyYWRpZW50LTMpOwogICAgICB9CgogICAgICAuY2xzLTcgewogICAgICAgIGZpbGw6IHVybCgjbGluZWFyLWdyYWRpZW50KTsKICAgICAgfQoKICAgICAgLmNscy04IHsKICAgICAgICBmaWxsOiAjMDAyNTM5OwogICAgICB9CiAgICA8L3N0eWxlPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJsaW5lYXItZ3JhZGllbnQiIHgxPSIxOTkuMDYiIHkxPSIxMDQ1LjQ4IiB4Mj0iMTk5LjA2IiB5Mj0iNTgzLjg4IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2ZlNWMyNSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmZGM5MzMiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImxpbmVhci1ncmFkaWVudC0yIiB4MT0iMzYuOTciIHkxPSI2NzYuNSIgeDI9IjQ4My4zOCIgeTI9IjY3Ni41IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxzdG9wIG9mZnNldD0iLjI3IiBzdG9wLWNvbG9yPSIjZmRjOTMzIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2ZlNWMyNSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ibGluZWFyLWdyYWRpZW50LTMiIHgxPSIzMzAuMjIiIHkxPSI5MTAuMTciIHgyPSI3MDIuODEiIHkyPSI5MTAuMTciIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjNWYxNjI2Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzAwMCIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ibGluZWFyLWdyYWRpZW50LTQiIHgxPSIyMjMuMTYiIHkxPSI4MjEuNDkiIHgyPSI3MDIuMDMiIHkyPSI4MjEuNDkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZjQwMDNhIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzAwMCIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPGcgaWQ9IkdlbmVyYXRpdmVfT2JqZWN0IiBkYXRhLW5hbWU9IkdlbmVyYXRpdmUgT2JqZWN0Ij4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTgiIGQ9Ik0yNDEuMDIsMzQ0LjMyYzIuNzYsMzAuODEsMTAuNSw2MC4yNCwyMy44OSw4OC4wMiw1LjM1LDExLjEsMTAuNTcsMjEuMjgsMTcuNDQsMzEuNDRsMzYuMTgsNTEuMzVjLjM1LjUzLTEuMTctLjUtMi42Ni0xLjM1LTIuNS0xLjQzLTQuNzQtMy4yNi02LjczLTUuMzUtMzMuMTUtMzQuNzUtNzkuNTktNTUuNjktMTI2LjY2LTY1LjcyLTguOTgtMS45MS0xNy4xNy00LjIzLTI1LjM4LTcuNzEtMTAuNC00LjQxLTE1LjMxLTE0Ljk4LTExLjgtMjUuMzEsMi43LS40MywzLjktMi42OCw2LjIyLTQuNCwyOS4xOS0yMS42Niw1OS40Mi00MS4zLDg5LjUtNjAuOThaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtNSIgZD0iTTM2MS40OCw2ODIuNDJsMS4xMywxLjY5Yy4xNyw2LjExLS40NywxMi4yMi0xLjkyLDE4LjMzbC0xLjU0LDYuMzZjLTMuMSwyMy4zMS0yLjYyLDQ5LjI2LTEuMzIsNzIuMjFsLTE2LjQ5LTE3LjU1LTM3LjUxLTU1LjUtMzAuNTctNTEuMjktMTAuMTYtMjEuMzJjLTExLjQ0LTI4LjcxLTIzLjY0LTU2LjQ0LTM3Ljc3LTgzLjk1LTguOTItMTcuMzYtMTkuNDgtMzIuNDgtMzEuNzUtNDcuNDlsLTI0LjYzLTMwLjEzYy4yLS40LjI0LS42NS40NS0uODdsMjMuODcsMTMuOTdjMjMuNTQsMTEuNjUsNDYuMDEsMjMuOTgsNjguNDcsMzcuNTcsMTYuMiw5LjgxLDI5Ljg1LDIxLjA3LDQzLjE3LDM0LjQ1LDMwLjAzLDMwLjE2LDUwLjQyLDY4LjU4LDU2LjEyLDExMC41NGwuNDUsMTIuOThaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtNCIgZD0iTTYyNC40Myw0MzEuNjVsLTEwLjgsMTMuNjgtNDUuNTgsNTguODRjLTE2LjU1LDIxLjM3LTM0Ljc0LDQwLjY1LTUwLjIzLDYyLjk1LTI5LjE5LDQyLjAyLTU0LjAzLDg2LjEzLTc3LjE2LDEzMS43LTEwLjA1LDE5LjgxLTE5LjE1LDM5LjAzLTI3LjU1LDU5LjQ2bC04LjExLDIwLjFjLS42Ni41Ni0xLjMzLDEuMDktMi4wNiwxLjUyLS43My40My0xLjQzLjgzLTIuMTYuOTMtMTMuMjYsMS43OS0yNS4zOSwyLjYxLTM4Ljc5LDIuMTgtLjczLS4wMi0xLjQ3LS4zNi0yLjI0LS43MS0uNzctLjM1LTEuMjItLjgtMS45Mi0xLjI5bC0uMTctMi44MWMtLjUtLjg3LS45Ni0xLjc2LTEuMzEtMi42OS0uMzUtLjkyLS42Ny0xLjgyLS43Mi0yLjczLTEuMzQtMjIuMS0uMTctNDIuMzIsMS44LTY0LjI2LjAzLS4zOC4xNy0xLjY5LjM4LTMuNTZoMGMuMTMtMS4xNC4yOS0yLjQ4LjQ3LTMuOTMuMDItLjE2LjA0LS4zLjA1LS40MS40LTMuMTUuOS02LjgxLDEuNDYtMTAuMTcuNC0yLjQxLDIuMi00LjQ3LDIuNjMtNi4yNi4xNS0uNi0xLjA5LTEuMzQtLjk0LTEuODN0LjAxLS4wMnMuMDEtLjA1LjAyLS4wOGMuMDItLjA3LjA0LS4xNC4wNi0uMjF2LS4wM2MuMy0uOTEuNTktMS41Ny44OC0xLjg4LjEzLS4xNi4yNi0uMjMuMzktLjIyLDEuNjQtMTQuMzEsNi40Mi01Ljg1LDEzLjM0LTE4LjQ4LDE2LjU2LTMwLjIxLDM2LjYzLTU5LjExLDU4LjkxLTg1LjQ3Ljg1LTEuMDEsMS45Mi0xLjg0LDMuMDEtMi42NywxLjA5LS44NCwyLjI3LTEuNTcsMy40Ny0yLjI3LS4wNC0uMzktLjA0LS43OS0uMDEtMS4xOS4yLTIuMjYsMS42MS00LjUsNC4xOC00LjE3LDYuNjMtOC45OCwxNC42LTE2LjgzLDIzLjkxLTIzLjU1LDE2LjE5LTEyLjMyLDI0LjI4LTE4LjQ4LDI0LjI4LTE4LjQ4bDc5LjUzLTUyLjhjMTYuMDYtMTQuODcsMzUuNzgtMzYuODUsMzYuMjUtNTkuNjguMzYtMTcuOTItOS4wMS0zMS4zMS0xOS40MS00NS40NS0zNi43Ni00OS45Ni04Ny45NC0xMTEuNTYtMTQzLjc1LTEzOS41OC0zNi41MS0xOC4zMy02Ny4zMy0zLjgtOTkuNDIsMTYuOS01Mi4xOSwzMy42NS0xMDQuMTEsNzQuMjItMTUwLjU2LDExMi44OWwtMi4wOS0uNTJjLTIuNjQsMS4xOS0yLjU4LS4zMi0xLjY5LTIuNzEsNDcuMjMtNTIuODQsOTQuODgtMTA2LjA4LDE0Mi45NS0xNTkuNzMsMTIuNS0xNC41NywyNS0yOS41NiwzNS45Mi00NC44NCwxLjctMi4zOCw4LjE0LTEyLjIyLDYuNDEtMTQuODUtMS4zOS0yLjEtMTIuMy0xLjQzLTE0LjgxLS45NS0zOS42OSw3LjQ5LTc1LjkyLDMwLjUzLTEwNS4zMyw1Ny4xOC0uNzcuODgtMy4yMi40Ny0zLjY4LS4xOS0xLjgyLTIuNTYsNi42Mi0yMS42Niw4LjcxLTI2LjI0LDEwLjY0LTIzLjI1LDI1Ljk4LTQyLjkyLDQzLjQtNjAuODNsMzkuNDktNDAuMzhjMTAuOTktMTEuNDcsMTguNTktMjUuOTUsMjEuODctNDEuMzguOTctLjI5LDEuODQtLjY2LDIuNTItMS40NWg5LjU3YzM0LjA0LDYuNDIsNzAuNTQsMzcuNTIsOTMuMzIsNjQuMjksMTIuOTIsMTUuMTgsMjUuODgsMzAsMzYuMjYsNDcuMjEsMTkuMDQsMzEuNTYsMzMuNCw2NS4yOSw0NS4yMywxMDAuMDgsNi4xMSwxOCwxMC45OCwzNS4xMywxNy45Nyw1Mi42Miw2LjcyLDE2LjgyLDE1Ljk1LDMxLjA3LDI2LjkyLDQ1LjQxbDE4LjUxLDI0LjE5YzkuNDQsMTIuMzQsMTUuMTcsMjYuNzgsMTcuODUsNDIuMTIsMi40MiwxMy44OC0xLjgsMjYuODMtMTEuNDQsMzYuN1oiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMTk0LjAxLDM1My45M2MtLjQ4LjUtLjU4LDEuMDEuNDcsMS40N2wuNTEsMS44M2MtMTcuMSwxMy44Ni0zNS4wMSwyOS4zOS00Ni4zNyw0OC44MWwtMy4xMywzLjYzLS4wNy4wOGMtLjM1LDEuNy0uNTEsMy4zLS41MSw0LjgyLDAsMTMuMjIsMTIuNTUsMTkuNjgsMjUuMjEsMjMuMjYsNDYuMDEsMTAuMDQsOTMuMzIsMjUuMjQsMTI5LjA4LDU3LjQ1LDUuNDQsNC45LDEwLjk2LDEwLjA0LDE0LjI5LDE2LjYxLjg3LjMyLDEuNzMuNjcsMi41MiwxLjEyLjc4LjQ1LDEuNTIuOTEsMi4wNywxLjUzLjA1LjA1LjA5LjExLjE0LjE2LDIuODksMy4yNyw1LjY3LDYuNzMsOC4zMywxMC4zNiw1LjM3LDcuMzIsMTAuMjUsMTUuMzIsMTQuNTgsMjMuNzQuMDIuMDMuMDQuMDcuMDYuMTEsNi40NSwxMi41NCwxMS42OSwyNi4wMiwxNS41MiwzOS42MnQwLC4wMmM5LjI1LDQxLjE4LDQuOTcsOTEuNTEsNC43Nyw5My43OS4wMS0uMDMuMDEtLjA1LjAyLS4wOC40NS0yLjU5Ljk1LTUuMTcsMS40OC03Ljc0LS4wNi44OC0uMTMsMS43Ny0uMjEsMi42Mi0uMSwxLjA3LS4yMSwyLjA5LS4zMywzLS4xNiwxLjE5LS4zNSwyLjE5LS41NywyLjg5LS4yMS42Ny0uNDYsMS4wNS0uNzQsMS0uMDMsMC0uMDYtLjAxLS4xLS4wMy0uMTYtLjA4LS4zNC0uMjktLjUyLS42Ny04LjMzLTU2LjU3LTQ3LjQzLTEyNS4wMy05NS43My0xNTQuOTItMjMuMzktMTQuNDktNDcuNjYtMjcuNzItNzIuMzQtMzkuOTktOC41OC00LjcxLTE2LjQyLTkuNTktMjMuNS0xNC42NC0uOTUtMS4xNi0yLjQxLTIuOTMtNC4wNC0zLjk2LTE1Ljg3LTEwLjA1LTI5Ljk5LTIxLjcxLTQyLjI2LTM1Ljk2LTEwLjc1LTEyLjQ3LTE0LjY3LTI4LjQxLTEwLjQ1LTQ0LjMzLDMuNDItMTIuOTIsOS4wMy0yNC41NiwxNi43Ny0zNS40Nyw4LjAyLTExLjI5LDE2LjE2LTIxLjc4LDI0LjkzLTMyLjUsMTAuNDQtMTIuNzYsMTguMTQtMjYuMjcsMjMuMzQtNDEuOTlsMTguMTctNTQuODdjMTQuMjktNDMuMTksMzIuNjEtODMuMTQsNjIuOTctMTE3LjMxLDI0Ljc3LTI3Ljg3LDUzLjctNTYuMTQsODUuNDItNzUuNTYsNy44My00Ljc5LDE1LjU4LTguODMsMjMuOTItMTEuMzUuNTEuMTUsMS4yNiwxLjEsMS4wOSwyLjA3LTIuNzQsMTUuMTQtMTEuODksMzAuNDgtMjIuNTYsNDEuNGwtMzguNjIsMzkuNDktOS43LDEwLjUzYy0xOS43NywyMS40NS0zNC40MSw0Ni40My00Mi43OSw3NS4wNCwzLjcxLTEuNSw1LjM5LTQuNjcsOC4yNS03LjA1LDI2LjAyLTIxLjU4LDYyLjktNDQuNzEsOTYuMTYtNTAuODMsNy4zNS0xLjM1LDE3Ljk0LTEuODMsMTkuOTQsMS4xOSwzLjE4LDQuNzgtOC4wMywxOS4zNS0xNC4xNiwyNy4yOS0xNS41OSwyMC4xOS0zMS44NywzOC45Ny00OS4wNCw1Ny45M2wtNDYuMzYsNTEuMTctNDguOTUsNTUuNDctMjYuOTcsMjkuNzVaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtOCIgZD0iTTQ0NS43NCw1NjUuNjdjLjA2LTIuODgsMS4wOC01LjY5LDIuMzEtOC4yOSwxMy43My0yOC44NiwzOC42MS01NS4yNSw2Mi44OS03NS41OGw1My44My00MC44N2MxOS40Ny0xNy45NywzMi45NC0zNS4yMSwxMS44Ni01Ny45OS0xOS4xMi0xNS42Mi0zOS4xNi0yOS44OC02MC4xLTQyLjc4bC0uOTgtLjYzYy0yLjk5LS43NC00LjEyLTIuOTYtNC4xMi0yLjk2LTM1Ljg0LTI0LjUzLTc5LjE0LTUxLjc2LTEyMi43Ny01Ny44OC0xOC42My0yLjYxLTM2LjY2LDMuMTYtNTMuMiwxMS4yNi0yOS42MSwxNC41MS01OC42LDMyLjExLTg2LjU4LDUwLjI2bC03Ljc0LDQuMTQtMy44OCwzLjkyYy0zMC41NCwyMC4wNy02MC4xOCw0MC44LTg4LjkzLDYyLjE4LTEsLjgzLTEuOTkuMjYtMi45MS0uNzIsMi41My03LjQ1LDcuMjEtMTQuMDgsMTIuODctMjAuMjksNy43Ny04LjUzLDE1LjQxLTE2Ljk3LDI0LjM0LTI0LjNsMTEuODUtOS43NCwxOC42NS0xNS42N2MzNC4wOS0yNy4yLDY4LjI3LTUzLjQzLDEwMy45NS03OC42MSwxNS4wNi0xMC42MywyOS42Mi0yMC40Miw0NS42LTI5LjM0LDIzLjM4LTEzLjA0LDQ5Ljg1LTIxLjksNzUuMzItMTEuNDQsMTQuMDQsNS43NywyNi4zMSwxMy40MiwzOC42NiwyMi4yNSwzOC43NiwyNy43Miw2OS4yNyw2NC4xNiw5OC44OSwxMDEuMjcsOS42OSwxMi4xMywxOC43NCwyMy41MywyNi45NiwzNi42OSwxMC4yNywxNi40NSwxMi40NCwzNi4zMywyLjU2LDUzLjc5LTcuOTYsMTQuMDYtMTguMDEsMjcuNDItMzAuNTUsMzcuODZsLTM0LjU1LDIyLjk5LTQ1LjA0LDI5Ljg3Yy0xNy41OCwxMi42LTMzLjk2LDI1Ljc1LTQ5LjE5LDQwLjYxWiIvPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTgiIGQ9Ik00NDQsNTYyLjgzYy0yLjYuOTEtNS4xNy40Ni02LjcsNC40LTEuNzItMy43NS0xLjAxLTYuMjktLjEzLTkuMzlsMy42OC0xLjVjLjA5LTEuOTQtLjY2LTMuNTgtMS43OS00LjA5LTEuMTEtLjUtMi40Mi0uMzYtNC4xMS4yMi0xLjYzLTMuMy00LjU1LTcuMzUtNS4wNC0xMC45OC0uMTMtLjkzLDEuMjItMy4yNC0uNS0zLjgzLTQuNzksMy44My02Ljc2LDkuMzktOC45OSwxNC43OWwtMy44OCw0Ljg0Yy0yLjI2LDcuODEtOS4xNSw5LjY4LTQuOTQsMTYuMjhsLTMsNi4xMmM0LjgxLS40OSw5LjExLDMuMzYsMTAuMy4zNS4yNC0uNi0uMDQtMi4wMy0uNjYtMi41LTEuMjktLjk2LTQuODMsMy4yNS00LjQ4LS44MSwyLjc2LS44OCwzLjQ2LTMuMDksNC40NC01LjcuODMtMi4yMSwzLjE0LTQuMTEsMi42NS03LjEtLjE5LTEuMi0xLjc2LTMuNTktLjY4LTUuMzUsMS44MS0yLjk1LDUuMDUsNC45Niw2LjQsNS4yNiwxLjUyLjMzLDQuNTQtMS43NCw1Ljg5LS4wNiwxLjEsMS4zOC0yLjI5LDMuNDktLjQ4LDYuMDEuNzMsMS4wMiwzLjExLDIuMDQsMy44Ny45LDEuMDktMS42MywxLjU5LTIuNTYsMy41NS0yLjM4Ljk5LjA5LDEuOTEuNTgsMi4xNiwxLjUzLjEuMzMuMTEuNzMuMDEsMS4xOS0yMi40OCwyNi4wOC00Mi43MSw1NC4wOS02MC4wMiw4NC4zMi02LjY1LDExLjYxLTEzLjkxLDI0LjY5LTE5LjI2LDM3LjQ1LTEuNzIsNC4xLTMuMjQsOC4xNy00LjQ4LDEyLjE1aDBjLS41MS4wNS4yNC0yLjY2LjQ3LTMuOTIuMDItLjE2LjA0LS4zLjA1LS40MS4yMi0zLjQ4LjI4LTQuNDUsMS40Ni0xMC4xNy4zNC0xLjY3Ljc4LTMuNzUsMS4zNS02LjQyLjExLS41MS4yMi0xLjA1LjM0LTEuNjEsMC0uMDMuMDEtLjA1LjAxLS4wOC4wMS0uMDMuMDEtLjA1LjAyLS4wOC40NS0yLjU5Ljk1LTUuMTcsMS40OC03Ljc0LDEuOTctOS41LDQuNDQtMTguODksNy4zNi0yOC4xNmwuMDItLjA2YzE0LjU4LTQ2LjQxLDQwLjE2LTg5LjkzLDY4LjE0LTEyOS45NWw2LjEyLTguNDFjMi4xMywzLjI5LS43LDEwLjE3LTMuMDIsMTIuNTdsLTQuNjcsNC44NGMtNC4yMSw0LjM0LTMuNDcsNi40NS02LjEyLDEwLjIzLDQuMS43OSw2LjQ5LDMuODIsNi44Miw4LjEzbDYuMS0uMTJjLTEuMzMsNC4zOC0yLjUxLDguNzYuMzEsMTEuOTksMS42MiwxLjg2LDMuMTksNi4xMS0uMDUsNy4yNVoiLz4KICAgICAgPGc+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy04IiBkPSJNNDQ1Ljc0LDU2NS42N2MtMS4wMywyLjA4LTIuNjMsMy41Ni00LjE3LDUuMzYtLjk5LS41OS0xLjk3LS45Mi0yLjk1LTEtNC4xNCw2LjEyLTExLjM2LDEtNy44Ny01LjE4LTUsMS45Mi02LjU4LS40OS05LjA1LTQuNCwxLjIyLDQuOTEtLjAyLDkuOTgtMy43MywxNS4yMSw0LjAyLDEuODMsMy42OSw2LjQ2LS44OCw3LjI2LTEuNjcuMjktMTEuMTktMi4wMS05LjY2LTQuODEsMS44Mi0zLjEzLDIuNTYtNC41NCwxLjEtOC4xNCwyLjktNi40Niw2LjQxLTEyLjU3LDEwLjUzLTE4LjMsMi41MS02LjIsNi4wNS0xMS4zOCwxMC42Mi0xNS41NCwyLjYzLTYuNDksNi40OS0xMi40NSwxMS41OS0xNy44OWwzLjM5LTcuNTFjLS43LS4zLS4wNS0yLjA4LS4wNC0yLjgsMzcuMzYtNDcuMyw2Mi43Mi0xMDQuNzYsNjkuNzktMTY3LjExbC0zLjA3LTQuMjksMjcuNiwxNi4xMSwzMC4wMSwyMS4zM2MxNi4yNiwxMS41NiwyNi44MiwzMC43NiwxNC42LDQ5LjAzLTUuMjYsNy44NS0xMS40LDE0LjU4LTE4Ljk3LDIwLjI2bC0zMS4zMiwyMy41Yy0xMS45NSw4Ljk2LTIzLjIsMTcuNDYtMzQuMjYsMjcuNjEtMjIuMjcsMjAuNDUtNDAuMDMsNDQuNS01My4yOCw3MS4zWiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtOCIgZD0iTTQzMi4zMyw1NTMuMTZjLjg3LS4yLDEuOC0uMzIsMi4wMi4xOS4zLjctLjE0LDEuMzMtLjQ4LDEuNjMtLjUuNDQtMS4yMS42OS0xLjk4LjAzLS41OC0uNS0xLjIyLTEuNDguNDQtMS44NloiLz4KICAgICAgPC9nPgogICAgPC9nPgogICAgPGc+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtNyIgZD0iTTM2My4yOCw5MDQuNzlsLjY0LDEuNzhjLTQ3LjY3LDQzLjQ5LTk1LjExLDg3LjM1LTEzOC44OCwxMzguMTRsLTEuODkuNzZjLTEuNjktLjcyLTIuNzUtMi4wOS00LjA3LTMuOTlsLTY1LjAzLTkzLjIzYy0xNC40LTIwLjY1LTI3LjE4LTQxLjIxLTM5LjkzLTYyLjgybC0yOS44Ni01NC42NGMtMjYuMzktNDQuNDgtNDIuNjktOTMuNzctNDguOTEtMTQ1LjA2LS4xNi0xLjM0LS41OS0xLjk4LTEuMTYtMi40N3YtODQuNDVjLjQzLS4yNi44My0uOC45NS0xLjYxbDEuODItMTEuNThjLjk5LTMuMjYsMi42Ni0xLjcyLDMuODQsMi40OSwxNS4yNSw1MS45NSwzOC4xNCwxMDEuNzEsNjguODksMTQ2LjMzLDI4LjY2LDQxLjYsNjEuMDYsNzMuMzMsOTkuNjQsMTA1LjMyLDIwLjIyLDE2Ljc3LDQyLjA0LDMwLjM2LDY3LjA1LDQwLjg0LDI3LjUzLDExLjU0LDUxLjkxLDE2LjM1LDgwLjg5LDIxLjY4LDIuMTUuNCw0LjExLDEuNDQsNiwyLjVaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMzU3LjU2LDgwMC45OWMxNS43OSwxLjIxLDMxLjguMTEsNDcuNDMtMi42MSwyNy40LTQuNzYsNTMuNjUtMTQuNTgsNzcuNTItMjkuMjcuNDQuNTUsMS4wOCwxLjQyLjc5LDEuODUtNS44Nyw4Ljc4LTEzLjQsMTguNi0yMC4wMSwyNi45Mi0yOS44NCwzNy41LTYyLjE0LDc1LjIxLTk3Ljg5LDEwNy4zMmwtMi4xMi0uNGMtNDMuNjgtNS4wMS04NS45OC0xOC4zNi0xMjQuMDMtNDAuODZsLTE3LjM1LTEyLjQ5Yy0xOC41My0xMy4zNS0zNS41OS0yOC4yOC01Mi40LTQ0LjItNjMuMzktNjAuMDQtMTA3LjQxLTEzOC4xMS0xMzEuNC0yMjIuMjFsLTEuMTQuNjFjOC4zNy00OS40NCwyNy4zOC05Ni41OSw1Ny4xMi0xMzcuODNsNzEuODgsNjguMDZjLTE4LjUxLDUxLjMtMTYuNCwxMDYuNzcsNS45NSwxNTYsMjAuNzgsNDUuNiw1Ni4zLDgzLjE5LDEwMC43NSwxMDYuMzMsMjYuNzksMTMuNDEsNTUuNTYsMjAuNTQsODQuOSwyMi43OVoiLz4KICAgICAgPC9nPgogICAgICA8Zz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTYiIGQ9Ik03MDIuMDMsNTgzLjdsLjc4LDEwOS4xNWMtLjc4LDMuNjktLjU3LDIuMjItLjc1LDMuNTYtNi40Myw0Ny4xMy0yMi44Miw5MS4xMy00Ni4wOCwxMzIuMjRsLTI0LjgxLDQ1Ljk1LTQ2LjUsNzIuNjYtMzQuMTgsNTAuMzMtMzQuNzUsNDguMDktMTA1LjYsMTQ2LjYtMjguMzcsMzcuMDNjLTIuNTYsMy4zNC01LjYxLDUuNjUtOC45NCw3LjY2aC02Ljk0Yy02LjAzLTMtMTAuODktNy45Mi0xNS4wNC0xMy43NWwtMTkuODEtMjcuOTEtLjgyLTMuMzRjOS43MS0xMDUuMTMsNzMuMTItMTk0LjY4LDE0MS4yNS0yNzEuODMsMzIuNDItMzUuNTMsNjUuMjQtNzAuNDksOTguNDQtMTA0LjkxLDYxLjY0LTYzLjE0LDEwMi4yMi0xNDQuMjcsMTI5LjczLTIyNy42NWwyLjM5LTMuODhjLjIyLDEuNDItMS41My0xLjE4LDAsMFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik03MDIuMDMsNTgzLjdjLTIwLjIyLDY3LjY0LTUxLjM2LDEzMS45MS05My4zMiwxODkuMDYtMTMuOTYsMTkuMDItMjkuNzIsMzUuNjQtNDUuOTgsNTIuNDNsLTIyLjczLDIzLjQ2LTkuMjQsMTAuMDgtNTUuMjUsNTkuNTdjLTIxLjM5LDIzLjA4LTQwLjc0LDQ2LjgxLTU4LjkxLDcyLjUtMzAuMDUsNDIuNDgtNTAuNzEsNzYuMTctNjguMjIsMTI1LjkzLTkuMDYsMjUuNzYtMTQuNyw1MS44MS0xNy4zNSw3OC41N2wtODAuNTYtMTExLjg0LTI3LjMyLTM3Ljk4Yy4wNS0xLjIyLjU1LTIuMzcsMS42OC0zLjYzLDIwLjU4LTIyLjk4LDQxLjI3LTQ1LjQxLDYzLjUxLTY2LjgybDIzLjU4LTIyLjcxLDE0Ljc5LTEzLjk2LDExLjctMTAuOTUsMTYuMDctMTQuMzcsOC43OS04LjI1LDIwLjQxLTE5LjEyYzEwLjk4LTEwLjI5LDIxLjA3LTIwLjQsMzAuNzYtMzIuMDJsNDcuNDctNTYuODUsMjAuNTktMjcuNzFjMjQuNjEtMTYuMDksNDYuNzgtMzYuMTQsNjMuOTItNjEuMTIsMjAuNDQtMjguNzksMzMuMy02MS41NiwzNy43My05Ni4xOSwyLjc5LTIxLjg0LDEuNDktNDMuODgtMi44Ni02Ni4xNWw2Mi44OS05Ny45NywxMCwxNC4yM2MyMy4yMiwzNS42LDQxLjQ2LDc5LjksNDcuODQsMTIxLjc5WiIvPgogICAgICA8L2c+CiAgICA8L2c+CiAgPC9nPgogIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTMyNi41NSw1MjUuMDZjNS4zNyw3LjMyLDEwLjI1LDE1LjMyLDE0LjU4LDIzLjc0LTQuODEtOC45NC05Ljk1LTE3LjA0LTE0LjU4LTIzLjc0WiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTM3MC4zNSw2NDYuMzZsLTcuNTcsMzAuNzgtMS4yLDQuODh2LjAzcy0uMS4zNy0uMS4zN3YtLjA2cy4wMS0uMDEuMDEtLjAyYy4wMS0uMDMuMDEtLjA1LjAyLS4wOC40NS0yLjU5Ljk1LTUuMTcsMS40OC03Ljc0LDEuOTctOS41LDQuNDQtMTguODksNy4zNi0yOC4xNloiLz4KPC9zdmc+" alt="">
+    <span class="brand">GeoNoMore</span>
+    <span class="state on">Running</span>
+    <button class="power" aria-pressed="true"><i></i></button>
+    <button class="gear">&#9881;</button>
+  </header>
+  <main>
+    <section class="box">
+      <div class="boxhead"><span>Location</span><button class="link">More…</button></div>
+      <select><option>Turkey</option><option>Germany</option><option>Japan</option></select>
+      <select><option>Istanbul</option><option>Ankara</option><option>Izmir</option></select>
+      <label>Time zone</label>
+      <p class="field">Europe/Istanbul</p>
+      <label>Locale</label>
+      <p class="field">tr-TR</p>
+      <div class="grid2">
+        <div><label>Latitude</label><p class="field">41.0082</p></div>
+        <div><label>Longitude</label><p class="field">28.9784</p></div>
+      </div>
+      <p class="sub">Medium privacy, about 1500 m</p>
+    </section>
+  </main>
+  <footer>
+    <span class="dot on"></span>
+    <span class="sitename">maps.google.com</span>
+    <select class="ovr"><option>Exact for…</option></select>
+  </footer>
+</div>
+
+<div class="popup">
+  <header>
+    <img class="logo" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgNzM3IDEyNTYiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6IHVybCgjbGluZWFyLWdyYWRpZW50LTIpOwogICAgICB9CgogICAgICAuY2xzLTIgewogICAgICAgIGZpbGw6ICMwNTNiNjM7CiAgICAgIH0KCiAgICAgIC5jbHMtMyB7CiAgICAgICAgZmlsbDogdXJsKCNsaW5lYXItZ3JhZGllbnQtNCk7CiAgICAgIH0KCiAgICAgIC5jbHMtNCB7CiAgICAgICAgZmlsbDogIzIxNjNkODsKICAgICAgfQoKICAgICAgLmNscy01IHsKICAgICAgICBmaWxsOiAjMWY1MDk5OwogICAgICB9CgogICAgICAuY2xzLTYgewogICAgICAgIGZpbGw6IHVybCgjbGluZWFyLWdyYWRpZW50LTMpOwogICAgICB9CgogICAgICAuY2xzLTcgewogICAgICAgIGZpbGw6IHVybCgjbGluZWFyLWdyYWRpZW50KTsKICAgICAgfQoKICAgICAgLmNscy04IHsKICAgICAgICBmaWxsOiAjMDAyNTM5OwogICAgICB9CiAgICA8L3N0eWxlPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJsaW5lYXItZ3JhZGllbnQiIHgxPSIxOTkuMDYiIHkxPSIxMDQ1LjQ4IiB4Mj0iMTk5LjA2IiB5Mj0iNTgzLjg4IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2ZlNWMyNSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmZGM5MzMiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImxpbmVhci1ncmFkaWVudC0yIiB4MT0iMzYuOTciIHkxPSI2NzYuNSIgeDI9IjQ4My4zOCIgeTI9IjY3Ni41IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxzdG9wIG9mZnNldD0iLjI3IiBzdG9wLWNvbG9yPSIjZmRjOTMzIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2ZlNWMyNSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ibGluZWFyLWdyYWRpZW50LTMiIHgxPSIzMzAuMjIiIHkxPSI5MTAuMTciIHgyPSI3MDIuODEiIHkyPSI5MTAuMTciIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjNWYxNjI2Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzAwMCIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ibGluZWFyLWdyYWRpZW50LTQiIHgxPSIyMjMuMTYiIHkxPSI4MjEuNDkiIHgyPSI3MDIuMDMiIHkyPSI4MjEuNDkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZjQwMDNhIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzAwMCIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPGcgaWQ9IkdlbmVyYXRpdmVfT2JqZWN0IiBkYXRhLW5hbWU9IkdlbmVyYXRpdmUgT2JqZWN0Ij4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTgiIGQ9Ik0yNDEuMDIsMzQ0LjMyYzIuNzYsMzAuODEsMTAuNSw2MC4yNCwyMy44OSw4OC4wMiw1LjM1LDExLjEsMTAuNTcsMjEuMjgsMTcuNDQsMzEuNDRsMzYuMTgsNTEuMzVjLjM1LjUzLTEuMTctLjUtMi42Ni0xLjM1LTIuNS0xLjQzLTQuNzQtMy4yNi02LjczLTUuMzUtMzMuMTUtMzQuNzUtNzkuNTktNTUuNjktMTI2LjY2LTY1LjcyLTguOTgtMS45MS0xNy4xNy00LjIzLTI1LjM4LTcuNzEtMTAuNC00LjQxLTE1LjMxLTE0Ljk4LTExLjgtMjUuMzEsMi43LS40MywzLjktMi42OCw2LjIyLTQuNCwyOS4xOS0yMS42Niw1OS40Mi00MS4zLDg5LjUtNjAuOThaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtNSIgZD0iTTM2MS40OCw2ODIuNDJsMS4xMywxLjY5Yy4xNyw2LjExLS40NywxMi4yMi0xLjkyLDE4LjMzbC0xLjU0LDYuMzZjLTMuMSwyMy4zMS0yLjYyLDQ5LjI2LTEuMzIsNzIuMjFsLTE2LjQ5LTE3LjU1LTM3LjUxLTU1LjUtMzAuNTctNTEuMjktMTAuMTYtMjEuMzJjLTExLjQ0LTI4LjcxLTIzLjY0LTU2LjQ0LTM3Ljc3LTgzLjk1LTguOTItMTcuMzYtMTkuNDgtMzIuNDgtMzEuNzUtNDcuNDlsLTI0LjYzLTMwLjEzYy4yLS40LjI0LS42NS40NS0uODdsMjMuODcsMTMuOTdjMjMuNTQsMTEuNjUsNDYuMDEsMjMuOTgsNjguNDcsMzcuNTcsMTYuMiw5LjgxLDI5Ljg1LDIxLjA3LDQzLjE3LDM0LjQ1LDMwLjAzLDMwLjE2LDUwLjQyLDY4LjU4LDU2LjEyLDExMC41NGwuNDUsMTIuOThaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtNCIgZD0iTTYyNC40Myw0MzEuNjVsLTEwLjgsMTMuNjgtNDUuNTgsNTguODRjLTE2LjU1LDIxLjM3LTM0Ljc0LDQwLjY1LTUwLjIzLDYyLjk1LTI5LjE5LDQyLjAyLTU0LjAzLDg2LjEzLTc3LjE2LDEzMS43LTEwLjA1LDE5LjgxLTE5LjE1LDM5LjAzLTI3LjU1LDU5LjQ2bC04LjExLDIwLjFjLS42Ni41Ni0xLjMzLDEuMDktMi4wNiwxLjUyLS43My40My0xLjQzLjgzLTIuMTYuOTMtMTMuMjYsMS43OS0yNS4zOSwyLjYxLTM4Ljc5LDIuMTgtLjczLS4wMi0xLjQ3LS4zNi0yLjI0LS43MS0uNzctLjM1LTEuMjItLjgtMS45Mi0xLjI5bC0uMTctMi44MWMtLjUtLjg3LS45Ni0xLjc2LTEuMzEtMi42OS0uMzUtLjkyLS42Ny0xLjgyLS43Mi0yLjczLTEuMzQtMjIuMS0uMTctNDIuMzIsMS44LTY0LjI2LjAzLS4zOC4xNy0xLjY5LjM4LTMuNTZoMGMuMTMtMS4xNC4yOS0yLjQ4LjQ3LTMuOTMuMDItLjE2LjA0LS4zLjA1LS40MS40LTMuMTUuOS02LjgxLDEuNDYtMTAuMTcuNC0yLjQxLDIuMi00LjQ3LDIuNjMtNi4yNi4xNS0uNi0xLjA5LTEuMzQtLjk0LTEuODN0LjAxLS4wMnMuMDEtLjA1LjAyLS4wOGMuMDItLjA3LjA0LS4xNC4wNi0uMjF2LS4wM2MuMy0uOTEuNTktMS41Ny44OC0xLjg4LjEzLS4xNi4yNi0uMjMuMzktLjIyLDEuNjQtMTQuMzEsNi40Mi01Ljg1LDEzLjM0LTE4LjQ4LDE2LjU2LTMwLjIxLDM2LjYzLTU5LjExLDU4LjkxLTg1LjQ3Ljg1LTEuMDEsMS45Mi0xLjg0LDMuMDEtMi42NywxLjA5LS44NCwyLjI3LTEuNTcsMy40Ny0yLjI3LS4wNC0uMzktLjA0LS43OS0uMDEtMS4xOS4yLTIuMjYsMS42MS00LjUsNC4xOC00LjE3LDYuNjMtOC45OCwxNC42LTE2LjgzLDIzLjkxLTIzLjU1LDE2LjE5LTEyLjMyLDI0LjI4LTE4LjQ4LDI0LjI4LTE4LjQ4bDc5LjUzLTUyLjhjMTYuMDYtMTQuODcsMzUuNzgtMzYuODUsMzYuMjUtNTkuNjguMzYtMTcuOTItOS4wMS0zMS4zMS0xOS40MS00NS40NS0zNi43Ni00OS45Ni04Ny45NC0xMTEuNTYtMTQzLjc1LTEzOS41OC0zNi41MS0xOC4zMy02Ny4zMy0zLjgtOTkuNDIsMTYuOS01Mi4xOSwzMy42NS0xMDQuMTEsNzQuMjItMTUwLjU2LDExMi44OWwtMi4wOS0uNTJjLTIuNjQsMS4xOS0yLjU4LS4zMi0xLjY5LTIuNzEsNDcuMjMtNTIuODQsOTQuODgtMTA2LjA4LDE0Mi45NS0xNTkuNzMsMTIuNS0xNC41NywyNS0yOS41NiwzNS45Mi00NC44NCwxLjctMi4zOCw4LjE0LTEyLjIyLDYuNDEtMTQuODUtMS4zOS0yLjEtMTIuMy0xLjQzLTE0LjgxLS45NS0zOS42OSw3LjQ5LTc1LjkyLDMwLjUzLTEwNS4zMyw1Ny4xOC0uNzcuODgtMy4yMi40Ny0zLjY4LS4xOS0xLjgyLTIuNTYsNi42Mi0yMS42Niw4LjcxLTI2LjI0LDEwLjY0LTIzLjI1LDI1Ljk4LTQyLjkyLDQzLjQtNjAuODNsMzkuNDktNDAuMzhjMTAuOTktMTEuNDcsMTguNTktMjUuOTUsMjEuODctNDEuMzguOTctLjI5LDEuODQtLjY2LDIuNTItMS40NWg5LjU3YzM0LjA0LDYuNDIsNzAuNTQsMzcuNTIsOTMuMzIsNjQuMjksMTIuOTIsMTUuMTgsMjUuODgsMzAsMzYuMjYsNDcuMjEsMTkuMDQsMzEuNTYsMzMuNCw2NS4yOSw0NS4yMywxMDAuMDgsNi4xMSwxOCwxMC45OCwzNS4xMywxNy45Nyw1Mi42Miw2LjcyLDE2LjgyLDE1Ljk1LDMxLjA3LDI2LjkyLDQ1LjQxbDE4LjUxLDI0LjE5YzkuNDQsMTIuMzQsMTUuMTcsMjYuNzgsMTcuODUsNDIuMTIsMi40MiwxMy44OC0xLjgsMjYuODMtMTEuNDQsMzYuN1oiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMTk0LjAxLDM1My45M2MtLjQ4LjUtLjU4LDEuMDEuNDcsMS40N2wuNTEsMS44M2MtMTcuMSwxMy44Ni0zNS4wMSwyOS4zOS00Ni4zNyw0OC44MWwtMy4xMywzLjYzLS4wNy4wOGMtLjM1LDEuNy0uNTEsMy4zLS41MSw0LjgyLDAsMTMuMjIsMTIuNTUsMTkuNjgsMjUuMjEsMjMuMjYsNDYuMDEsMTAuMDQsOTMuMzIsMjUuMjQsMTI5LjA4LDU3LjQ1LDUuNDQsNC45LDEwLjk2LDEwLjA0LDE0LjI5LDE2LjYxLjg3LjMyLDEuNzMuNjcsMi41MiwxLjEyLjc4LjQ1LDEuNTIuOTEsMi4wNywxLjUzLjA1LjA1LjA5LjExLjE0LjE2LDIuODksMy4yNyw1LjY3LDYuNzMsOC4zMywxMC4zNiw1LjM3LDcuMzIsMTAuMjUsMTUuMzIsMTQuNTgsMjMuNzQuMDIuMDMuMDQuMDcuMDYuMTEsNi40NSwxMi41NCwxMS42OSwyNi4wMiwxNS41MiwzOS42MnQwLC4wMmM5LjI1LDQxLjE4LDQuOTcsOTEuNTEsNC43Nyw5My43OS4wMS0uMDMuMDEtLjA1LjAyLS4wOC40NS0yLjU5Ljk1LTUuMTcsMS40OC03Ljc0LS4wNi44OC0uMTMsMS43Ny0uMjEsMi42Mi0uMSwxLjA3LS4yMSwyLjA5LS4zMywzLS4xNiwxLjE5LS4zNSwyLjE5LS41NywyLjg5LS4yMS42Ny0uNDYsMS4wNS0uNzQsMS0uMDMsMC0uMDYtLjAxLS4xLS4wMy0uMTYtLjA4LS4zNC0uMjktLjUyLS42Ny04LjMzLTU2LjU3LTQ3LjQzLTEyNS4wMy05NS43My0xNTQuOTItMjMuMzktMTQuNDktNDcuNjYtMjcuNzItNzIuMzQtMzkuOTktOC41OC00LjcxLTE2LjQyLTkuNTktMjMuNS0xNC42NC0uOTUtMS4xNi0yLjQxLTIuOTMtNC4wNC0zLjk2LTE1Ljg3LTEwLjA1LTI5Ljk5LTIxLjcxLTQyLjI2LTM1Ljk2LTEwLjc1LTEyLjQ3LTE0LjY3LTI4LjQxLTEwLjQ1LTQ0LjMzLDMuNDItMTIuOTIsOS4wMy0yNC41NiwxNi43Ny0zNS40Nyw4LjAyLTExLjI5LDE2LjE2LTIxLjc4LDI0LjkzLTMyLjUsMTAuNDQtMTIuNzYsMTguMTQtMjYuMjcsMjMuMzQtNDEuOTlsMTguMTctNTQuODdjMTQuMjktNDMuMTksMzIuNjEtODMuMTQsNjIuOTctMTE3LjMxLDI0Ljc3LTI3Ljg3LDUzLjctNTYuMTQsODUuNDItNzUuNTYsNy44My00Ljc5LDE1LjU4LTguODMsMjMuOTItMTEuMzUuNTEuMTUsMS4yNiwxLjEsMS4wOSwyLjA3LTIuNzQsMTUuMTQtMTEuODksMzAuNDgtMjIuNTYsNDEuNGwtMzguNjIsMzkuNDktOS43LDEwLjUzYy0xOS43NywyMS40NS0zNC40MSw0Ni40My00Mi43OSw3NS4wNCwzLjcxLTEuNSw1LjM5LTQuNjcsOC4yNS03LjA1LDI2LjAyLTIxLjU4LDYyLjktNDQuNzEsOTYuMTYtNTAuODMsNy4zNS0xLjM1LDE3Ljk0LTEuODMsMTkuOTQsMS4xOSwzLjE4LDQuNzgtOC4wMywxOS4zNS0xNC4xNiwyNy4yOS0xNS41OSwyMC4xOS0zMS44NywzOC45Ny00OS4wNCw1Ny45M2wtNDYuMzYsNTEuMTctNDguOTUsNTUuNDctMjYuOTcsMjkuNzVaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtOCIgZD0iTTQ0NS43NCw1NjUuNjdjLjA2LTIuODgsMS4wOC01LjY5LDIuMzEtOC4yOSwxMy43My0yOC44NiwzOC42MS01NS4yNSw2Mi44OS03NS41OGw1My44My00MC44N2MxOS40Ny0xNy45NywzMi45NC0zNS4yMSwxMS44Ni01Ny45OS0xOS4xMi0xNS42Mi0zOS4xNi0yOS44OC02MC4xLTQyLjc4bC0uOTgtLjYzYy0yLjk5LS43NC00LjEyLTIuOTYtNC4xMi0yLjk2LTM1Ljg0LTI0LjUzLTc5LjE0LTUxLjc2LTEyMi43Ny01Ny44OC0xOC42My0yLjYxLTM2LjY2LDMuMTYtNTMuMiwxMS4yNi0yOS42MSwxNC41MS01OC42LDMyLjExLTg2LjU4LDUwLjI2bC03Ljc0LDQuMTQtMy44OCwzLjkyYy0zMC41NCwyMC4wNy02MC4xOCw0MC44LTg4LjkzLDYyLjE4LTEsLjgzLTEuOTkuMjYtMi45MS0uNzIsMi41My03LjQ1LDcuMjEtMTQuMDgsMTIuODctMjAuMjksNy43Ny04LjUzLDE1LjQxLTE2Ljk3LDI0LjM0LTI0LjNsMTEuODUtOS43NCwxOC42NS0xNS42N2MzNC4wOS0yNy4yLDY4LjI3LTUzLjQzLDEwMy45NS03OC42MSwxNS4wNi0xMC42MywyOS42Mi0yMC40Miw0NS42LTI5LjM0LDIzLjM4LTEzLjA0LDQ5Ljg1LTIxLjksNzUuMzItMTEuNDQsMTQuMDQsNS43NywyNi4zMSwxMy40MiwzOC42NiwyMi4yNSwzOC43NiwyNy43Miw2OS4yNyw2NC4xNiw5OC44OSwxMDEuMjcsOS42OSwxMi4xMywxOC43NCwyMy41MywyNi45NiwzNi42OSwxMC4yNywxNi40NSwxMi40NCwzNi4zMywyLjU2LDUzLjc5LTcuOTYsMTQuMDYtMTguMDEsMjcuNDItMzAuNTUsMzcuODZsLTM0LjU1LDIyLjk5LTQ1LjA0LDI5Ljg3Yy0xNy41OCwxMi42LTMzLjk2LDI1Ljc1LTQ5LjE5LDQwLjYxWiIvPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTgiIGQ9Ik00NDQsNTYyLjgzYy0yLjYuOTEtNS4xNy40Ni02LjcsNC40LTEuNzItMy43NS0xLjAxLTYuMjktLjEzLTkuMzlsMy42OC0xLjVjLjA5LTEuOTQtLjY2LTMuNTgtMS43OS00LjA5LTEuMTEtLjUtMi40Mi0uMzYtNC4xMS4yMi0xLjYzLTMuMy00LjU1LTcuMzUtNS4wNC0xMC45OC0uMTMtLjkzLDEuMjItMy4yNC0uNS0zLjgzLTQuNzksMy44My02Ljc2LDkuMzktOC45OSwxNC43OWwtMy44OCw0Ljg0Yy0yLjI2LDcuODEtOS4xNSw5LjY4LTQuOTQsMTYuMjhsLTMsNi4xMmM0LjgxLS40OSw5LjExLDMuMzYsMTAuMy4zNS4yNC0uNi0uMDQtMi4wMy0uNjYtMi41LTEuMjktLjk2LTQuODMsMy4yNS00LjQ4LS44MSwyLjc2LS44OCwzLjQ2LTMuMDksNC40NC01LjcuODMtMi4yMSwzLjE0LTQuMTEsMi42NS03LjEtLjE5LTEuMi0xLjc2LTMuNTktLjY4LTUuMzUsMS44MS0yLjk1LDUuMDUsNC45Niw2LjQsNS4yNiwxLjUyLjMzLDQuNTQtMS43NCw1Ljg5LS4wNiwxLjEsMS4zOC0yLjI5LDMuNDktLjQ4LDYuMDEuNzMsMS4wMiwzLjExLDIuMDQsMy44Ny45LDEuMDktMS42MywxLjU5LTIuNTYsMy41NS0yLjM4Ljk5LjA5LDEuOTEuNTgsMi4xNiwxLjUzLjEuMzMuMTEuNzMuMDEsMS4xOS0yMi40OCwyNi4wOC00Mi43MSw1NC4wOS02MC4wMiw4NC4zMi02LjY1LDExLjYxLTEzLjkxLDI0LjY5LTE5LjI2LDM3LjQ1LTEuNzIsNC4xLTMuMjQsOC4xNy00LjQ4LDEyLjE1aDBjLS41MS4wNS4yNC0yLjY2LjQ3LTMuOTIuMDItLjE2LjA0LS4zLjA1LS40MS4yMi0zLjQ4LjI4LTQuNDUsMS40Ni0xMC4xNy4zNC0xLjY3Ljc4LTMuNzUsMS4zNS02LjQyLjExLS41MS4yMi0xLjA1LjM0LTEuNjEsMC0uMDMuMDEtLjA1LjAxLS4wOC4wMS0uMDMuMDEtLjA1LjAyLS4wOC40NS0yLjU5Ljk1LTUuMTcsMS40OC03Ljc0LDEuOTctOS41LDQuNDQtMTguODksNy4zNi0yOC4xNmwuMDItLjA2YzE0LjU4LTQ2LjQxLDQwLjE2LTg5LjkzLDY4LjE0LTEyOS45NWw2LjEyLTguNDFjMi4xMywzLjI5LS43LDEwLjE3LTMuMDIsMTIuNTdsLTQuNjcsNC44NGMtNC4yMSw0LjM0LTMuNDcsNi40NS02LjEyLDEwLjIzLDQuMS43OSw2LjQ5LDMuODIsNi44Miw4LjEzbDYuMS0uMTJjLTEuMzMsNC4zOC0yLjUxLDguNzYuMzEsMTEuOTksMS42MiwxLjg2LDMuMTksNi4xMS0uMDUsNy4yNVoiLz4KICAgICAgPGc+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy04IiBkPSJNNDQ1Ljc0LDU2NS42N2MtMS4wMywyLjA4LTIuNjMsMy41Ni00LjE3LDUuMzYtLjk5LS41OS0xLjk3LS45Mi0yLjk1LTEtNC4xNCw2LjEyLTExLjM2LDEtNy44Ny01LjE4LTUsMS45Mi02LjU4LS40OS05LjA1LTQuNCwxLjIyLDQuOTEtLjAyLDkuOTgtMy43MywxNS4yMSw0LjAyLDEuODMsMy42OSw2LjQ2LS44OCw3LjI2LTEuNjcuMjktMTEuMTktMi4wMS05LjY2LTQuODEsMS44Mi0zLjEzLDIuNTYtNC41NCwxLjEtOC4xNCwyLjktNi40Niw2LjQxLTEyLjU3LDEwLjUzLTE4LjMsMi41MS02LjIsNi4wNS0xMS4zOCwxMC42Mi0xNS41NCwyLjYzLTYuNDksNi40OS0xMi40NSwxMS41OS0xNy44OWwzLjM5LTcuNTFjLS43LS4zLS4wNS0yLjA4LS4wNC0yLjgsMzcuMzYtNDcuMyw2Mi43Mi0xMDQuNzYsNjkuNzktMTY3LjExbC0zLjA3LTQuMjksMjcuNiwxNi4xMSwzMC4wMSwyMS4zM2MxNi4yNiwxMS41NiwyNi44MiwzMC43NiwxNC42LDQ5LjAzLTUuMjYsNy44NS0xMS40LDE0LjU4LTE4Ljk3LDIwLjI2bC0zMS4zMiwyMy41Yy0xMS45NSw4Ljk2LTIzLjIsMTcuNDYtMzQuMjYsMjcuNjEtMjIuMjcsMjAuNDUtNDAuMDMsNDQuNS01My4yOCw3MS4zWiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtOCIgZD0iTTQzMi4zMyw1NTMuMTZjLjg3LS4yLDEuOC0uMzIsMi4wMi4xOS4zLjctLjE0LDEuMzMtLjQ4LDEuNjMtLjUuNDQtMS4yMS42OS0xLjk4LjAzLS41OC0uNS0xLjIyLTEuNDguNDQtMS44NloiLz4KICAgICAgPC9nPgogICAgPC9nPgogICAgPGc+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtNyIgZD0iTTM2My4yOCw5MDQuNzlsLjY0LDEuNzhjLTQ3LjY3LDQzLjQ5LTk1LjExLDg3LjM1LTEzOC44OCwxMzguMTRsLTEuODkuNzZjLTEuNjktLjcyLTIuNzUtMi4wOS00LjA3LTMuOTlsLTY1LjAzLTkzLjIzYy0xNC40LTIwLjY1LTI3LjE4LTQxLjIxLTM5LjkzLTYyLjgybC0yOS44Ni01NC42NGMtMjYuMzktNDQuNDgtNDIuNjktOTMuNzctNDguOTEtMTQ1LjA2LS4xNi0xLjM0LS41OS0xLjk4LTEuMTYtMi40N3YtODQuNDVjLjQzLS4yNi44My0uOC45NS0xLjYxbDEuODItMTEuNThjLjk5LTMuMjYsMi42Ni0xLjcyLDMuODQsMi40OSwxNS4yNSw1MS45NSwzOC4xNCwxMDEuNzEsNjguODksMTQ2LjMzLDI4LjY2LDQxLjYsNjEuMDYsNzMuMzMsOTkuNjQsMTA1LjMyLDIwLjIyLDE2Ljc3LDQyLjA0LDMwLjM2LDY3LjA1LDQwLjg0LDI3LjUzLDExLjU0LDUxLjkxLDE2LjM1LDgwLjg5LDIxLjY4LDIuMTUuNCw0LjExLDEuNDQsNiwyLjVaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMzU3LjU2LDgwMC45OWMxNS43OSwxLjIxLDMxLjguMTEsNDcuNDMtMi42MSwyNy40LTQuNzYsNTMuNjUtMTQuNTgsNzcuNTItMjkuMjcuNDQuNTUsMS4wOCwxLjQyLjc5LDEuODUtNS44Nyw4Ljc4LTEzLjQsMTguNi0yMC4wMSwyNi45Mi0yOS44NCwzNy41LTYyLjE0LDc1LjIxLTk3Ljg5LDEwNy4zMmwtMi4xMi0uNGMtNDMuNjgtNS4wMS04NS45OC0xOC4zNi0xMjQuMDMtNDAuODZsLTE3LjM1LTEyLjQ5Yy0xOC41My0xMy4zNS0zNS41OS0yOC4yOC01Mi40LTQ0LjItNjMuMzktNjAuMDQtMTA3LjQxLTEzOC4xMS0xMzEuNC0yMjIuMjFsLTEuMTQuNjFjOC4zNy00OS40NCwyNy4zOC05Ni41OSw1Ny4xMi0xMzcuODNsNzEuODgsNjguMDZjLTE4LjUxLDUxLjMtMTYuNCwxMDYuNzcsNS45NSwxNTYsMjAuNzgsNDUuNiw1Ni4zLDgzLjE5LDEwMC43NSwxMDYuMzMsMjYuNzksMTMuNDEsNTUuNTYsMjAuNTQsODQuOSwyMi43OVoiLz4KICAgICAgPC9nPgogICAgICA8Zz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTYiIGQ9Ik03MDIuMDMsNTgzLjdsLjc4LDEwOS4xNWMtLjc4LDMuNjktLjU3LDIuMjItLjc1LDMuNTYtNi40Myw0Ny4xMy0yMi44Miw5MS4xMy00Ni4wOCwxMzIuMjRsLTI0LjgxLDQ1Ljk1LTQ2LjUsNzIuNjYtMzQuMTgsNTAuMzMtMzQuNzUsNDguMDktMTA1LjYsMTQ2LjYtMjguMzcsMzcuMDNjLTIuNTYsMy4zNC01LjYxLDUuNjUtOC45NCw3LjY2aC02Ljk0Yy02LjAzLTMtMTAuODktNy45Mi0xNS4wNC0xMy43NWwtMTkuODEtMjcuOTEtLjgyLTMuMzRjOS43MS0xMDUuMTMsNzMuMTItMTk0LjY4LDE0MS4yNS0yNzEuODMsMzIuNDItMzUuNTMsNjUuMjQtNzAuNDksOTguNDQtMTA0LjkxLDYxLjY0LTYzLjE0LDEwMi4yMi0xNDQuMjcsMTI5LjczLTIyNy42NWwyLjM5LTMuODhjLjIyLDEuNDItMS41My0xLjE4LDAsMFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik03MDIuMDMsNTgzLjdjLTIwLjIyLDY3LjY0LTUxLjM2LDEzMS45MS05My4zMiwxODkuMDYtMTMuOTYsMTkuMDItMjkuNzIsMzUuNjQtNDUuOTgsNTIuNDNsLTIyLjczLDIzLjQ2LTkuMjQsMTAuMDgtNTUuMjUsNTkuNTdjLTIxLjM5LDIzLjA4LTQwLjc0LDQ2LjgxLTU4LjkxLDcyLjUtMzAuMDUsNDIuNDgtNTAuNzEsNzYuMTctNjguMjIsMTI1LjkzLTkuMDYsMjUuNzYtMTQuNyw1MS44MS0xNy4zNSw3OC41N2wtODAuNTYtMTExLjg0LTI3LjMyLTM3Ljk4Yy4wNS0xLjIyLjU1LTIuMzcsMS42OC0zLjYzLDIwLjU4LTIyLjk4LDQxLjI3LTQ1LjQxLDYzLjUxLTY2LjgybDIzLjU4LTIyLjcxLDE0Ljc5LTEzLjk2LDExLjctMTAuOTUsMTYuMDctMTQuMzcsOC43OS04LjI1LDIwLjQxLTE5LjEyYzEwLjk4LTEwLjI5LDIxLjA3LTIwLjQsMzAuNzYtMzIuMDJsNDcuNDctNTYuODUsMjAuNTktMjcuNzFjMjQuNjEtMTYuMDksNDYuNzgtMzYuMTQsNjMuOTItNjEuMTIsMjAuNDQtMjguNzksMzMuMy02MS41NiwzNy43My05Ni4xOSwyLjc5LTIxLjg0LDEuNDktNDMuODgtMi44Ni02Ni4xNWw2Mi44OS05Ny45NywxMCwxNC4yM2MyMy4yMiwzNS42LDQxLjQ2LDc5LjksNDcuODQsMTIxLjc5WiIvPgogICAgICA8L2c+CiAgICA8L2c+CiAgPC9nPgogIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTMyNi41NSw1MjUuMDZjNS4zNyw3LjMyLDEwLjI1LDE1LjMyLDE0LjU4LDIzLjc0LTQuODEtOC45NC05Ljk1LTE3LjA0LTE0LjU4LTIzLjc0WiIvPgogIDxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTM3MC4zNSw2NDYuMzZsLTcuNTcsMzAuNzgtMS4yLDQuODh2LjAzcy0uMS4zNy0uMS4zN3YtLjA2cy4wMS0uMDEuMDEtLjAyYy4wMS0uMDMuMDEtLjA1LjAyLS4wOC40NS0yLjU5Ljk1LTUuMTcsMS40OC03Ljc0LDEuOTctOS41LDQuNDQtMTguODksNy4zNi0yOC4xNloiLz4KPC9zdmc+" alt="">
+    <span class="brand">GeoNoMore</span>
+    <span class="state">Stopped</span>
+    <button class="power" aria-pressed="false"><i></i></button>
+    <button class="gear">&#9881;</button>
+  </header>
+  <div class="warn">
+    <p>GeoNoMore needs permission to run on websites.</p>
+    <button>Grant permission</button>
+  </div>
+  <main>
+    <section class="box">
+      <div class="boxhead"><span>Location</span><button class="link">More…</button></div>
+      <select><option>Japan</option><option>Turkey</option><option>Germany</option></select>
+      <select><option>Tokyo</option><option>Osaka</option><option>Kyoto</option></select>
+      <label>Time zone</label>
+      <p class="field">Asia/Tokyo</p>
+      <label>Locale</label>
+      <p class="field">ja-JP</p>
+      <div class="grid2">
+        <div><label>Latitude</label><p class="field">35.6762</p></div>
+        <div><label>Longitude</label><p class="field">139.6503</p></div>
+      </div>
+      <p class="sub">Exact location is being reported.</p>
+    </section>
+  </main>
+  <footer>
+    <span class="dot"></span>
+    <span class="sitename">No site in this tab</span>
+    <select class="ovr"><option>Exact for…</option></select>
+  </footer>
+</div>
+  <p class="hint">280 piksel genişlik. Solda çalışır hali, sağda durmuş hali ve Firefox&#39;ta
+  çıkan izin uyarısı. Sağ üstteki yuvarlak düğme üstünde <b>yapılacak işi</b> gösteriyor:
+  duruyorsa yeşil oynat, çalışıyorsa kırmızı duraklat.</p>
+</div>
+
+<h2>Options</h2>
+<div class="shell">
+  <div class="side">
+    <div class="seg" id="uiMode">
+      <button data-v="basic">Basic</button>
+      <button data-v="advanced" class="sel">Advanced</button>
+    </div>
+    <p class="hint sidehint">Everything is on the table.</p>
+    <nav class="sidetabs">
+      <button data-tab="general">General</button>
+      <button data-tab="location" class="sel">Location</button>
+      <button data-tab="privacy">Privacy</button>
+      <button data-tab="consistency">Consistency</button>
+      <button data-tab="sites">Sites</button>
+      <button data-tab="rules">Rules</button>
+      <button data-tab="motion">Motion</button>
+      <button data-tab="schedule">Schedule</button>
+      <button data-tab="timeline">Timeline</button>
+      <button data-tab="presets">Presets</button>
+      <button data-tab="log">Log</button>
+    </nav>
+  </div>
+
+  <main class="content">
+    
+<div class="panel">
+  <div class="panelname">General</div>
+  <h2>Status</h2>
+  <div class="btns">
+    <button class="big go" aria-pressed="true">Start</button>
+    <button class="big halt">Stop</button>
+  </div>
+  <p class="hint">GeoNoMore is running.</p>
+
+  <h2>Appearance</h2>
+  <div class="grid2">
+    <div><label>Theme</label><select><option>Follow the system</option><option>Dark</option><option>Light</option></select></div>
+    <div><label>Language</label><select><option>English</option><option>Türkçe</option><option>Español</option><option>Русский</option><option>中文</option></select></div>
+  </div>
+  <p class="hint">Each language lives in its own file under ui/lang.</p>
+
+  <h2>Settings data</h2>
+  <div class="row">
+    <button>Export</button><button>Import</button><button class="danger">Reset</button>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panelname">Location</div>
+  <label for="x">Find by address</label>
+  <div class="row"><input type="text" value="berlin"><button>Search</button></div>
+  <div class="results">
+    <button>Berlin, Germany<span class="coords">52.51739, 13.39513  ·  DE</span></button>
+    <button>Berlin, New Hampshire, United States<span class="coords">44.46867, -71.18508  ·  US</span></button>
+  </div>
+  <p class="hint warnhint">The text you type here goes to OpenStreetMap, with your real IP. The country list below works offline.</p>
+
+  <div class="map map-big fakemap">
+      <svg viewBox="0 0 1200 620" preserveAspectRatio="none"><line class="grid" x1="0" y1="0" x2="0" y2="620"/><line class="grid" x1="60" y1="0" x2="60" y2="620"/><line class="grid" x1="120" y1="0" x2="120" y2="620"/><line class="grid" x1="180" y1="0" x2="180" y2="620"/><line class="grid" x1="240" y1="0" x2="240" y2="620"/><line class="grid" x1="300" y1="0" x2="300" y2="620"/><line class="grid" x1="360" y1="0" x2="360" y2="620"/><line class="grid" x1="420" y1="0" x2="420" y2="620"/><line class="grid" x1="480" y1="0" x2="480" y2="620"/><line class="grid" x1="540" y1="0" x2="540" y2="620"/><line class="grid" x1="600" y1="0" x2="600" y2="620"/><line class="grid" x1="660" y1="0" x2="660" y2="620"/><line class="grid" x1="720" y1="0" x2="720" y2="620"/><line class="grid" x1="780" y1="0" x2="780" y2="620"/><line class="grid" x1="840" y1="0" x2="840" y2="620"/><line class="grid" x1="900" y1="0" x2="900" y2="620"/><line class="grid" x1="960" y1="0" x2="960" y2="620"/><line class="grid" x1="1020" y1="0" x2="1020" y2="620"/><line class="grid" x1="1080" y1="0" x2="1080" y2="620"/><line class="grid" x1="1140" y1="0" x2="1140" y2="620"/><line class="grid" x1="1200" y1="0" x2="1200" y2="620"/><line class="grid" x1="0" y1="0" x2="1200" y2="0"/><line class="grid" x1="0" y1="60" x2="1200" y2="60"/><line class="grid" x1="0" y1="120" x2="1200" y2="120"/><line class="grid" x1="0" y1="180" x2="1200" y2="180"/><line class="grid" x1="0" y1="240" x2="1200" y2="240"/><line class="grid" x1="0" y1="300" x2="1200" y2="300"/><line class="grid" x1="0" y1="360" x2="1200" y2="360"/><line class="grid" x1="0" y1="420" x2="1200" y2="420"/><line class="grid" x1="0" y1="480" x2="1200" y2="480"/><line class="grid" x1="0" y1="540" x2="1200" y2="540"/><line class="grid" x1="0" y1="600" x2="1200" y2="600"/><path class="road" d="M0 210 H1200"/><path class="road" d="M0 430 H1200"/>
+    <path class="road" d="M340 0 V620"/><path class="road" d="M820 0 V620"/></svg>
+      
+  <div class="map-zone map-zone-outer" style="width:260px;height:260px;left:calc(50% - 130px);top:calc(50% - 130px)"></div>
+  <div class="map-zone map-zone-inner" style="width:96px;height:96px;left:calc(50% - 48px);top:calc(50% - 48px)"></div>
+  <div class="map-pin" style="left:50%;top:50%"></div>
+      <a class="map-attrib" href="#">© OpenStreetMap</a>
+      <button class="map-zoom" type="button">+</button>
+      <button class="map-zoom map-zoom-out" type="button">−</button>
+    </div>
+
+  <div class="grid4">
+    <div><label>Country</label><select><option>Turkey</option><option>Germany</option><option>Japan</option></select></div>
+    <div><label>Place</label><select><option>Istanbul</option><option>Ankara</option><option>Izmir</option></select></div>
+    <div><label>Latitude</label><input type="text" value="41.008200"></div>
+    <div><label>Longitude</label><input type="text" value="28.978400"></div>
+  </div>
+  <p class="hint">Click the map to place the point. The dashed circle is the inner zone, the solid one the outer zone. The reported location falls between them.</p>
+</div>
+
+<div class="panel">
+  <div class="panelname">Privacy</div>
+  <label class="check"><input type="checkbox"><span>Report the exact point</span></label>
+  <p class="hint">Turns the zone off. Only for sites that genuinely need a precise address.</p>
+
+  <label>Privacy level</label>
+  <div class="seg"><button>Low</button><button class="sel">Medium</button><button>High</button></div>
+
+  <div class="grid2">
+    <div><label>Inner radius (m)</label><input type="text" value="500"></div>
+    <div><label>Outer radius (m)</label><input type="text" value="1500"></div>
+  </div>
+  <p class="hint">The centre is never reported. The point sent out sits somewhere between the two radii, and stays the same for a given site for the rest of the day.</p>
+</div>
+
+<div class="panel">
+  <div class="panelname">Consistency</div>
+  <p class="hint">A location in Türkiye with a German time zone gives you away. Everything here is fed from the same profile.</p>
+
+  <h2>Time zone</h2>
+  <label class="check"><input type="checkbox" checked><span>Follow the selected country</span></label>
+  <input type="text" value="Europe/Istanbul">
+
+  <h2>Locale</h2>
+  <label class="check"><input type="checkbox" checked><span>Follow the selected country</span></label>
+  <input type="text" value="tr-TR">
+
+  <h2>What to change</h2>
+  <label class="check"><input type="checkbox" checked><span>Browser language reported to pages</span></label>
+  <label class="check"><input type="checkbox" checked><span>Accept-Language request header</span></label>
+  <label class="check"><input type="checkbox" checked><span>Block WebRTC local IP leaks</span></label>
+  <label class="check"><input type="checkbox" checked><span>Answer IP-location lookups made by the page</span></label>
+  <p class="hint warnhint">WebRTC is a browser-wide setting, it cannot be applied per site. It is restored when GeoNoMore is stopped.</p>
+  <p class="hint warnhint">Your IP address is not changed. A site that checks location on its own server will still see where you really are. That needs a VPN.</p>
+</div>
+
+<div class="panel">
+  <div class="panelname">Sites</div>
+  <h2>Where it runs</h2>
+  <div class="radios">
+    <label class="check"><input type="radio" name="sm" checked><span>Every site</span></label>
+    <label class="check"><input type="radio" name="sm"><span>Only the sites listed below</span></label>
+    <label class="check"><input type="radio" name="sm"><span>Every site except those listed below</span></label>
+  </div>
+  <textarea rows="6">google.com
+*.example.com
+banka.com.tr</textarea>
+  <p class="hint">One domain per line. google.com also covers its subdomains. Where it does not run, no code is injected at all.</p>
+
+  <h2>Ready-made groups</h2>
+  <div class="groups">
+    <label class="check group"><input type="checkbox"><span>Social Media  (9)</span></label>
+    <label class="check group"><input type="checkbox" checked><span>Shopping  (7)</span></label>
+    <label class="check group"><input type="checkbox"><span>Maps  (7)</span></label>
+    <label class="check group"><input type="checkbox"><span>Work  (7)</span></label>
+    <label class="check group"><input type="checkbox"><span>Banking  (6)</span></label>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panelname">Rules</div>
+  <h2>Per-site rules</h2>
+  <p class="hint">Use a different setting for a specific site. Empty fields fall back to the global setting. The longest matching pattern wins.</p>
+  <div class="rulehead"><span>Site</span><span>Mode</span><span>Coordinates</span><span></span></div>
+  <div class="rule">
+    <input type="text" value="mail.google.com">
+    <select><option>Exact</option><option>Inherit</option><option>High</option></select>
+    <input type="text" value="39.9179, 32.8627">
+    <button class="del">×</button>
+  </div>
+  <div class="rule">
+    <input type="text" value="*.banka.com.tr">
+    <select><option>High</option><option>Inherit</option><option>Exact</option></select>
+    <input type="text" placeholder="optional: 41.0, 29.0">
+    <button class="del">×</button>
+  </div>
+  <button class="link">Add rule</button>
+</div>
+
+<div class="panel">
+  <div class="panelname">Motion</div>
+  <label class="check"><input type="checkbox" checked><span>Simulate movement along a route</span></label>
+  <p class="hint">The location walks the route instead of standing still. No background timer: where you are is simply how long it has been since the route started, so it keeps going even after the browser sleeps.</p>
+
+  <h2>Route</h2>
+  <div class="map map-big fakemap">
+      <svg viewBox="0 0 1200 620" preserveAspectRatio="none"><line class="grid" x1="0" y1="0" x2="0" y2="620"/><line class="grid" x1="60" y1="0" x2="60" y2="620"/><line class="grid" x1="120" y1="0" x2="120" y2="620"/><line class="grid" x1="180" y1="0" x2="180" y2="620"/><line class="grid" x1="240" y1="0" x2="240" y2="620"/><line class="grid" x1="300" y1="0" x2="300" y2="620"/><line class="grid" x1="360" y1="0" x2="360" y2="620"/><line class="grid" x1="420" y1="0" x2="420" y2="620"/><line class="grid" x1="480" y1="0" x2="480" y2="620"/><line class="grid" x1="540" y1="0" x2="540" y2="620"/><line class="grid" x1="600" y1="0" x2="600" y2="620"/><line class="grid" x1="660" y1="0" x2="660" y2="620"/><line class="grid" x1="720" y1="0" x2="720" y2="620"/><line class="grid" x1="780" y1="0" x2="780" y2="620"/><line class="grid" x1="840" y1="0" x2="840" y2="620"/><line class="grid" x1="900" y1="0" x2="900" y2="620"/><line class="grid" x1="960" y1="0" x2="960" y2="620"/><line class="grid" x1="1020" y1="0" x2="1020" y2="620"/><line class="grid" x1="1080" y1="0" x2="1080" y2="620"/><line class="grid" x1="1140" y1="0" x2="1140" y2="620"/><line class="grid" x1="1200" y1="0" x2="1200" y2="620"/><line class="grid" x1="0" y1="0" x2="1200" y2="0"/><line class="grid" x1="0" y1="60" x2="1200" y2="60"/><line class="grid" x1="0" y1="120" x2="1200" y2="120"/><line class="grid" x1="0" y1="180" x2="1200" y2="180"/><line class="grid" x1="0" y1="240" x2="1200" y2="240"/><line class="grid" x1="0" y1="300" x2="1200" y2="300"/><line class="grid" x1="0" y1="360" x2="1200" y2="360"/><line class="grid" x1="0" y1="420" x2="1200" y2="420"/><line class="grid" x1="0" y1="480" x2="1200" y2="480"/><line class="grid" x1="0" y1="540" x2="1200" y2="540"/><line class="grid" x1="0" y1="600" x2="1200" y2="600"/><path class="road" d="M0 210 H1200"/><path class="road" d="M0 430 H1200"/>
+    <path class="road" d="M340 0 V620"/><path class="road" d="M820 0 V620"/></svg>
+      
+  <svg class="map-route" viewBox="0 0 1200 620" preserveAspectRatio="none">
+    <polyline class="route-line" points="180,150 430,300 620,240 880,420"/>
+    <circle class="route-dot" cx="180" cy="150" r="9"/><text class="route-num" x="180" y="154">1</text>
+    <circle class="route-dot" cx="430" cy="300" r="9"/><text class="route-num" x="430" y="304">2</text>
+    <circle class="route-dot" cx="620" cy="240" r="9"/><text class="route-num" x="620" y="244">3</text>
+    <circle class="route-dot" cx="880" cy="420" r="9"/><text class="route-num" x="880" y="424">4</text>
+  </svg>
+  <div class="map-pin" style="left:44%;top:44%"></div>
+      <a class="map-attrib" href="#">© OpenStreetMap</a>
+      <button class="map-zoom" type="button">+</button>
+      <button class="map-zoom map-zoom-out" type="button">−</button>
+    </div>
+  <div class="row" style="margin-top:8px">
+    <button class="picking">Add points on the map</button>
+    <button class="danger">Clear route</button>
+    <button>Restart from the first point</button>
+  </div>
+  <div class="waypoints">
+    <span class="waypoint"><span>1.  41.0158, 28.9391</span><button>×</button></span>
+    <span class="waypoint"><span>2.  41.0055, 28.9820</span><button>×</button></span>
+    <span class="waypoint"><span>3.  41.0171, 29.0078</span><button>×</button></span>
+    <span class="waypoint"><span>4.  40.9903, 29.0250</span><button>×</button></span>
+  </div>
+  <p class="hint">4 points, 8.10 km, about 14 minutes per pass.</p>
+
+  <h2>How it moves</h2>
+  <div class="grid3">
+    <div><label>Profile</label><select><option>Walking</option><option>Cycling</option><option>Driving</option></select></div>
+    <div><label>Speed (km/h)</label><input type="text" value="5"></div>
+    <div><label>Wait at each point (s)</label><input type="text" value="20"></div>
+  </div>
+  <label>When the route ends</label>
+  <select><option>Turn around and walk back</option><option>Jump back to the start</option><option>Stop at the last point</option></select>
+
+  <h2>Right now</h2>
+  <p class="field">41.01573, 28.93953  ·  5.0 km/h  ·  heading 108</p>
+</div>
+
+<div class="panel">
+  <div class="panelname">Schedule</div>
+  <label class="check"><input type="checkbox" checked><span>Switch presets on a timetable</span></label>
+  <p class="hint">At each time below the matching preset takes over, the way your day actually moves. No background timer: which entry is in force is simply read off the clock, so it survives a sleeping browser.</p>
+
+  <div class="schedhead"><span>Days</span><span>From</span><span>Preset</span><span></span></div>
+  <div class="sched">
+    <div class="days"><button>Su</button><button class="sel">Mo</button><button class="sel">Tu</button><button class="sel">We</button><button class="sel">Th</button><button class="sel">Fr</button><button>Sa</button></div>
+    <input type="text" value="08:30">
+    <select><option>Work</option><option>Home</option><option>Travel</option></select>
+    <button class="del">×</button>
+  </div>
+  <div class="sched">
+    <div class="days"><button>Su</button><button class="sel">Mo</button><button class="sel">Tu</button><button class="sel">We</button><button class="sel">Th</button><button class="sel">Fr</button><button>Sa</button></div>
+    <input type="text" value="18:00">
+    <select><option>Home</option><option>Work</option><option>Travel</option></select>
+    <button class="del">×</button>
+  </div>
+  <button class="link">Add entry</button>
+  <p class="hint">Right now the Work preset is in force.</p>
+</div>
+
+<div class="panel">
+  <div class="panelname">Timeline</div>
+  <label class="check"><input type="checkbox"><span>Keep a history of the simulated movement</span></label>
+  <p class="hint warnhint">Off by default, and it should stay off unless you need it. This is a record of where you pretended to be, one point per minute, kept on this machine only.</p>
+  <div class="row" style="margin-top:10px"><button>Download</button><button class="danger">Clear</button></div>
+  <p class="hint">4 points recorded.</p>
+  <div class="logbox">
+    <div class="logrow"><span class="lt">09:14:02</span><span class="ls">41.01573, 28.93953</span><span class="le">maps.google.com</span><span class="ld"></span></div>
+    <div class="logrow"><span class="lt">09:13:02</span><span class="ls">41.01498, 28.94267</span><span class="le">maps.google.com</span><span class="ld"></span></div>
+    <div class="logrow"><span class="lt">09:12:02</span><span class="ls">41.01402, 28.94688</span><span class="le">weather.com</span><span class="ld"></span></div>
+    <div class="logrow"><span class="lt">09:11:02</span><span class="ls">41.01311, 28.95090</span><span class="le">weather.com</span><span class="ld"></span></div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panelname">Presets</div>
+  <div class="preset empty"><span class="name">Home</span><span class="tag">empty</span><button>Save current here</button></div>
+  <div class="preset active"><span class="name">Work</span><span class="tag"></span><button>Apply</button><button class="danger">×</button></div>
+  <div class="preset empty"><span class="name">Travel</span><span class="tag">empty</span><button>Save current here</button></div>
+  <div class="preset"><span class="name">High Privacy</span><span class="tag">built in</span><button>Apply</button></div>
+  <div class="preset"><span class="name">Precise Location</span><span class="tag">built in</span><button>Apply</button></div>
+
+  <h2>Save as preset</h2>
+  <div class="row"><input type="text" placeholder="Home"><button>Save</button></div>
+</div>
+
+<div class="panel">
+  <div class="panelname">Log</div>
+  <p class="hint">Every setting change, every location handed to a site and everything the background does is recorded here. Copy it and send it over when something looks wrong.</p>
+  <div class="logbar">
+    <label class="check"><input type="checkbox" checked><span>Keep a log</span></label>
+    <label class="check"><input type="checkbox"><span>Verbose</span></label>
+    <select><option>All sources</option></select>
+    <span class="grow"></span>
+    <button>Copy</button><button>Download</button><button class="danger">Clear</button>
+  </div>
+  <p class="hint warnhint">The log contains the sites you visited. It stays on this machine, but do look it over before sharing.</p>
+  <p class="hint">Showing 6 of 412 records, newest first.</p>
+  <div class="logbox">
+    <div class="logrow"><span class="lt">09:14:02.118</span><span class="ls">patch</span><span class="le">geo.fake</span><span class="ld">{"origin":"https://maps.google.com","lat":41.0157,"lon":28.9395,"acc":1500}</span></div>
+    <div class="logrow"><span class="lt">09:14:02.090</span><span class="ls">patch</span><span class="le">geo.get.call</span><span class="ld">{"origin":"https://maps.google.com","active":true}</span></div>
+    <div class="logrow"><span class="lt">09:13:58.774</span><span class="ls">patch</span><span class="le">install</span><span class="ld">{"origin":"https://maps.google.com","frame":false}</span></div>
+    <div class="logrow"><span class="lt">09:13:58.771</span><span class="ls">bridge</span><span class="le">inject</span><span class="ld">{"origin":"https://maps.google.com","inline":true}</span></div>
+    <div class="logrow"><span class="lt">09:13:41.502</span><span class="ls">bg</span><span class="le">dnr.set</span><span class="ld">{"acceptLanguage":"tr-TR,tr;q=0.9,en;q=0.8","error":null}</span></div>
+    <div class="logrow err"><span class="lt">09:12:07.330</span><span class="ls">bg</span><span class="le">dnr.error</span><span class="ld">{"message":"modifyHeaders not supported"}</span></div>
+  </div>
+</div>
+    <p class="mocknote">
+      Gerçek arayüzde bu bölümlerden yalnız biri görünür, soldaki menüden seçilir.
+      Maket olduğu için hepsi alt alta dizildi. Basit kipte yalnız General, Location
+      ve Privacy görünür; gerisi Gelişmiş kipte açılır.
+    </p>
+  </main>
+</div>
+
+</body>
+</html>

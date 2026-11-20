@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<!-- GeoNoMore, Miabeyefendi (Mustafa Ihsan Albayrak).
+     https://github.com/Miabeyefendi/GeoNoMore -->
+<html data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Miabeyefendi">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GeoNoMore</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/logo.svg">
+  <link rel="icon" sizes="128x128" href="../assets/icons/128.png">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+
+<!-- Simge rayi. Sekme adi simgenin altinda: yalniz simge "hangisi neydi"
+     diye sorduruyordu. Basit/Gelismis rayin tabaninda. Dar ekranda alt
+     sekme cubuguna donuyor (options.css, dar ekran). -->
+<aside class="side">
+  <div class="brandrow">
+    <img class="logo" src="../assets/icons/logo.svg" alt="GeoNoMore">
+    <span class="ver" id="version"></span>
+  </div>
+
+  <nav class="sidetabs" id="tabs">
+    <button data-tab="location" class="sel"><i class="ico"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14.25s-4.75-4.3-4.75-7.75a4.75 4.75 0 0 1 9.5 0c0 3.45-4.75 7.75-4.75 7.75z"/><circle cx="8" cy="6.5" r="1.75"/></svg></i><span data-i18n="tabLocation"></span></button>
+    <button data-tab="app"><i class="ico"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h7.25M12.75 4H14M2 8h2.25M7.75 8H14M2 12h8.25M13.75 12H14"/><circle cx="11" cy="4" r="1.75"/><circle cx="6" cy="8" r="1.75"/><circle cx="12" cy="12" r="1.75"/></svg></i><span data-i18n="tabGeneral"></span></button>
+    <button data-tab="identity"><i class="ico"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.75" y="3.25" width="12.5" height="9.5" rx="1.75"/><circle cx="5.5" cy="7.25" r="1.4"/><path d="M3.5 10.75c.5-1 1.2-1.5 2-1.5s1.5.5 2 1.5M9.5 6.5h3M9.5 9h2"/></svg></i><span data-i18n="tabIdentity"></span></button>
+    <button data-tab="protect"><i class="ico"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.75l5 1.75v4c0 3.1-2.1 5.4-5 6.75-2.9-1.35-5-3.65-5-6.75v-4z"/><path d="M5.75 8l1.6 1.6 2.9-3"/></svg></i><span data-i18n="tabProtect"></span></button>
+    <button data-tab="sites"><i class="ico"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M1.75 8h12.5M8 1.75c1.7 1.8 2.5 3.9 2.5 6.25S9.7 12.45 8 14.25M8 1.75C6.3 3.55 5.5 5.65 5.5 8s.8 4.45 2.5 6.25"/></svg></i><span data-i18n="tabSitesRules"></span></button>
+    <button data-tab="schedule"><i class="ico"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 4.5V8l2.5 1.75"/></svg></i><span data-i18n="tabSchedule"></span></button>
+    <button data-tab="history"><i class="ico"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.25 8a5.75 5.75 0 1 0 1.7-4.1M2.25 2.25v2.5h2.5M8 5v3.25l2 1.5"/></svg></i><span data-i18n="tabHistory"></span></button>
+  </nav>
+
+  <div class="seg" id="uiMode">
+    <button data-v="basic" data-i18n="modeBasic"></button>
+    <button data-v="advanced" data-i18n="modeAdvanced"></button>
+  </div>
+
+  <div class="sidefoot">
+    <a id="repoLink" class="chip" href="#" target="_blank" rel="noreferrer" title="Miabeyefendi" aria-label="Miabeyefendi">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <path fill="currentColor" d="M8 0a8 8 0 0 0-2.5 15.6c.4.1.5-.2.5-.4v-1.4c-2.2.5-2.7-1-2.7-1-.4-1-.9-1.2-.9-1.2-.8-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.4.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-3.9 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.4 7.4 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.5 1.1.2 1.9.1 2.1.5.5.8 1.2.8 2.1 0 3-1.8 3.7-3.6 3.9.3.3.5.7.5 1.5v2.2c0 .2.1.5.5.4A8 8 0 0 0 8 0z"/>
+      </svg>
+    </a>
+  </div>
+</aside>
+
+<main class="content">
+  <!-- Kimlik seridi: sitelerin su an ne gordugu. Konum sekmesinde buyuk,
+       digerlerinde tek satir (body[data-tab], selectTab yazar). -->
+  <div class="topbar">
+    <div class="idstrip" id="idStrip">
+      <div class="idcell idmain"><span class="idk" data-i18n="sitesSee"></span><span class="idv" id="idPlace"></span></div>
+      <div class="idcell"><span class="idk" data-i18n="latitude"></span><span class="idv" id="idLat"></span></div>
+      <div class="idcell"><span class="idk" data-i18n="longitude"></span><span class="idv" id="idLon"></span></div>
+      <div class="idcell"><span class="idk" data-i18n="timeZone"></span><span class="idv" id="idTz"></span></div>
+      <div class="idcell"><span class="idk" data-i18n="locale"></span><span class="idv" id="idLocale"></span></div>
+      <!-- IP: siteler sunucuda bunu goruyor. Yalniz dugmeye basinca sorulur. -->
+      <div class="idcell idip"><span class="idk" data-i18n="ipLabel"></span><span class="idv"><button type="button" class="iplink" id="ipBtn"></button><button type="button" class="iplink ipmatch" id="ipMatch" data-i18n="ipUseIt" hidden></button></span></div>
+      <div class="idrun">
+        <div class="idstate">
+          <span><span class="logmsg" id="saved" data-i18n="saved" hidden></span> <span class="runstate" id="runstate"></span></span>
+          <span class="idprot" id="idProt"></span>
+        </div>
+        <button class="power" id="power" aria-pressed="false"><i></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page">
+    <h1 id="pageTitle" class="sr-only"></h1>
+
+        <!-- UYGULAMA -->
+    <section class="tab" data-tab="app" hidden>
+      <div class="bento">
+        <div class="stack span-6">
+          <div class="card">
+          <h2 class="cardtitle" data-i18n="appearance"></h2>
+          <label data-i18n="theme" for="theme"></label>
+          <select id="theme" class="gap">
+            <option value="auto" data-i18n="themeAuto"></option>
+            <option value="ink" data-i18n="themeInk"></option>
+            <option value="paper" data-i18n="themePaper"></option>
+            <option value="slate" data-i18n="themeSlate"></option>
+            <option value="indigo" data-i18n="themeIndigo"></option>
+            <option value="brick" data-i18n="themeBrick"></option>
+            <option value="mist" data-i18n="themeMist"></option>
+            <option value="carbon" data-i18n="themeCarbon"></option>
+            <option value="moss" data-i18n="themeMoss"></option>
+            <option value="vcrimson" data-i18n="themeVcrimson"></option>
+            <option value="vgreenify" data-i18n="themeVgreenify"></option>
+            <option value="volive" data-i18n="themeVolive"></option>
+            <option value="vteal" data-i18n="themeVteal"></option>
+            <option value="vwhite" data-i18n="themeVwhite"></option>
+            <option value="vlavender" data-i18n="themeVlavender"></option>
+            <option value="vmidnight" data-i18n="themeVmidnight"></option>
+            <option value="vrose" data-i18n="themeVrose"></option>
+            <option value="vblack" data-i18n="themeVblack"></option>
+            <option value="vindigo" data-i18n="themeVindigo"></option>
+          </select>
+          <label data-i18n="language" for="language"></label>
+          <select id="language"></select>
+                  </div>
+          <div class="card">
+          <h2 class="cardtitle" data-i18n="dataTitle"></h2>
+          <div class="row">
+            <button id="exportBtn" data-i18n="exportSettings"></button>
+            <button id="importBtn" data-i18n="importSettings"></button>
+            <button id="resetBtn" class="danger" data-i18n="resetSettings"></button>
+          </div>
+          <input id="importFile" type="file" accept="application/json" hidden>
+          <p class="hint" id="dataMsg"></p>
+
+        </div>
+        </div>
+        <div class="card span-6">
+          <h2 class="cardtitle" data-i18n="tuning"></h2>
+          <div class="grid2">
+            <div class="field">
+              <div class="lblrow"><label data-i18n="tileServer" for="tiles"></label><button class="help" type="button" data-i18n-title="tileServerHint" data-tip="tileServerHint" aria-label="?">?</button></div>
+              <select id="tiles">
+                <option value="osm">OpenStreetMap</option>
+                <option value="osmde">OpenStreetMap Deutschland</option>
+                <option value="topo">OpenTopoMap</option>
+                <option value="custom" data-i18n="tileCustom"></option>
+              </select>
+              <div id="tilesCustomBox" hidden>
+                <input id="tilesCustom" type="text" spellcheck="false"
+                       placeholder="https://example.com/{z}/{x}/{y}.png">
+                <button class="help" type="button" data-i18n-title="tileCustomHint" data-tip="tileCustomHint" aria-label="?">?</button>
+              </div>
+                          </div>
+            <div class="field">
+              <div class="lblrow"><label data-i18n="logMaxLabel" for="logMax"></label><button class="help" type="button" data-i18n-title="logMaxHint" data-tip="logMaxHint" aria-label="?">?</button></div>
+              <select id="logMax">
+                <option value="200">200</option>
+                <option value="1000">1000</option>
+                <option value="5000">5000</option>
+              </select>
+            </div>
+          </div>
+          <div class="optlist">
+            <div class="opt">
+              <div class="lblrow"><label class="check"><input id="badge" type="checkbox"><span data-i18n="badgeLabel"></span></label><button class="help" type="button" data-i18n-title="badgeLabelHint" data-tip="badgeLabelHint" aria-label="?">?</button></div>
+            </div>
+            <div class="opt">
+              <div class="lblrow"><label class="check"><input id="lowMemory" type="checkbox"><span data-i18n="lowMemory"></span></label><button class="help" type="button" data-i18n-title="lowMemoryHint" data-tip="lowMemoryHint" aria-label="?">?</button></div>
+                          </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+<!-- KONUM -->
+    <section class="tab" data-tab="location">
+        <!-- Harita tam genislik. Arama, kip, gizlilik ve koyu harita haritanin
+             USTUNDE yuzuyor ama #map'in KARDESI, cocugu degil: icindeyken
+             tiklamalar haritaya sizip nokta birakiyordu. Kip kartlari (zone:
+             gizlilik, moving: rota) JS ile hidden olur. Alt satir 4+4+4;
+             Basic'te Reporting gizli, kalan ikisi 6+6. -->
+        <div class="bento" id="locCards">
+          <div class="maphero span-12">
+          <div class="map" id="map"></div>
+
+          <div class="mapover mapover-top">
+            <div class="searchbox" id="searchBox">
+              <div class="row">
+                <input id="search" type="search" spellcheck="false" data-i18n-ph="searchPlaceholder">
+                <button id="searchBtn" data-i18n="searchGo"></button>
+              </div>
+              <p class="searchnote" id="searchMsg" hidden></p>
+              <div class="results" id="searchResults" hidden></div>
+            </div>
+            <div class="seg" id="locMode">
+              <button data-v="fixed" data-i18n="modeFixedPoint"></button>
+              <button data-v="zone" data-i18n="modeFixedZone"></button>
+              <button data-v="moving" data-i18n="modeMoving"></button>
+            </div>
+          </div>
+
+          <div class="mapover mapover-bottom">
+            <div class="card floatcard" id="zoneCard">
+              <div class="cardhead-inline"><h2 class="cardtitle" data-i18n="privacy"></h2><button class="help" type="button" data-i18n-title="zoneHintShort" data-tip="zoneHintShort" aria-label="?">?</button></div>
+              <div class="seg" id="privacy">
+                <button data-v="low" data-i18n="low"></button>
+                <button data-v="medium" data-i18n="medium"></button>
+                <button data-v="high" data-i18n="high"></button>
+              </div>
+              <div class="radrow">
+                <div class="field">
+                  <label data-i18n="innerRadius" for="inner"></label>
+                  <input id="inner" type="number" min="0" step="10">
+                </div>
+                <div class="field">
+                  <label data-i18n="outerRadius" for="outer"></label>
+                  <input id="outer" type="number" min="1" step="10">
+                </div>
+                <button class="btn" id="zoneReset" data-i18n="zoneReset"></button>
+              </div>
+            </div>
+
+            <div class="card floatcard" id="motionRoute" hidden>
+              <div class="cardhead">
+                <div class="cardhead-inline"><h2 class="cardtitle" data-i18n="motionRoute"></h2><button class="help" type="button" data-i18n-title="motionIntroShort" data-tip="motionIntroShort" aria-label="?">?</button></div>
+              </div>
+              <div class="row">
+                <button id="pickPoints" data-i18n="motionAddPoints"></button>
+                <button id="clearPoints" class="danger" data-i18n="motionClear"></button>
+                <button id="restartMotion" data-i18n="motionRestart"></button>
+              </div>
+              <div class="waypoints" id="waypoints"></div>
+              <p class="hint" id="routeInfo"></p>
+            </div>
+
+            <div class="maptools">
+              <span class="maptip" id="coordHint"></span>
+              <button id="darkMap" class="toggle" type="button" aria-pressed="false">
+                <span class="dot"></span><span data-i18n="darkMap"></span>
+              </button>
+            </div>
+          </div>
+          </div>
+
+          <div class="card span-12" id="motionHow" hidden>
+            <h2 class="cardtitle" data-i18n="motionHow"></h2>
+            <div class="motionrow">
+              <div class="field motionprofile">
+                <label data-i18n="motionProfile" for="motionProfile"></label>
+                <select id="motionProfile">
+                  <option value="walking" data-i18n="profWalking"></option>
+                  <option value="running" data-i18n="profRunning"></option>
+                  <option value="cycling" data-i18n="profCycling"></option>
+                  <option value="commuting" data-i18n="profCommuting"></option>
+                  <option value="driving" data-i18n="profDriving"></option>
+                  <option value="train" data-i18n="profTrain"></option>
+                  <option value="flight" data-i18n="profFlight"></option>
+                  <option value="stationary" data-i18n="profStationary"></option>
+                </select>
+              </div>
+              <div class="field motionnum">
+                <label data-i18n="motionSpeed" for="motionSpeed"></label>
+                <input id="motionSpeed" type="number" min="0" max="900" step="1">
+              </div>
+              <div class="field motionnum">
+                <label data-i18n="motionPauseShort" for="motionPause"></label>
+                <input id="motionPause" type="number" min="0" max="3600" step="5">
+              </div>
+              <div class="field motionloop">
+                <label data-i18n="motionLoop" for="motionLoop"></label>
+                <select id="motionLoop">
+                  <option value="once" data-i18n="loopOnce"></option>
+                  <option value="loop" data-i18n="loopLoop"></option>
+                  <option value="pingpong" data-i18n="loopPingpong"></option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card span-4 fill-basic" id="coordCard">
+            <div class="cardhead-inline"><h2 class="cardtitle" data-i18n="coordinates"></h2><button class="warnbadge" type="button" id="customNote" hidden data-i18n-title="customPointNote" data-tip="customPointNote" aria-label="!">!</button></div>
+            <div class="grid4">
+              <div>
+                <label data-i18n="country" for="country"></label>
+                <select id="country"></select>
+              </div>
+              <div>
+                <label data-i18n="city" for="city"></label>
+                <select id="city"></select>
+              </div>
+              <div>
+                <label data-i18n="latitude" for="lat"></label>
+                <input id="lat" type="number" step="0.000001" min="-90" max="90">
+              </div>
+              <div>
+                <label data-i18n="longitude" for="lon"></label>
+                <input id="lon" type="number" step="0.000001" min="-180" max="180">
+              </div>
+            </div>
+          </div>
+
+          <div class="card span-4 fill-basic" id="presetCard">
+            <h2 class="cardtitle" data-i18n="tabPresets"></h2>
+            <div class="presets" id="presetList"></div>
+            <div class="row presetadd">
+              <input id="presetName" type="text" data-i18n-ph="presetNewName">
+              <button id="presetSave" data-i18n="save"></button>
+            </div>
+          </div>
+
+          <div class="card span-4" data-adv="1">
+  <div class="cardhead-inline"><h2 class="cardtitle" data-i18n="reporting"></h2><button class="help" type="button" data-i18n-title="reportingIntro" data-tip="reportingIntro" aria-label="?">?</button></div>
+            <div class="grid4">
+    <div>
+      <label data-i18n="accuracyLabel" for="accuracyMode"></label>
+      <select id="accuracyMode">
+        <option value="auto" data-i18n="accuracyAuto"></option>
+        <option value="custom" data-i18n="accuracyCustom"></option>
+      </select>
+    </div>
+    <div>
+      <label data-i18n="accuracyMeters" for="accuracyM"></label>
+      <input id="accuracyM" type="number" min="1" max="20000" step="1">
+    </div>
+    <div>
+      <label data-i18n="jitterPeriodLabel" for="jitterPeriod"></label>
+      <select id="jitterPeriod">
+        <option value="day" data-i18n="jitterDay"></option>
+        <option value="hour" data-i18n="jitterHour"></option>
+        <option value="fixed" data-i18n="jitterFixed"></option>
+      </select>
+    </div>
+    <div>
+      <div class="lblrow"><label data-i18n="watchIntervalLabel" for="watchInterval"></label><button class="help" type="button" data-i18n-title="jitterHint" data-tip="jitterHint" aria-label="?">?</button></div>
+      <input id="watchInterval" type="number" min="1" max="600" step="1">
+    </div>
+  </div>
+          </div>
+        </div>
+    </section>
+
+    <!-- KIMLIK -->
+    <section class="tab" data-tab="identity" hidden>
+      <div class="bento">
+        <div class="card span-6">
+          <div class="cardhead-inline"><h2 class="cardtitle" data-i18n="tzAndLocale"></h2><button class="help" type="button" data-i18n-title="consistencyIntro" data-tip="consistencyIntro" aria-label="?">?</button></div>
+                    <div class="field">
+            <label data-i18n="timeZone" for="tz"></label>
+            <label class="check"><input id="tzAuto" type="checkbox"><span data-i18n="tzAuto"></span></label>
+            <input id="tz" type="text" spellcheck="false">
+          </div>
+          <div class="field">
+            <label data-i18n="locale" for="locale"></label>
+            <label class="check"><input id="localeAuto" type="checkbox"><span data-i18n="localeAuto"></span></label>
+            <input id="locale" type="text" spellcheck="false" placeholder="tr-TR">
+          </div>
+        </div>
+        <div class="card span-6">
+          <div class="cardhead-inline"><h2 class="cardtitle" data-i18n="whatToSpoof"></h2></div>
+          <div class="optlist">
+            <div class="opt">
+              <div class="lblrow"><label class="check"><input id="localeSpoof" type="checkbox"><span data-i18n="spoofNavLanguage"></span></label><button class="help" type="button" data-i18n-title="spoofNavLanguageHint" data-tip="spoofNavLanguageHint" aria-label="?">?</button></div>
+            </div>
+            <div class="opt">
+              <div class="lblrow"><label class="check"><input id="localeIntl" type="checkbox"><span data-i18n="spoofIntl"></span></label><button class="help" type="button" data-i18n-title="spoofIntlHint" data-tip="spoofIntlHint" aria-label="?">?</button></div>
+            </div>
+            <div class="opt">
+              <div class="lblrow"><label class="check"><input id="acceptLanguage" type="checkbox"><span data-i18n="spoofAcceptLanguage"></span></label><button class="help" type="button" data-i18n-title="spoofAcceptLanguageHint" data-tip="spoofAcceptLanguageHint" aria-label="?">?</button></div>
+            </div>
+            <div class="opt">
+              <div class="lblrow"><label class="check"><input id="tzDeep" type="checkbox"><span data-i18n="tzDeep"></span></label><button class="help" type="button" data-i18n-title="tzDeepHint" data-tip="tzDeepHint" aria-label="?">?</button></div>
+            </div>
+            <div class="opt">
+              <div class="lblrow"><label class="check"><input id="ipGeo" type="checkbox"><span data-i18n="spoofIpGeo"></span></label><button class="help" type="button" data-i18n-title="spoofIpGeoHint" data-tip="spoofIpGeoHint" aria-label="?">?</button><button class="warnbadge" type="button" data-i18n-title="ipWarn" data-tip="ipWarn" aria-label="!">!</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KORUMA -->
+    <section class="tab" data-tab="protect" hidden>
+      <div class="bento">
+        <div class="card grp span-6" data-grp="leaks">
+          <div class="ghead">
+            <h2 class="cardtitle" data-i18n="leaks"></h2><button class="help" type="button" data-i18n-title="leaksIntro" data-tip="leaksIntro" aria-label="?">?</button>
+            <span class="gsum"></span>
+            <button type="button" class="master" data-master="leaks" aria-pressed="false" data-i18n-title="groupToggleAll"></button>
+          </div>
+          <div class="gbody">
+                      <div class="opt">
+            <div class="lblrow"><label class="check"><input id="webrtc" type="checkbox"><span data-i18n="spoofWebrtc"></span></label><button class="help" type="button" data-i18n-title="spoofWebrtcHint" data-tip="spoofWebrtcHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="webrtcRelay" type="checkbox"><span data-i18n="webrtcRelay"></span></label><button class="help" type="button" data-i18n-title="webrtcRelayHint" data-tip="webrtcRelayHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="webrtcBlock" type="checkbox"><span data-i18n="webrtcBlock"></span></label><button class="help" type="button" data-i18n-title="webrtcBlockHint" data-tip="webrtcBlockHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="windowName" type="checkbox"><span data-i18n="windowName"></span></label><button class="help" type="button" data-i18n-title="windowNameHint" data-tip="windowNameHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="noPrediction" type="checkbox"><span data-i18n="noPrediction"></span></label><button class="help" type="button" data-i18n-title="noPredictionHint" data-tip="noPredictionHint" aria-label="?">?</button></div>
+          </div>
+          </div>
+        </div>
+
+        <div class="card grp span-6" data-grp="harden">
+          <div class="ghead">
+            <h2 class="cardtitle" data-i18n="hardening"></h2><button class="help" type="button" data-i18n-title="hardeningIntro" data-tip="hardeningIntro" aria-label="?">?</button>
+            <span class="gsum"></span>
+            <button type="button" class="master" data-master="harden" aria-pressed="false" data-i18n-title="groupToggleAll"></button>
+          </div>
+          <div class="gbody">
+                      <div class="opt">
+            <div class="lblrow"><label class="check"><input id="harden" type="checkbox"><span data-i18n="hardenFrames"></span></label><button class="help" type="button" data-i18n-title="hardenFramesHint" data-tip="hardenFramesHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="maskNative" type="checkbox"><span data-i18n="maskNative"></span></label><button class="help" type="button" data-i18n-title="maskNativeHint" data-tip="maskNativeHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="denyWhenOff" type="checkbox"><span data-i18n="denyWhenOff"></span></label><button class="help" type="button" data-i18n-title="denyWhenOffHint" data-tip="denyWhenOffHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="workerPatch" type="checkbox"><span data-i18n="workerPatch"></span></label><button class="help" type="button" data-i18n-title="workerPatchHint" data-tip="workerPatchHint" aria-label="?">?</button></div>
+          </div>
+          </div>
+        </div>
+
+        <div class="card grp span-6" data-grp="fp">
+          <div class="ghead">
+            <h2 class="cardtitle" data-i18n="fingerprint"></h2><button class="help" type="button" data-i18n-title="fingerprintIntro" data-tip="fingerprintIntro" aria-label="?">?</button>
+            <span class="gsum"></span>
+            <button type="button" class="master" data-master="fp" aria-pressed="false" data-i18n-title="groupToggleAll"></button>
+          </div>
+          <div class="gbody">
+                      <div class="opt">
+            <div class="lblrow"><label class="check"><input id="fpCanvas" type="checkbox"><span data-i18n="fpCanvas"></span></label><button class="help" type="button" data-i18n-title="fpCanvasHint" data-tip="fpCanvasHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="fpWebgl" type="checkbox"><span data-i18n="fpWebgl"></span></label><button class="help" type="button" data-i18n-title="fpWebglHint" data-tip="fpWebglHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="fpAudio" type="checkbox"><span data-i18n="fpAudio"></span></label><button class="help" type="button" data-i18n-title="fpAudioHint" data-tip="fpAudioHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="fpRect" type="checkbox"><span data-i18n="fpRect"></span></label><button class="help" type="button" data-i18n-title="fpRectHint" data-tip="fpRectHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="fpScreen" type="checkbox"><span data-i18n="fpScreen"></span></label><button class="help" type="button" data-i18n-title="fpScreenHint" data-tip="fpScreenHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="fpDevice" type="checkbox"><span data-i18n="fpDevice"></span></label><button class="help" type="button" data-i18n-title="fpDeviceHint" data-tip="fpDeviceHint" aria-label="?">?</button></div>
+          </div>
+          </div>
+        </div>
+
+        <div class="card grp span-6" data-grp="track">
+          <div class="ghead">
+            <h2 class="cardtitle" data-i18n="tracking"></h2><button class="help" type="button" data-i18n-title="trackingIntro" data-tip="trackingIntro" aria-label="?">?</button>
+            <span class="gsum"></span>
+            <button type="button" class="master" data-master="track" aria-pressed="false" data-i18n-title="groupToggleAll"></button>
+          </div>
+          <div class="gbody">
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="gpc" type="checkbox"><span data-i18n="gpc"></span></label><button class="help" type="button" data-i18n-title="gpcHint" data-tip="gpcHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="stripParams" type="checkbox"><span data-i18n="stripParams"></span></label><button class="help" type="button" data-i18n-title="stripParamsHint" data-tip="stripParamsHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt">
+            <div class="lblrow"><label class="check"><input id="noPing" type="checkbox"><span data-i18n="noPing"></span></label><button class="help" type="button" data-i18n-title="noPingHint" data-tip="noPingHint" aria-label="?">?</button></div>
+          </div>
+          <!-- Tarayiciya ozel: data-only, core/ui.js gnmBrowser() -->
+          <div class="opt" data-only="chromium">
+            <div class="lblrow"><label class="check"><input id="noSandbox" type="checkbox"><span data-i18n="noSandbox"></span></label><button class="help" type="button" data-i18n-title="noSandboxHint" data-tip="noSandboxHint" aria-label="?">?</button></div>
+          </div>
+          <div class="opt" data-only="firefox">
+            <div class="lblrow"><label class="check"><input id="etpAlways" type="checkbox"><span data-i18n="etpAlways"></span></label><button class="help" type="button" data-i18n-title="etpAlwaysHint" data-tip="etpAlwaysHint" aria-label="?">?</button></div>
+          </div>
+          </div>
+        </div>
+
+        <!-- Tam satir: dorduncu grup 6+6'yi doldurdu, bu kart tek basina kalsa
+             yarim satir bos kaliyordu -->
+        <div class="card span-12" data-adv="1">
+          <div class="cardhead-inline"><h2 class="cardtitle" data-i18n="browserHardening"></h2><button class="help" type="button" data-i18n-title="browserHardeningHint" data-tip="browserHardeningHint" aria-label="?">?</button><button class="warnbadge" type="button" data-i18n-title="prefsNote" data-tip="prefsNote" aria-label="!">!</button></div>
+                    <div class="stack prefscol">
+            <div>
+              <label data-i18n="prefsFirefox"></label>
+              <pre class="prefs" id="prefsFF">geo.enabled                                    false
+permissions.default.geo                        2
+geo.provider.network.url                       (empty)
+media.peerconnection.ice.default_address_only  true
+media.peerconnection.ice.no_host               true
+dom.netinfo.enabled                            false
+network.dns.disablePrefetch                    true</pre>
+            </div>
+            <div>
+              <label data-i18n="prefsChromium"></label>
+              <pre class="prefs" id="prefsCR">chrome://settings/content/location    Block
+chrome://settings/content/sensors     Block
+chrome://flags/#enable-webrtc-hide-local-ips-with-mdns    Enabled
+edge://settings/content/location      Block</pre>
+            </div>
+          </div>
+          <div class="row">
+            <button id="prefsCopy" data-i18n="prefsCopy"></button>
+            <span class="logmsg" id="prefsMsg"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SİTELER VE KURALLAR -->
+    <section class="tab" data-tab="sites" hidden>
+      <div class="bento">
+        <div class="card span-6">
+<div class="cardhead-inline"><h2 class="cardtitle" data-i18n="whereToRun"></h2><button class="help" type="button" data-i18n-title="siteListHint" data-tip="siteListHint" aria-label="?">?</button></div>
+<div class="radios" id="siteMode">
+<label class="check"><input type="radio" name="sm" value="all"><span data-i18n="modeAll"></span></label>
+<label class="check"><input type="radio" name="sm" value="only"><span data-i18n="modeOnly"></span></label>
+<label class="check"><input type="radio" name="sm" value="except"><span data-i18n="modeExcept"></span></label>
+</div>
+<textarea id="siteList" rows="6" spellcheck="false" data-i18n-ph="siteListPlaceholder"></textarea>
+        </div>
+
+        <div class="card span-6">
+          <div class="cardhead-inline"><h2 class="cardtitle" data-i18n="domainGroups"></h2><button class="help" type="button" data-i18n-title="domainGroupsHint" data-tip="domainGroupsHint" aria-label="?">?</button></div>
+                      <div class="groups" id="groups"></div>
+        </div>
+
+        <div class="card span-12">
+          <div class="cardhead-inline"><h2 class="cardtitle" data-i18n="siteRules"></h2><button class="help" type="button" data-i18n-title="siteRulesHint" data-tip="siteRulesHint" aria-label="?">?</button></div>
+                    <div id="rules"></div>
+          <button class="link add" id="addRule" data-i18n="addRule"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZAMANLAMA -->
+    <section class="tab" data-tab="schedule" hidden>
+      <!-- Tek kart, tam genislik. 8+4 denendi: sagdaki durum kutusu bir onay
+           kutusu ve tek satirla yarim bos kaliyordu. -->
+      <div class="bento">
+        <div class="card span-12">
+          <h2 class="cardtitle" data-i18n="tabSchedule"></h2>
+          <div class="lblrow"><label class="check"><input id="scheduleOn" type="checkbox"><span data-i18n="scheduleOn"></span></label><button class="help" type="button" data-i18n-title="scheduleIntro" data-tip="scheduleIntro" aria-label="?">?</button></div>
+          <p class="hint" id="scheduleNow"></p>
+          <div class="schedhead">
+            <span data-i18n="schedDays"></span>
+            <span data-i18n="schedTime"></span>
+            <span data-i18n="schedPreset"></span>
+            <span></span>
+          </div>
+          <div id="schedule"></div>
+          <button class="link add" id="addSchedule" data-i18n="schedAdd"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- GEÇMİŞ -->
+    <section class="tab" data-tab="history" hidden>
+      <div class="bento">
+        <div class="card span-12">
+          <div class="cardhead">
+            <div class="cardhead-inline"><h2 class="cardtitle" data-i18n="movementHistory"></h2><button class="help" type="button" data-i18n-title="movementIntro" data-tip="movementIntro" aria-label="?">?</button><button class="warnbadge" type="button" data-i18n-title="timelineIntro" data-tip="timelineIntro" aria-label="!">!</button></div>
+            <label class="check"><input id="timelineOn" type="checkbox"><span data-i18n="timelineKeep"></span></label>
+            <span class="grow"></span>
+            <button id="timelineDownload" data-i18n="logDownload"></button>
+            <button id="timelineClear" class="danger" data-i18n="logClear"></button>
+          </div>
+          <p class="hint" id="timelineCount"></p>
+          <div class="logbox" id="timelineBox"></div>
+        </div>
+
+        <div class="card span-12">
+          <div class="cardhead-inline"><h2 class="cardtitle" data-i18n="eventLog"></h2><button class="help" type="button" data-i18n-title="logIntro" data-tip="logIntro" aria-label="?">?</button><button class="warnbadge" type="button" data-i18n-title="logPrivacy" data-tip="logPrivacy" aria-label="!">!</button></div>
+                    <div class="logbar">
+            <label class="check"><input id="logging" type="checkbox"><span data-i18n="logEnabled"></span></label>
+            <label class="check"><input id="logVerbose" type="checkbox"><span data-i18n="logVerboseLabel"></span></label>
+            <div class="lblrow"><label class="check"><input id="logDetail" type="checkbox"><span data-i18n="logDetailLabel"></span></label><button class="help" type="button" data-i18n-title="logDetailHint" data-tip="logDetailHint" aria-label="?">?</button></div>
+            <select id="logFilter"></select>
+            <span class="logmsg" id="logMsg"></span>
+            <span class="grow"></span>
+            <button id="logCopy" data-i18n="logCopy"></button>
+            <button id="logDownload" data-i18n="logDownload"></button>
+            <button id="logClear" class="danger" data-i18n="logClear"></button>
+          </div>
+          <p class="hint" id="logCount"></p>
+          <div class="logbox" id="logBox"></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script src="../core/store.js"></script>
+<script src="../core/engine.js"></script>
+<script src="../core/log.js"></script>
+<script src="../core/ui.js"></script>
+<script src="map.js"></script>
+<script src="options.js"></script>
+</body>
+</html>

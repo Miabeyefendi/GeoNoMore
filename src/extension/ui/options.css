@@ -1,0 +1,2093 @@
+/* GeoNoMore options. Düzen docs/Live design for location spoofing altındaki
+   tasarımdan birebir alındı. Tasarım koyu tema için satır içi renklerle
+   yazılmıştı; buraya değişkenlerle taşındı ki açık tema da çalışsın. */
+
+/* Temalar. Bu blok ELLE DUZENLENMEZ, src/tools/themes.js uretiyor.
+
+   Paletin tamami bir cekirdekten turuyor: yuzeyler bir aciklik merdiveni,
+   metinler kontrast hedefinden, etkilesim renkleri kendi ciftiyle. Vantagraph
+   ile baslayanlar disaridan gelen paletler; renkleri korunuyor, yalniz esigi
+   tutmayanlar tonu bozulmadan aciliyor.
+
+   Her rolun KENDI esigi var, cunku isleri farkli:
+     --text --dim --blue --go --red --warn      4.5  metin
+     --faint                                    3.0  sus, tasiyici degil
+     --accent uzerinde --accentText             4.5  dolu dugme yazisi
+     --accentInk   vurgunun cizgisi, kartta     2.0  dolu dugmenin siniri
+     --lineStrong  giris kenarligi              3.0  arayuz bileseni
+     --line        ayrac                        1.5  yalnizca secilebilsin
+
+   Yuzeyler dort kademe: --bg zemin, --panel kart, --panel2 ic kart ve satir
+   vurgusu, --float katman. Koyu temada yukseklik golgeyle degil parlaklikla
+   anlatiliyor: yukseldikce aciliyor.
+
+   Olcumu src/tests/test-theme.js yapiyor, tutmayan bir deger yayini durdurur. */
+
+:root, :root[data-theme="ink"] {
+  --bg: #0e0e0e;
+  --panel: #181818;
+  --panel2: #222222;
+  --accentSoft: #313a17;
+  --washFrom: #0e0e0e;
+  --washTo: #151515;
+  --line: #4d4d4d;
+  --lineStrong: #6f6f6f;
+  --text: #e6e6e6;
+  --dim: #a8a8a8;
+  --faint: #858585;
+  --blue: #daff64;
+  --purple: #6f6f6f;
+  --accent: #b6ec13;
+  --accentText: #000000;
+  --accentInk: #b6ec13;
+  --accentHover: #bfee2f;
+  --orange: #f5b13d;
+  --red: #d88b83;
+  --go: #7dbf9c;
+  --mapbg: #131313;
+  --zebra: rgba(230, 230, 230, .035);
+  --dangerline: #614441;
+  --warn: #f5b13d;
+  --bar: rgba(14, 14, 14, .95);
+  --float: rgba(45, 45, 45, .96);
+}
+
+:root[data-theme="paper"] {
+  --bg: #f6f6f6;
+  --panel: #ffffff;
+  --panel2: #f1f1f1;
+  --accentSoft: #f8fde5;
+  --washFrom: #f6f6f6;
+  --washTo: #f1f1f1;
+  --line: #cccccc;
+  --lineStrong: #8b8b8b;
+  --text: #212121;
+  --dim: #5c5c5c;
+  --faint: #808080;
+  --blue: #141414;
+  --purple: #8b8b8b;
+  --accent: #c4f22a;
+  --accentText: #000000;
+  --accentInk: #141414;
+  --accentHover: #bbef0f;
+  --orange: #966208;
+  --red: #a33f33;
+  --go: #366d50;
+  --mapbg: #f5f5f5;
+  --zebra: rgba(33, 33, 33, .05);
+  --dangerline: #dcb6b1;
+  --warn: #966208;
+  --bar: rgba(246, 246, 246, .95);
+  --float: rgba(255, 255, 255, .96);
+}
+
+:root[data-theme="slate"] {
+  --bg: #0c0f10;
+  --panel: #15191b;
+  --panel2: #1e2427;
+  --accentSoft: #202c31;
+  --washFrom: #0c0f10;
+  --washTo: #121718;
+  --line: #415058;
+  --lineStrong: #5a707c;
+  --text: #e4e6e7;
+  --dim: #96adba;
+  --faint: #6e8b9b;
+  --blue: #97bece;
+  --purple: #5a707c;
+  --accent: #5990a6;
+  --accentText: #000000;
+  --accentInk: #5990a6;
+  --accentHover: #6d9db1;
+  --orange: #5e93a9;
+  --red: #d88b83;
+  --go: #7dbf9c;
+  --mapbg: #111415;
+  --zebra: rgba(228, 230, 231, .035);
+  --dangerline: #5f4443;
+  --warn: #5e93a9;
+  --bar: rgba(12, 15, 16, .95);
+  --float: rgba(39, 46, 50, .96);
+}
+
+:root[data-theme="indigo"] {
+  --bg: #0c0b11;
+  --panel: #14131d;
+  --panel2: #1d1c29;
+  --accentSoft: #211e33;
+  --washFrom: #0c0b11;
+  --washTo: #12111a;
+  --line: #3e3a5f;
+  --lineStrong: #6b64a0;
+  --text: #e3e3e8;
+  --dim: #928dc4;
+  --faint: #6962a7;
+  --blue: #a097ce;
+  --purple: #6b64a0;
+  --accent: #6659a6;
+  --accentText: #ffffff;
+  --accentInk: #6659a6;
+  --accentHover: #786db1;
+  --orange: #8b81bb;
+  --red: #d88b83;
+  --go: #7dbf9c;
+  --mapbg: #100f17;
+  --zebra: rgba(227, 227, 232, .035);
+  --dangerline: #5e4144;
+  --warn: #8b81bb;
+  --bar: rgba(12, 11, 17, .95);
+  --float: rgba(37, 36, 54, .96);
+}
+
+:root[data-theme="brick"] {
+  --bg: #100d0c;
+  --panel: #1b1715;
+  --panel2: #27201e;
+  --accentSoft: #34221d;
+  --washFrom: #100d0c;
+  --washTo: #181412;
+  --line: #584741;
+  --lineStrong: #7f675f;
+  --text: #e7e5e4;
+  --dim: #b99f98;
+  --faint: #997a70;
+  --blue: #d9998c;
+  --purple: #7f675f;
+  --accent: #b55c4a;
+  --accentText: #000000;
+  --accentInk: #b55c4a;
+  --accentHover: #be7060;
+  --orange: #c07465;
+  --red: #d88b83;
+  --go: #7dbf9c;
+  --mapbg: #151211;
+  --zebra: rgba(231, 229, 228, .035);
+  --dangerline: #63433f;
+  --warn: #c07465;
+  --bar: rgba(16, 13, 12, .95);
+  --float: rgba(50, 42, 39, .96);
+}
+
+:root[data-theme="mist"] {
+  --bg: #f6f6f7;
+  --panel: #ffffff;
+  --panel2: #f0f1f2;
+  --accentSoft: #eaf1f5;
+  --washFrom: #f6f6f7;
+  --washTo: #f1f1f3;
+  --line: #c6ced2;
+  --lineStrong: #788c96;
+  --text: #1f2223;
+  --dim: #4d616a;
+  --faint: #6e8591;
+  --blue: #33627a;
+  --purple: #788c96;
+  --accent: #548eab;
+  --accentText: #000000;
+  --accentInk: #548eab;
+  --accentHover: #4a7d96;
+  --orange: #427087;
+  --red: #a33f33;
+  --go: #366d50;
+  --mapbg: #f5f5f5;
+  --zebra: rgba(31, 34, 35, .05);
+  --dangerline: #dcb6b1;
+  --warn: #427087;
+  --bar: rgba(246, 246, 247, .95);
+  --float: rgba(255, 255, 255, .96);
+}
+
+:root[data-theme="carbon"] {
+  --bg: #f6f6f7;
+  --panel: #ffffff;
+  --panel2: #f0f1f2;
+  --accentSoft: #ecf0f4;
+  --washFrom: #f6f6f7;
+  --washTo: #f1f1f3;
+  --line: #c6ccd2;
+  --lineStrong: #7d8b99;
+  --text: #1f2123;
+  --dim: #4d5c6a;
+  --faint: #6e7f91;
+  --blue: #3c5972;
+  --purple: #7d8b99;
+  --accent: #5e82a1;
+  --accentText: #000000;
+  --accentInk: #5e82a1;
+  --accentHover: #53728e;
+  --orange: #506e89;
+  --red: #a33f33;
+  --go: #366d50;
+  --mapbg: #f5f5f5;
+  --zebra: rgba(31, 33, 35, .05);
+  --dangerline: #dcb6b1;
+  --warn: #506e89;
+  --bar: rgba(246, 246, 247, .95);
+  --float: rgba(255, 255, 255, .96);
+}
+
+:root[data-theme="moss"] {
+  --bg: #f6f6f6;
+  --panel: #ffffff;
+  --panel2: #f0f2f1;
+  --accentSoft: #ebf4ef;
+  --washFrom: #f6f6f6;
+  --washTo: #f1f1f1;
+  --line: #c7d1cb;
+  --lineStrong: #788f81;
+  --text: #202221;
+  --dim: #506859;
+  --faint: #718e7c;
+  --blue: #357851;
+  --purple: #788f81;
+  --accent: #55a476;
+  --accentText: #000000;
+  --accentInk: #55a476;
+  --accentHover: #4b9067;
+  --orange: #3d7755;
+  --red: #a33f33;
+  --go: #366d50;
+  --mapbg: #f5f5f5;
+  --zebra: rgba(32, 34, 33, .05);
+  --dangerline: #dcb6b1;
+  --warn: #3d7755;
+  --bar: rgba(246, 246, 246, .95);
+  --float: rgba(255, 255, 255, .96);
+}
+
+:root[data-theme="vcrimson"] {
+  --bg: #090e14;
+  --panel: #300c12;
+  --panel2: #44111a;
+  --accentSoft: #482118;
+  --washFrom: #090e14;
+  --washTo: #0d151e;
+  --line: #6e1d29;
+  --lineStrong: #c9344a;
+  --text: #f0e4e4;
+  --dim: #bf9098;
+  --faint: #bf9098;
+  --blue: #d9a040;
+  --purple: #c9344a;
+  --accent: #c8903a;
+  --accentText: #000000;
+  --accentInk: #c8903a;
+  --accentHover: #cf9d52;
+  --orange: #c8903a;
+  --red: #ff3e65;
+  --go: #c8903a;
+  --mapbg: #090e14;
+  --zebra: rgba(240, 228, 228, .035);
+  --dangerline: #7f1f32;
+  --warn: #c8903a;
+  --bar: rgba(6, 10, 14, .95);
+  --float: rgba(77, 19, 29, .96);
+}
+
+:root[data-theme="vgreenify"] {
+  --bg: #000000;
+  --panel: #121212;
+  --panel2: #1f1f1f;
+  --accentSoft: #14321e;
+  --washFrom: #000000;
+  --washTo: #070707;
+  --line: #343434;
+  --lineStrong: #696969;
+  --text: #ffffff;
+  --dim: #b3b3b3;
+  --faint: #b3b3b3;
+  --blue: #ffffff;
+  --purple: #696969;
+  --accent: #1ed760;
+  --accentText: #000000;
+  --accentInk: #1ed760;
+  --accentHover: #31e270;
+  --orange: #1ed760;
+  --red: #ff2f58;
+  --go: #13ec4d;
+  --mapbg: #292929;
+  --zebra: rgba(255, 255, 255, .035);
+  --dangerline: #6c1d2d;
+  --warn: #1ed760;
+  --bar: rgba(13, 13, 13, .95);
+  --float: rgba(40, 40, 40, .96);
+}
+
+:root[data-theme="volive"] {
+  --bg: #100818;
+  --panel: #131c05;
+  --panel2: #223209;
+  --accentSoft: #25340e;
+  --washFrom: #100818;
+  --washTo: #170c23;
+  --line: #2d410a;
+  --lineStrong: #5b8414;
+  --text: #f0ebe0;
+  --dim: #a8b878;
+  --faint: #a8b878;
+  --blue: #98c855;
+  --purple: #5b8414;
+  --accent: #81b040;
+  --accentText: #000000;
+  --accentInk: #81b040;
+  --accentHover: #90bf4f;
+  --orange: #81b040;
+  --red: #ff5d7d;
+  --go: #81b040;
+  --mapbg: #0b0610;
+  --zebra: rgba(240, 235, 224, .035);
+  --dangerline: #6d3533;
+  --warn: #81b040;
+  --bar: rgba(11, 6, 16, .95);
+  --float: rgba(30, 14, 46, .96);
+}
+
+:root[data-theme="vteal"] {
+  --bg: #f2eef6;
+  --panel: #80c8a8;
+  --panel2: #f7f3fa;
+  --accentSoft: #82b399;
+  --washFrom: #f2eef6;
+  --washTo: #ede8f3;
+  --line: #50988a;
+  --lineStrong: #386b61;
+  --text: #081e14;
+  --dim: #26533c;
+  --faint: #285840;
+  --blue: #832833;
+  --purple: #386b61;
+  --accent: #901828;
+  --accentText: #ffffff;
+  --accentInk: #901828;
+  --accentHover: #761421;
+  --orange: #901828;
+  --red: #95001e;
+  --go: #901828;
+  --mapbg: #50988a;
+  --zebra: rgba(8, 30, 20, .05);
+  --dangerline: #887c74;
+  --warn: #901828;
+  --bar: rgba(228, 216, 236, .95);
+  --float: rgba(104, 176, 144, .96);
+}
+
+:root[data-theme="vwhite"] {
+  --bg: #ffffff;
+  --panel: #f5f4f2;
+  --panel2: #eceae6;
+  --accentSoft: #dbdad8;
+  --washFrom: #ffffff;
+  --washTo: #fafafa;
+  --line: #cec9bf;
+  --lineStrong: #8f836d;
+  --text: #1a1a1a;
+  --dim: #6a6a6a;
+  --faint: #6e6e6e;
+  --blue: #3a3a3a;
+  --purple: #8f836d;
+  --accent: #1a1a1a;
+  --accentText: #ffffff;
+  --accentInk: #1a1a1a;
+  --accentHover: #0b0b0b;
+  --orange: #1a1a1a;
+  --red: #d2002a;
+  --go: #1a1a1a;
+  --mapbg: #d8d4cc;
+  --zebra: rgba(26, 26, 26, .05);
+  --dangerline: #e897a6;
+  --warn: #1a1a1a;
+  --bar: rgba(240, 238, 240, .95);
+  --float: rgba(228, 226, 220, .96);
+}
+
+:root[data-theme="vlavender"] {
+  --bg: #f6f1e4;
+  --panel: #a8a0e0;
+  --panel2: #faf6ee;
+  --accentSoft: #a396c7;
+  --washFrom: #f6f1e4;
+  --washTo: #f4eddd;
+  --line: #7868b0;
+  --lineStrong: #5a4b90;
+  --text: #1a1830;
+  --dim: #38375b;
+  --faint: #4a4878;
+  --blue: #503316;
+  --purple: #5a4b90;
+  --accent: #7f4a0f;
+  --accentText: #ffffff;
+  --accentInk: #7f4a0f;
+  --accentHover: #643a0c;
+  --orange: #56320a;
+  --red: #7e0019;
+  --go: #5a340a;
+  --mapbg: #7868b0;
+  --zebra: rgba(26, 24, 48, .05);
+  --dangerline: #986394;
+  --warn: #56320a;
+  --bar: rgba(237, 229, 208, .95);
+  --float: rgba(144, 136, 200, .96);
+}
+
+:root[data-theme="vmidnight"] {
+  --bg: #090c18;
+  --panel: #160b2a;
+  --panel2: #0d1c28;
+  --accentSoft: #1d1e46;
+  --washFrom: #090c18;
+  --washTo: #0d1122;
+  --line: #3f2373;
+  --lineStrong: #7a4eca;
+  --text: #f0eaf8;
+  --dim: #c8a850;
+  --faint: #c8a850;
+  --blue: #c8a850;
+  --purple: #7a4eca;
+  --accent: #4480d8;
+  --accentText: #000000;
+  --accentInk: #4480d8;
+  --accentHover: #5d91dd;
+  --orange: #4a84d9;
+  --red: #ff1846;
+  --go: #4a84d9;
+  --mapbg: #060810;
+  --zebra: rgba(240, 234, 248, .035);
+  --dangerline: #6f1035;
+  --warn: #4a84d9;
+  --bar: rgba(6, 8, 16, .95);
+  --float: rgba(32, 14, 60, .96);
+}
+
+:root[data-theme="vrose"] {
+  --bg: #eef5eb;
+  --panel: #e8a0a0;
+  --panel2: #f4f9f2;
+  --accentSoft: #cf929a;
+  --washFrom: #eef5eb;
+  --washTo: #e9f2e5;
+  --line: #b87070;
+  --lineStrong: #934949;
+  --text: #182010;
+  --dim: #304821;
+  --faint: #3a5828;
+  --blue: #2e3c8b;
+  --purple: #934949;
+  --accent: #182870;
+  --accentText: #ffffff;
+  --accentInk: #182870;
+  --accentHover: #131f57;
+  --orange: #182870;
+  --red: #8d001c;
+  --go: #182870;
+  --mapbg: #b87070;
+  --zebra: rgba(24, 32, 16, .05);
+  --dangerline: #c5636e;
+  --warn: #182870;
+  --bar: rgba(226, 238, 224, .95);
+  --float: rgba(208, 136, 136, .96);
+}
+
+:root[data-theme="vblack"] {
+  --bg: #040404;
+  --panel: #080808;
+  --panel2: #111111;
+  --accentSoft: #232423;
+  --washFrom: #040404;
+  --washTo: #0b0b0b;
+  --line: #333333;
+  --lineStrong: #616161;
+  --text: #f0f5f2;
+  --dim: #777e77;
+  --faint: #5d635d;
+  --blue: #9ea39e;
+  --purple: #616161;
+  --accent: #b0b5b0;
+  --accentText: #000000;
+  --accentInk: #b0b5b0;
+  --accentHover: #c0c4c0;
+  --orange: #b0b5b0;
+  --red: #ff1040;
+  --go: #b0b5b0;
+  --mapbg: #010101;
+  --zebra: rgba(240, 245, 242, .035);
+  --dangerline: #660b1d;
+  --warn: #b0b5b0;
+  --bar: rgba(1, 1, 1, .95);
+  --float: rgba(23, 23, 23, .96);
+}
+
+:root[data-theme="vindigo"] {
+  --bg: #f6eef2;
+  --panel: #8aaad0;
+  --panel2: #faf4f7;
+  --accentSoft: #8a98b8;
+  --washFrom: #f6eef2;
+  --washTo: #f3e8ed;
+  --line: #4868a0;
+  --lineStrong: #3c5786;
+  --text: #0c1828;
+  --dim: #263a65;
+  --faint: #2a4070;
+  --blue: #6f1e14;
+  --purple: #3c5786;
+  --accent: #8a1408;
+  --accentText: #ffffff;
+  --accentInk: #8a1408;
+  --accentHover: #6d1006;
+  --orange: #741107;
+  --red: #7e0019;
+  --go: #741107;
+  --mapbg: #4868a0;
+  --zebra: rgba(12, 24, 40, .05);
+  --dangerline: #85698a;
+  --warn: #741107;
+  --bar: rgba(237, 224, 232, .95);
+  --float: rgba(104, 136, 184, .96);
+}
+
+* { box-sizing: border-box; }
+
+/* Olcu degiskenleri (--sp-*, --fs-*, --r-*, --h-*) ui/tokens.css icinde. */
+
+/* display veren bir kural (grid, flex) tarayıcının [hidden] kuralını yener.
+   Gizlediğimizi sandığımız kart ekranda kalıyordu, bu yüzden zorluyoruz. */
+[hidden] { display: none !important; }
+
+html, body { margin: 0; height: 100%; }
+
+body {
+  display: flex;
+  min-width: 1000px;
+  background: var(--bg);
+  background-image: linear-gradient(160deg, var(--washFrom), var(--washTo));
+  color: var(--text);
+  font: var(--fs-sm)/1.5 "Segoe UI", system-ui, sans-serif;
+  overflow: hidden;
+}
+
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* --- simge rayi -----------------------------------------------------------
+   88 px. Sekme: simge ve altinda adi. Etkin sekmenin simgesi lime hapin
+   icinde (dolgu --accent, kenar --accentInk); sekme adi duz metin, dugme
+   gibi bagirmiyor. Basit/Gelismis ve depo baglantisi rayin tabaninda. */
+
+.side {
+  flex: 0 0 88px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-2) var(--sp-4);
+  background: linear-gradient(200deg, var(--washTo), var(--washFrom));
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+}
+
+.brandrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-2);
+}
+
+.logo {
+  flex: 0 0 auto;
+  width: auto;
+  height: 28px;
+}
+
+.brandrow .ver {
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  font-size: var(--fs-xs);
+  color: var(--dim);
+}
+
+.sidetabs { display: flex; flex-direction: column; gap: var(--sp-1); }
+
+.sidetabs button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  height: auto;
+  padding: var(--sp-2) var(--sp-1);
+  background: none;
+  border: 0;
+  border-radius: var(--r-sm);
+  color: var(--dim);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--fs-xs);
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+}
+
+.sidetabs .ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: var(--h-sm);
+  border: 1.5px solid transparent;
+  border-radius: var(--r-full);
+  transition: background-color var(--m-out) var(--ease), border-color var(--m-out) var(--ease);
+}
+
+.sidetabs svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sidetabs button:hover { color: var(--text); }
+.sidetabs button:hover .ico { background: var(--panel2); }
+
+.sidetabs button.sel { color: var(--text); font-weight: 600; }
+.sidetabs button.sel .ico {
+  background: var(--accent);
+  border-color: var(--accentInk);
+  color: var(--accentText);
+}
+
+/* Basit/Gelismis: dar rayda alt alta */
+.side .seg { flex-direction: column; margin-top: auto; }
+.side .seg button { height: var(--h-sm); padding: 0; font-size: var(--fs-xs); }
+
+.sidefoot { display: flex; justify-content: center; }
+
+.sidefoot .chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--h-ctl);
+  height: var(--h-ctl);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--dim);
+  text-decoration: none;
+}
+
+.sidefoot .chip:hover {
+  color: var(--text);
+  border-color: var(--accentInk);
+}
+
+/* --- ana sütun ------------------------------------------------------------ */
+
+.content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: var(--sp-3) var(--sp-10);
+  background: var(--bar);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+}
+
+/* Kimlik seridi. Sayfa sutunuyla ayni genislikte, kartlarla ayni hizada.
+   Sitelerin gordugu yer genis hucrede ve buyuk; dort deger esit; durum ve
+   guc dugmesi sagda. Konum disindaki sekmelerde etiketler gizlenip tek
+   satira iniyor. */
+.idstrip {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(5, minmax(0, 1fr)) auto;
+  gap: var(--sp-4);
+  align-items: center;
+  max-width: calc(1200px - 2 * var(--sp-10));
+  margin: 0 auto;
+  padding: var(--sp-3) var(--sp-6);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.idcell { min-width: 0; }
+
+.idk {
+  display: block;
+  line-height: 16px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.idv {
+  display: block;
+  line-height: 22px;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.idmain .idv { line-height: 28px; font-size: var(--fs-lg); }
+
+/* Durunca siteler gercek konumu goruyor: deger soluk, yalan soylemesin */
+.idstrip.off .idv { color: var(--faint); }
+
+.idrun { display: flex; align-items: center; gap: var(--sp-3); }
+.idstate { display: flex; flex-direction: column; align-items: flex-end; white-space: nowrap; }
+.idprot { font-size: var(--fs-xs); color: var(--dim); font-variant-numeric: tabular-nums; }
+
+.runstate {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.runstate.on { color: var(--go); }
+
+/* IP hucresi: deger kendisi dugme (bas, yeniden sor). Genel dugme kalibi
+   (36 px, cerceve, dolgu) burada metin gibi durmali. */
+.idstrip .iplink {
+  height: auto;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: var(--blue);
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.idstrip .iplink:hover { background: none; color: var(--text); text-decoration: underline; }
+.idstrip .iplink.ipok { color: var(--go); }
+.idstrip .iplink.ipbad { color: var(--warn); }
+.idstrip .ipmatch { margin-left: var(--sp-2); font-size: var(--fs-xs); color: var(--blue); text-decoration: underline; }
+
+/* Konum disi: tek satir, etiketsiz */
+body:not([data-tab="location"]) .idstrip { padding-block: var(--sp-2); }
+body:not([data-tab="location"]) .idk { display: none; }
+body:not([data-tab="location"]) .idmain .idv { line-height: 22px; font-size: var(--fs-md); }
+body:not([data-tab="location"]) .idv { font-size: var(--fs-sm); }
+body:not([data-tab="location"]) .idstate { flex-direction: row; gap: var(--sp-3); align-items: center; }
+
+.power {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--h-ctl);
+  height: var(--h-ctl);
+  padding: 0;
+  background: var(--go);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.power[aria-pressed="true"] { background: var(--red); }
+
+/* Simgeler karakter değil çizim: yazı tipine bağlı kalınca boş kutu çıkıyordu */
+.power i { display: block; box-sizing: border-box; }
+
+.power[aria-pressed="false"] i {
+  margin-left: 3px;
+  width: 0; height: 0;
+  border-left: 9px solid #fff;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+
+.power[aria-pressed="true"] i {
+  width: 10px; height: 11px;
+  border-left: 3px solid #fff;
+  border-right: 3px solid #fff;
+}
+
+/* Genislik sinirli ve ortali. Ultrawide ekranda kartlar 850px'e yayilip
+   ici bos kaliyordu; 1200 px insan gozunun rahat tarayabildigi olcu. */
+.page { flex: 1 1 auto; width: 100%; max-width: 1200px; margin: 0 auto; padding: var(--sp-6) var(--sp-10); container: page / inline-size; }
+h1 { margin: 0; font-size: var(--fs-lg); font-weight: 600; }
+
+/* Baslik ekranda yok: rayda etkin sekme zaten yaziyor. Ekran okuyucu icin
+   duruyor. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* --- kartlar -------------------------------------------------------------- */
+
+/* Ic bosluk 24 (Taste Skill: 24'un altina inme), telefonda 16. Durgunken
+   golge yok; karttan sayfaya tek kademe fark ve ince kenarlik yeter. */
+.card {
+  padding: var(--sp-6);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+/* Satir yuksekligi 20: yanina (?) ya da anahtar gelse de gelmese de baslik
+   satiri ayni boyda, yan yana kartlarin basliklari ayni hizada. */
+h2.cardtitle { margin-block-start: 0; }
+.cardtitle {
+  margin: 0 0 var(--sp-3);
+  line-height: 20px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.cardhead {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin: 0 0 var(--sp-3);
+}
+
+.cardhead .cardtitle { margin: 0; white-space: nowrap; }
+.cardhead .hint { margin: 0; }
+
+.stack { display: flex; flex-direction: column; gap: var(--sp-4); }
+
+/* --- bento ---------------------------------------------------------------
+   Butun sekmeler tek izgara: 12 sutun. Izinli satirlar 6+6, 4+4+4 ve
+   bento icin 8+4. Her satir dolu, satirda tek yukseklik; ilk kart sol
+   cizgide, son kart sag cizgide (Taste Skill, layout ve cards).
+   Kirilimlar @container ile: 880 altinda 8 ve 4 tam satira iner, 640
+   altinda her kart tek basina bir satir. */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--sp-4);
+  align-items: stretch;
+}
+.span-4 { grid-column: span 4; }
+.span-6 { grid-column: span 6; }
+.span-8 { grid-column: span 8; }
+.span-12 { grid-column: 1 / -1; }
+
+/* Kart dikey sutun; esneyen parca (metin kutusu, gruplar, tarayici
+   ayarlari) kalan yeri yer, kartin altinda olu bosluk kalmaz. */
+.bento > .card,
+.bento > .stack > .card { display: flex; flex-direction: column; min-width: 0; }
+.bento > .stack { min-width: 0; }
+.bento > .stack > .card:last-child { flex: 1; }
+.bento .card > textarea,
+.bento .card > .groups,
+.bento .card > .prefscol { flex: 1; }
+/* Kart flex sutun: margin cakismasi yok, bosluk acikca verilir. Yoksa Copy
+   dugmesi tarayici ayarlari kutusuna yapisiyor. */
+.prefscol + .row { margin-top: var(--sp-3); }
+/* Sutun kartta dugme kart boyunca uzamasin: icerigi kadar, solda */
+.bento .card > button { align-self: flex-start; }
+
+/* Yarim kartta dort alan sigmiyor: 2x2. Iki komsu kart (Koordinatlar,
+   Reporting) ayni kalipta, satirlari ayni hizada. */
+.span-6 .grid4, .span-4 .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* Basic kipte Advanced kart gizlenince satirda delik kalmasin: yanindaki
+   kart satiri tek basina doldurur. data-ui'yi renderMode() yaziyor. */
+[data-ui="basic"] .bento > .fill-basic { grid-column: 1 / -1; }
+[data-ui="basic"] .bento > .fill-basic .grid4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+/* Konumun alt satiri uclu: Basic'te Reporting gizlenince kalan iki kart 6+6 */
+[data-ui="basic"] #locCards > .fill-basic { grid-column: span 6; }
+[data-ui="basic"] #locCards > .fill-basic .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+@container page (max-width: 879px) {
+  .span-8, .span-4 { grid-column: 1 / -1; }
+}
+@container page (max-width: 639px) {
+  .bento > * { grid-column: 1 / -1; }
+  .grid4, [data-ui="basic"] .bento > .fill-basic .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* --- alanlar -------------------------------------------------------------- */
+
+label {
+  display: block;
+  margin: 0 0 var(--sp-2);
+  line-height: 18px;
+  font-size: var(--fs-xs);
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+/* Giris alanlari. Kenarlik --line degil --lineStrong: bir giris kutusu
+   arayuz bileseni, kenarligi 3:1 istiyor; --line yalnizca ayrac (1.5).
+   Zemin de --bg degil --panel2, cunku alan kartin ICINDE duruyor: yuzey
+   merdiveninde kartin bir kademe yukarisi. */
+input[type="text"], input[type="number"], input[type="time"],
+input[type="search"], textarea, select {
+  width: 100%;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--panel2);
+  color: var(--text);
+  border: 1px solid var(--lineStrong);
+  border-radius: var(--r-sm);
+  font: inherit;
+}
+/* Tek satirlik alanlarin boyu sabit: dolgu ve yazi boyu farki 35-41 px
+   arasi dokuz ayri yukseklik uretiyordu. */
+input[type="text"], input[type="number"], input[type="time"],
+input[type="search"], select {
+  height: var(--h-ctl);
+  padding-block: 0;
+}
+
+input[type="number"] { font-variant-numeric: tabular-nums; }
+textarea { resize: vertical; font-family: Consolas, monospace; font-size: var(--fs-sm); }
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid var(--accentInk);
+  outline-offset: -1px;
+  border-color: var(--accentInk);
+}
+input:disabled, select:disabled, textarea:disabled {
+  color: var(--faint);
+  background: var(--panel);
+  cursor: not-allowed;
+}
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); align-items: start; }
+.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-4); align-items: start; }
+.gap { margin-bottom: var(--sp-3); }
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Tik dolu vurgu rengiyle ciziliyor. --purple 3:1 esikli olur,
+   uzerine binen mavi tik zeminden ayirt edilemiyordu. */
+/* Kendi onay kutusu. Native accent-color bazi paletlerde 3:1'i tuturmuyordu
+   ve tik zeminde kayboluyordu. Bunu kendimiz cizerek her temada esit tutuyoruz:
+   isaretli kutunun zemini --accent, tik --accentText ile. */
+.check input[type="checkbox"], .check input[type="radio"] {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  background: var(--panel2);
+  border: 1.5px solid var(--lineStrong);
+  border-radius: 4px;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  position: relative;
+  transition: background .12s, border-color .12s;
+}
+.check input[type="radio"] { border-radius: 50%; }
+
+.check input[type="checkbox"]:hover,
+.check input[type="radio"]:hover { border-color: var(--accentInk); }
+
+/* Isaretli kutunun DIS kenarina --text renginde ince bir halka. Vurgu rengi
+   bazi paletlerde kart ile 3:1 tutmayabiliyor (moss, vlavender'da yasandi);
+   metin rengi kart ile 4.5:1 tutmak zorunda oldugu icin bu halka her temada
+   ayirt edilir bir kenarlik veriyor. */
+.check input[type="checkbox"]:checked,
+.check input[type="radio"]:checked {
+  background: var(--accent);
+  border-color: var(--accentInk);
+  box-shadow: 0 0 0 1px var(--text);
+}
+
+/* Tik: kutu icinde beyaz ya da siyah SVG. --accentText onun icin var,
+   dolu dugmedeki mürekkep ile ayni. */
+.check input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accentText);
+  clip-path: polygon(15% 45%, 40% 68%, 82% 22%, 90% 30%, 42% 82%, 8% 55%);
+}
+
+.check input[type="radio"]:checked::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  background: var(--accentText);
+  border-radius: 50%;
+}
+
+.check input:focus-visible {
+  outline: 2px solid var(--accentInk);
+  outline-offset: 2px;
+}
+.radios { display: flex; flex-direction: column; gap: var(--sp-1); margin-bottom: var(--sp-3); }
+
+/* Bir metin satiri 60-75 karakteri gecmemeli, gecince goz satir basini
+   kaybediyor. Kart genisleyebilir, metin genislemez. */
+.hint {
+  margin: var(--sp-2) 0 0;
+  max-width: 62ch;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--dim);
+}
+
+/* Ikincil dugme. Zemin karttan bir kademe ayri (--panel2), kenarligi
+   --lineStrong (3:1), ustune gelince vurgu dolgusu. Bir dugme oldugu
+   bakisla belli olmali; onceden sadece kose yuvarlakligi vardi. */
+/* Ikincil dugme. Kenarlik --accent: o renk kartla en az 3:1 (uretecte garanti),
+   yani cerceve net gorunuyor ve bu bir dugme belli oluyor. Onceden --lineStrong
+   ve --panel2 zemin karta cok yakindi (1.13), sadece kose fark ediyordu.
+   Ustune gelince doluyor. */
+/* Boy sabit. Ozel dugmeler (?, !, anahtar, sil, harita) kendi olculerini
+   sinif kuraliyla veriyor; metin akan liste dugmeleri height: auto. */
+button {
+  height: var(--h-ctl);
+  padding: 0 var(--sp-4);
+  background: var(--accentSoft);
+  color: var(--text);
+  border: 1.5px solid var(--accentInk);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+}
+
+button:hover { background: var(--accent); color: var(--accentText); }
+/* tokens.css'teki kalkma/basma hareketi bunlarda yok: (?) ve (!) balon
+   tasiyor, anahtarin dugmesi kendi kayiyor, menu ve liste satirlari dugme
+   degil satir. */
+.help, .warnbadge, .master, .sidetabs button, .results button, .iplink,
+.group .toggle, .waypoint button, .domain button { transform: none; }
+button.danger { color: var(--red); border-color: var(--red); background: transparent; }
+button.danger:hover { background: var(--red); color: var(--panel); }
+
+/* Ekleme dugmesi. Gorunur bir kenarligi ve zemini var: kullanici tiklanacak
+   bir sey oldugunu anlamali. Onceden zeminsiz ve kenarliksizdi, rengi de
+   --blue idi; --blue ile --text'in yakin dustugu paletlerde duz yaziya
+   donusuyordu. Vurgu rengi zemin olarak kullaniliyor, uzerindeki yazi da
+   kart rengi: ikisi arasindaki kontrast her temada olculu. */
+/* Iki kademe dugme.
+
+   .link      ikincil is (sifirla, geri al). Kenarligi var, zemini yok.
+   .link.add  ana is (bir sey ekle). Vurgu rengiyle dolu, basinda arti.
+
+   Ikisi de gorunur bir kutu. Onceden ikisi de zeminsiz, kenarliksiz ve
+   --blue renkteydi; --blue ile --text'in yakin dustugu paletlerde dugme duz
+   yaziya donusuyor, kullanici tiklanabilir oldugunu anlamiyordu. */
+.link {
+  margin-top: var(--sp-3);
+  height: var(--h-ctl);
+  padding: 0 var(--sp-4);
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--lineStrong);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+
+.link:hover { border-color: var(--purple); text-decoration: none; }
+
+.link.add {
+  background: var(--accent);
+  border-color: var(--accentInk);
+  color: var(--accentText);
+  font-weight: 600;
+}
+
+.link.add::before { content: "+"; margin-right: var(--sp-2); font-weight: 700; }
+.link.add:hover { background: var(--accentHover); border-color: var(--accentInk); }
+.link:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+.row { display: flex; gap: var(--sp-2); align-items: center; }
+/* Kart icinde izgaranin hemen ardindan gelen dugme satiri. Kart artik flex
+   sutun oldugu icin margin cakismasi yok, bosluk acikca verilmeli: 0 px'de
+   Copy dugmesi prefs kutusuna yapisiyordu. */
+
+.row input[type="text"] { flex: 1; }
+.grow { flex: 1; }
+
+/* Bölümlü düğmeler: kip anahtarı, gizlilik seviyesi, Basit/Gelişmiş */
+.seg { display: flex; gap: var(--sp-1); }
+
+.seg button {
+  flex: 1;
+  height: var(--h-ctl);
+  padding: 0 var(--sp-4);
+  background: var(--panel2);
+  color: var(--dim);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+.seg button.sel {
+  background: var(--accent);
+  border-color: var(--accentInk);
+  color: var(--accentText);
+}
+
+
+/* --- harita --------------------------------------------------------------- */
+
+.map {
+  position: relative;
+  width: 100%;
+  height: min(62vh, 680px);
+  min-height: 440px;
+  overflow: hidden;
+  background: var(--mapbg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
+
+/* --- harita kahraman ------------------------------------------------------
+   Tam genislik. Ustunde iki yuzen serit: ustte arama ve kip, altta kip
+   karti ve koyu harita. Seritlerin kendisi tiklamayi gecirir (pointer-events:
+   none), icindeki kutular yakalar. Alt serit tabandan 24 px yukarida:
+   OpenStreetMap atfi gorunur kalsin. */
+.maphero { position: relative; min-width: 0; }
+.maphero .map { height: min(62vh, 640px); min-height: 500px; }
+
+.mapover {
+  position: absolute;
+  left: var(--sp-3);
+  right: var(--sp-3);
+  z-index: 4;
+  display: flex;
+  gap: var(--sp-3);
+  pointer-events: none;
+}
+.mapover > * { pointer-events: auto; }
+
+/* Ustte sol: yakinlastirma dugmelerinin yanindan baslar (8 + 28 + 12) */
+.mapover-top { top: var(--sp-3); left: calc(var(--sp-2) + var(--h-sm) + var(--sp-3)); align-items: flex-start; }
+.mapover-top .seg { margin-left: auto; }
+.mapover-top .seg button { flex: 0 0 auto; }
+.mapover-top .searchbox { width: 340px; }
+
+.mapover-bottom { bottom: var(--sp-6); align-items: flex-end; }
+
+.floatcard {
+  width: 340px;
+  max-height: calc(100% - 2 * var(--sp-6));
+  padding: var(--sp-4);
+  background: var(--float);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .18), 0 2px 6px rgba(0, 0, 0, .08);
+  overflow: auto;
+}
+.mapover-bottom .floatcard { max-height: 320px; }
+
+.maptools {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-left: auto;
+  padding: var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-3);
+  background: var(--float);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+}
+.maptools .maptip:empty { display: none; }
+
+/* Dar sutunda yuzme yok: seritler haritanin ustune ve altina dizilir */
+@container page (max-width: 879px) {
+  .maphero { display: flex; flex-direction: column; gap: var(--sp-3); }
+  .maphero .map { height: min(50vh, 380px); min-height: 300px; }
+  .mapover { position: static; flex-wrap: wrap; }
+  .mapover-top { order: -1; }
+  .mapover-top .searchbox { flex: 1 1 280px; width: auto; }
+  .mapover-top .seg { margin-left: 0; flex: 1 1 100%; }
+  .mapover-top .seg button { flex: 1; }
+  .mapover-bottom { flex-direction: column; align-items: stretch; }
+  .floatcard, .mapover-bottom .floatcard { width: auto; max-height: none; box-shadow: none; }
+  .maptools { margin-left: 0; border-radius: var(--r-md); justify-content: space-between; }
+}
+
+.map-tiles { position: absolute; inset: 0; }
+.map-tile { position: absolute; width: 256px; height: 256px; pointer-events: none; }
+
+.map-zone { position: absolute; border-radius: 50%; pointer-events: none; }
+.map-zone-outer { background: rgba(124, 58, 237, .18); border: 1px solid rgba(124, 58, 237, .7); }
+.map-zone-inner { background: rgba(249, 115, 22, .16); border: 1px dashed rgba(249, 115, 22, .8); }
+
+.map-route { position: absolute; inset: 0; pointer-events: none; }
+.route-line { fill: none; stroke: var(--blue); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; opacity: .85; }
+.route-dot { fill: var(--blue); stroke: #fff; stroke-width: 2; }
+.route-num { fill: #fff; font: 600 10px "Segoe UI", sans-serif; text-anchor: middle; }
+
+.map-pin {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  background: var(--orange);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .5);
+  pointer-events: none;
+}
+
+/* Karo sunucusu engellediyse karoları hiç gösterme: engellenmiş karo da geçerli
+   bir resim, gösterilirse ekran sarı siyah şeritlerle doluyor. */
+.map-blocked .map-tiles { display: none; }
+
+.map-note {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  max-width: 320px;
+  padding: var(--sp-2) var(--sp-3);
+  transform: translate(-50%, -50%);
+  background: var(--float);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--dim);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+
+.map-attrib {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 0 var(--sp-1);
+  background: var(--bg);
+  opacity: .85;
+  color: var(--dim);
+  font-size: var(--fs-xs);
+}
+
+.map-zoom {
+  position: absolute;
+  left: var(--sp-2);
+  top: var(--sp-2);
+  width: var(--h-sm);
+  height: var(--h-sm);
+  padding: 0;
+  background: var(--bg);
+  opacity: .9;
+  font-size: var(--fs-md);
+  line-height: 1;
+}
+
+.map-zoom-out { top: calc(var(--sp-2) + var(--h-sm) + var(--sp-1)); }
+
+.searchbox {
+  position: relative;
+  z-index: 3;
+  width: 340px;
+}
+
+/* Dar ekranda .row sarilabiliyor; arama dugmesi kutunun yaninda kalsin */
+.searchbox .row { gap: var(--sp-2); flex-wrap: nowrap; }
+.searchbox .row input { flex: 1; min-width: 0; }
+.searchbox input { background: var(--float); }
+.searchbox button { padding: 0 var(--sp-3); background: var(--float); }
+
+.results {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: var(--sp-1);
+  overflow: hidden;
+  background: var(--float);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+.results button {
+  display: block;
+  width: 100%;
+  height: auto;
+  padding: var(--sp-2) var(--sp-3);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  color: var(--text);
+  font-size: var(--fs-sm);
+  white-space: normal;
+  text-align: left;
+}
+
+.results button:last-child { border-bottom: 0; }
+.results button:hover { background: var(--bg); }
+.results .coords { display: block; color: var(--dim); font-size: var(--fs-xs); }
+
+.searchnote {
+  margin: var(--sp-1) 0 0;
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--float);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-xs);
+  color: var(--warn);
+}
+
+/* --- rota noktaları ------------------------------------------------------- */
+
+.waypoints { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); }
+
+.waypoint {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-3);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  font-family: Consolas, monospace;
+  font-size: var(--fs-xs);
+}
+
+.waypoint button { height: auto; padding: 0 var(--sp-1); background: none; border: 0; color: var(--dim); line-height: 1; }
+.waypoint button:hover { color: var(--red); border: 0; }
+.picking { box-shadow: 0 0 0 2px var(--purple); }
+
+/* --- site kuralları ------------------------------------------------------- */
+
+.rulehead, .rule {
+  display: grid;
+  grid-template-columns: 1fr 120px 1fr var(--h-ctl);
+  gap: var(--sp-3);
+  align-items: center;
+}
+
+.rulehead {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-xs);
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.rule { margin-top: var(--sp-2); }
+/* Kare. Yalnizca yukseklik verilince genislik icerige gore 30 px kaliyor ve
+   dugme yamuk gorunuyordu; iki olcu de yazili. */
+.rule .del, .sched .del {
+  flex: none;
+  width: var(--h-ctl);
+  height: var(--h-ctl);
+  padding: 0;
+  color: var(--dim);
+  line-height: 1;
+}
+.rule .del:hover, .sched .del:hover { color: var(--red); border-color: var(--red); }
+
+.prefs {
+  margin: var(--sp-2) 0 0;
+  padding: var(--sp-2) var(--sp-3);
+  overflow-x: auto;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--dim);
+  font: var(--fs-xs)/1.7 Consolas, monospace;
+  white-space: pre;
+}
+
+/* Yukseklik kartin kendisinden gelir: `flex: 1` bos yeri yiyor. `min-height: 0`
+   olmadan flex ogesi icerigin altina inemiyor ve kaydirma calismiyor. Sabit
+   340 px sinir kalkti; kart 464 px iken icerde 124 px olu alan biraktiriyordu. */
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: var(--sp-1);
+}
+
+.group {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+.groups[inert] { opacity: .5; }
+.group > .check { margin: 0; padding: var(--sp-2) var(--sp-3); }
+.group > .check span { flex: 1; }
+.group .count { flex: 0 0 auto; color: var(--dim); font-size: var(--fs-xs); }
+
+.group .toggle {
+  height: var(--h-sm);
+  padding: 0 var(--sp-2);
+  background: transparent;
+  border: 0;
+  color: var(--dim);
+  font-size: var(--fs-xs);
+}
+
+.group .toggle:hover { color: var(--text); }
+.group .members { padding: 0 var(--sp-3) var(--sp-3); border-top: 1px solid var(--line); }
+
+.domains {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  margin: var(--sp-2) 0;
+}
+
+.domain {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-2);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  font-size: var(--fs-xs);
+}
+
+.domain.own { border-color: var(--purple); }
+
+.domain button {
+  height: auto;
+  padding: 0 var(--sp-1);
+  background: transparent;
+  border: 0;
+  color: var(--dim);
+  font-size: var(--fs-sm);
+  line-height: 1;
+}
+
+.domain button:hover { color: var(--red); }
+.addomain { display: flex; gap: var(--sp-2); }
+.addomain input { height: var(--h-sm); padding: 0 var(--sp-2); }
+.addomain button { height: var(--h-sm); padding: 0 var(--sp-3); }
+
+/* --- zamanlama ------------------------------------------------------------ */
+
+.schedhead, .sched {
+  display: grid;
+  grid-template-columns: 280px 140px 1fr var(--h-ctl);
+  gap: var(--sp-3);
+  align-items: center;
+}
+
+.schedhead {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-xs);
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.sched { margin-top: var(--sp-2); }
+/* Gun secilmemis satir calismiyor, oyle de gorunsun */
+.sched.off select, .sched.off input[type="time"] { color: var(--dim); }
+.days { display: flex; gap: var(--sp-1); }
+
+.days button {
+  flex: 1;
+  padding: 0;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--dim);
+  font-size: var(--fs-xs);
+}
+
+.days button.sel {
+  background: var(--accent);
+  border-color: var(--accentInk);
+  color: var(--accentText);
+}
+
+/* --- log ve geçmiş -------------------------------------------------------- */
+
+.logbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); margin-top: var(--sp-3); }
+.logbar .check { margin: 0; }
+.logbar select { width: auto; min-width: 130px; }
+.logmsg { font-size: var(--fs-sm); color: var(--blue); }
+
+.logbox {
+  max-height: 420px;
+  margin-top: var(--sp-3);
+  overflow: auto;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  font-family: Consolas, monospace;
+  font-size: var(--fs-xs);
+}
+
+.logrow {
+  display: grid;
+  grid-template-columns: 105px 70px 150px 1fr;
+  gap: var(--sp-3);
+  padding: var(--sp-1) var(--sp-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.timerow { grid-template-columns: 90px 170px 150px 1fr; }
+
+.logrow:nth-child(even) { background: var(--zebra); }
+.logrow .lt { color: var(--dim); }
+.logrow .ls { color: var(--blue); }
+.logrow .le { color: var(--orange); }
+.logrow .ld { color: var(--text); overflow-wrap: anywhere; }
+.logrow.err .le { color: var(--red); }
+.logempty { padding: var(--sp-4); color: var(--dim); font-family: "Segoe UI", system-ui, sans-serif; }
+
+/* --- hazır ayarlar -------------------------------------------------------- */
+
+.presets { display: flex; flex-direction: column; gap: var(--sp-1); margin-bottom: var(--sp-3); }
+
+.preset {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+.preset .name { flex: 1; font-size: var(--fs-sm); }
+.preset button { height: var(--h-sm); padding: 0 var(--sp-3); }
+/* Ekleme satiri, ustundeki .preset satirlariyla AYNI kutu modeli olmali:
+   4px/8px dolgu + 1 px kenarlik. Dolguyu 9 px yapip kenarligi atlayinca
+   Save dugmesi ustteki dugmelerden 1 px kayiyordu. */
+.presetadd { padding: 0 var(--sp-2); border: 1px solid transparent; }
+.presetadd input { max-width: none; }
+.presetadd input { height: var(--h-sm); padding: 0 var(--sp-2); }
+.presetadd button { height: var(--h-sm); padding: 0 var(--sp-3); }
+.preset .tag { font-size: var(--fs-xs); color: var(--dim); }
+.preset.active { border-color: var(--purple); }
+.preset.empty .name { color: var(--dim); }
+
+/* Rota karti dar sutunda: uc dugme sigmazsa alt satira iner */
+#motionRoute .row { flex-wrap: wrap; }
+#tilesCustomBox { margin-top: var(--sp-2); }
+
+
+/* Olculer 8'in katlari, bilesen icinde 4'un katlari. Kart ici 16, kartlar
+   arasi 16, dugme ici 8/14. Sabit sayi eklerken bu iki basamaga sadik kal;
+   17 px'lik bir bosluk hicbir seye hizalanmiyor. */
+
+/* Harita, tekerlek yakalamayi ancak Ctrl ile ya da bir tiklamadan sonra
+   yapiyor. Kenarlik acikken degisiyor ki kullanici hangi durumda oldugunu
+   gorsun. */
+.map-armed { border-color: var(--accentInk); }
+
+.map-hint::after {
+  content: attr(data-wheelhint);
+  position: absolute;
+  left: 50%;
+  bottom: var(--sp-4);
+  z-index: 4;
+  padding: var(--sp-2) var(--sp-3);
+  transform: translateX(-50%);
+  background: var(--float);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Kart icindeki secenek listesi. Akordeon govdesiyle ayni kalip: her onay
+   kutusunun aciklamasi kendi altinda. Onceden aciklamalar kartin en altina
+   toplu halde diziliyordu ve hangisinin hangisine ait oldugu belli olmuyordu;
+   kart da hem uzun hem bos gorunuyordu. */
+.optlist { margin-top: var(--sp-1); }
+.optlist .opt:first-child { padding-top: 0; }
+/* Izgaranin ardindan gelen secenek listesi kendi blogu. 4 px ile secim
+   kutusuna yapisiyor ve rozet ayari "karo sunucusunun altindaki bir sey" gibi
+   okunuyordu; ayirici cizgi ikisini tek grup yapiyor. */
+.grid2 + .optlist { margin-top: var(--sp-4); border-top: 1px solid var(--line); }
+.grid2 + .optlist .opt:first-child { padding-top: var(--sp-3); }
+.optlist .opt:last-child { border-bottom: 0; padding-bottom: 0; }
+
+/* Etiket, yardimci kutu ve alanin olusturdugu tek birim. Aralarinda bosluk
+   yok, birimler arasinda 16 var: goz hangi etiketin hangi alana ait oldugunu
+   bir bakista goruyor. */
+/* YALNIZ alt alta yiginlarda. Izgarada yan yana duran iki alana da uygulaninca
+   ikincisi 16 px asagi kayiyordu: Fine tuning'de Map tiles ile Log records ayni
+   satirda durmuyordu. */
+.field + .field { margin-top: var(--sp-4); }
+.grid2 > .field + .field,
+.grid4 > .field + .field,
+.motionrow > .field + .field,
+.radrow > .field + .field { margin-top: 0; }
+.field > input, .field > select { margin-bottom: 0; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); align-items: start; }
+
+/* Sade kayit satiri: saat ve tek cumle. Ham satir dort sutun; o "ham cikti"
+   acikken geri geliyor. */
+.logrow.simple { grid-template-columns: 78px 1fr; }
+.logrow.simple .lx { color: var(--text); }
+.logrow.simple.err .lx { color: var(--red); }
+
+/* Hesaplanan hareket satiri. Gozlenenden ayrilmali: bunlar OLMUS bir sey
+   degil, "bir site sorsa burayi gorurdu" demek. Soluk metin tam da bunun
+   icin var, tasiyici olmayan bilgi. */
+.timerow.guess .ls, .timerow.guess .lt { color: var(--faint); }
+.timerow.guess .ld { color: var(--faint); font-style: italic; }
+
+/* Koyu harita. Ayri bir karo sunucusu KULLANMIYORUZ: CARTO'nun anahtarsiz
+   kotasi asilinca "API key gerekli" yazan bir karo GORSELI donuyor, kullanici
+   haritanin ustunde o yaziyi goruyor. Onun yerine secili sunucunun kendi
+   karolarini ceviriyoruz. Ek istek yok, anahtar yok, hangi sunucu secilirse
+   secilsin calisiyor. */
+.map-dark .map-tiles {
+  filter: invert(1) hue-rotate(180deg) brightness(.92) contrast(1.05) saturate(.85);
+}
+
+/* Isaretci ve rota ceviriden etkilenmemeli, onlar karo degil */
+.map-dark .map-pin, .map-dark .map-route, .map-dark .map-zone { filter: none; }
+
+/* Kart basligi + yardim dugmesi. Uzun aciklamalari kartin govdesinden
+   cikardik: kullanici temayi ve dili secmek icin paragraf okumak zorunda
+   degil. Uzerine gelinince (masaustu) ya da tiklanınca (mobil ve klavye)
+   aciliyor. */
+.cardhead-inline {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-3);
+}
+.cardhead-inline .cardtitle { margin: 0; }
+
+.help {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: transparent;
+  color: var(--dim);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  font-size: var(--fs-xs);
+  line-height: 1;
+  cursor: help;
+  position: relative;
+}
+.help:hover, .help:focus-visible {
+  color: var(--accentInk);
+  border-color: var(--accentInk);
+}
+
+/* Balon. Tarayicinin native title'i cok kucuk ve gec cikiyor, kendi
+   balonumuzu yazip acidan HOVER/FOCUS ile aciyoruz. */
+.help[data-tip]::after {
+  content: attr(title);
+  position: absolute;
+  top: calc(100% + var(--sp-2));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  min-width: 240px;
+  max-width: 340px;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--float);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  text-align: left;
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .12s;
+}
+.help[data-tip]:hover::after, .help[data-tip]:focus-visible::after { opacity: 1; transform: translateX(-50%); }
+
+/* Kapali balon SIFIR boyutta. Yalniz opacity: 0 iken bile kaydirma alanina
+   sayiliyordu: sag kenardaki (?) balonu sayfayi 4 px tasiriyor, altta yatay
+   kaydirma cubugu cikiyordu. */
+.help[data-tip]::after, .warnbadge[data-tip]::after { transform: translateX(-50%) scale(0); }
+
+/* Ikincil dugme. Zemin --accentSoft (vurgu karta karistirilmis), boylece
+   kartin uzerinde acikca bir dugme olarak duruyor; --panel2 cok yakindi. */
+.btn {
+  height: var(--h-ctl);
+  padding: 0 var(--sp-4);
+  background: var(--accentSoft);
+  color: var(--text);
+  border: 1.5px solid var(--accentInk);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--accent); color: var(--accentText); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn:disabled:hover { border-color: var(--lineStrong); background: var(--panel2); }
+
+/* Dark map on/off dugmesi. Pill toggle: kapali gri nokta, acik vurgu nokta. */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: var(--h-ctl);
+  padding: 0 var(--sp-4) 0 var(--sp-3);
+  background: var(--accentSoft);
+  border: 1.5px solid var(--accentInk);
+  border-radius: var(--r-full);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.toggle .dot {
+  width: 24px;
+  height: 16px;
+  border-radius: var(--r-full);
+  background: var(--line);
+  position: relative;
+  transition: background .15s;
+}
+.toggle .dot::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--dim);
+  transition: left .15s, background .15s;
+}
+.toggle[aria-pressed="true"] { border-color: var(--accentInk); }
+/* ic halka: vurgu dolgusu kartla ayrilmayan temada dugmenin siniri */
+.toggle[aria-pressed="true"] .dot { background: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accentInk); }
+.toggle[aria-pressed="true"] .dot::after { left: 10px; background: var(--accentText); }
+
+
+/* Radius satiri: [inner][outer][Reset] tek hizada, alanlar dar */
+.radrow {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-4);
+  margin-top: var(--sp-4);
+}
+.radrow .field { flex: 1; }
+.radrow .field input { max-width: 120px; }
+.radrow .btn { flex: none; }
+
+/* How it moves: profil genis, hiz/bekleme dar. */
+/* Tek satir: profil - hiz - bekleme - rota bitince. Dongu secimi ayri satirda
+   tam genislikteydi, 300 px'lik metin 900 px'e yayiliyordu. Sayi kutulari
+   bekledikleri girdi kadar dar (uc hane). */
+.motionrow { display: grid; grid-template-columns: minmax(200px, 2.2fr) 104px 104px minmax(200px, 1.6fr); gap: var(--sp-4); align-items: end; }
+.motionrow .field { margin: 0; }
+.motionrow > .field > select,
+.motionrow > .field > input { width: 100%; }
+.motionnum { max-width: 104px; }
+
+/* Etiket ile (?) / (!) tek satir. `:has(+ .help)` denendi, ust eleman `.field`
+   olmayinca (grid4 icindeki duz div) tutmuyordu ve dugme alt satira dusuyordu;
+   ustelik satir ici iki eleman taban hizasinda 1-2 px kayiyordu. Sarmalayici
+   flex, hizalama merkezden: ust eleman ne olursa olsun ayni sonuc. */
+.lblrow { display: flex; align-items: center; gap: var(--sp-2); margin: 0 0 var(--sp-2); }
+/* WCAG 2.2 SC 2.5.8: tiklama hedefi en az 24x24. Halka 18 px kalir, hedef
+   seffaf olarak buyur. Mutlak konum PADDING kutusuna gore olctugu icin 1 px'lik
+   kenarlik dususuyor: 16 + 4 + 4 = 24. */
+.help::before, .warnbadge::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+.lblrow > label { margin: 0; }
+.lblrow > label.check { text-transform: none; }
+
+/* Balon kartin sagindan tasmasin: sag yarida acilanlar sola yaslaniyor. */
+.help[data-tip]::after { max-width: min(340px, 60vw); }
+
+/* (!) rozeti (?) ile TAM ayni kutu ve tipografi olmali. Ayri yazilinca
+   `font-weight: 700` kacmisti: kalin unlem hem daha genis hem optik olarak
+   kayik duruyordu. Fark yalnizca renkte. */
+.warnbadge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: transparent;
+  color: var(--warn);
+  border: 1px solid var(--warn);
+  border-radius: var(--r-full);
+  font-size: var(--fs-xs);
+  line-height: 1;
+  cursor: help;
+  position: relative;
+}
+.warnbadge:hover, .warnbadge:focus-visible { color: var(--text); }
+.warnbadge[data-tip]::after {
+  content: attr(title);
+  position: absolute;
+  top: calc(100% + var(--sp-2));
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  z-index: 10;
+  min-width: 240px;
+  max-width: min(340px, 60vw);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--float);
+  color: var(--text);
+  border: 1px solid var(--warn);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .12s;
+}
+.warnbadge[data-tip]:hover::after, .warnbadge[data-tip]:focus-visible::after { opacity: 1; transform: translateX(-50%); }
+
+/* madde 12: harita ipucu Dark Map dugmesinin yaninda, ayirt edilen renkte */
+.maptip {
+  color: var(--blue);
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+  max-width: 46ch;
+}
+
+/* Iki kart esit ve bir tik daha uzun. `min-height` DEGIL `height`: alt sinir
+   yerine olculu yukseklik lazim, yoksa icerideki `.groups` neye gore
+   esneyecegini bilemiyor ve kart icerik boyuna (730 px) uzuyor. Dar ekranda
+   tek sutuna dusunce serbest birakiliyor. */
+@container page (min-width: 640px) {
+  .tab[data-tab="sites"] .bento > .span-6 { height: 464px; }
+}
+@media (max-width: 900px) {
+  .groups { max-height: 340px; }
+}
+
+/* --- koruma gruplari -----------------------------------------------------
+   Akordeon degil, her zaman acik kart: acilip kapanan kutu bento
+   satirinin tek yuksekligini bozuyordu. JS yalniz basliktaki "3 / 6"
+   sayacini ve toplu ac-kapa anahtarini isletiyor. */
+
+.ghead {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-3);
+}
+.ghead .cardtitle { margin: 0; }
+
+.grp .gsum {
+  margin-left: auto;
+  font-size: var(--fs-xs);
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.grp .master {
+  flex: none;
+  width: 36px;
+  height: 20px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-full);
+  background: var(--line);
+  position: relative;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.grp .master::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--dim);
+  transition: left .15s, background .15s;
+}
+
+.grp .master[aria-pressed="true"] { background: var(--go); }
+.grp .master[aria-pressed="true"]::after { left: 18px; background: var(--panel); }
+.grp .master:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+
+.gbody { border-top: 1px solid var(--line); }
+.gbody .opt:first-child { padding-top: var(--sp-3); }
+.gbody .opt:last-child { padding-bottom: 0; }
+
+/* Etiket ve yardim dugmesi yan yana. Aciklama artik alt satirda degil,
+   basligin yanindaki (?) icinde. */
+.opt {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+.opt .check { flex: 1; }
+.opt:last-child { border-bottom: 0; }
+.opt .check { margin: 0; }
+
+
+html.is-mobile .grp .master { width: 44px; height: 24px; border-radius: var(--r-full); }
+html.is-mobile .grp .master::after { width: 20px; height: 20px; }
+html.is-mobile .grp .master[aria-pressed="true"]::after { left: 22px; }
+
+/* --- dar ekran ------------------------------------------------------------ */
+/* İki durumda katlanıyor: pencere gerçekten dar olduğunda ve cihaz mobil
+   olduğunda. İkincisi genişlikten bağımsız, çünkü telefonda tarayıcı sayfayı
+   geniş bir düzende kurup uzaklaştırabiliyor. Masaüstünde her ikisi de yanlış,
+   tasarım olduğu gibi kalıyor. */
+
+@media (max-width: 900px) {
+  body { display: block; min-width: 0; overflow: auto; padding-bottom: 76px; }
+  .side { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; flex-direction: row; align-items: center; gap: var(--sp-2); padding: var(--sp-1) var(--sp-2); background: var(--bar); backdrop-filter: blur(8px); border-right: 0; border-top: 1px solid var(--line); overflow: visible; }
+  .brandrow, .sidefoot { display: none; }
+  .sidetabs { flex: 1 1 auto; flex-direction: row; flex-wrap: nowrap; gap: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .sidetabs::-webkit-scrollbar { display: none; }
+  .sidetabs button { flex: 0 0 auto; min-width: 64px; white-space: nowrap; }
+  .side .seg { flex: 0 0 auto; margin: 0; }
+  .side .seg button { padding: 0 var(--sp-2); }
+  .content { height: auto; }
+  .page { padding: var(--sp-4); }
+  /* Yapiskan degil: telefonda dort satirlik serit ekranin ucte birini yiyordu */
+  .topbar { position: static; padding: var(--sp-2) var(--sp-4); }
+  .idstrip { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2) var(--sp-3); padding: var(--sp-3) var(--sp-4); }
+  .idmain { grid-column: 1 / span 3; grid-row: 1; }
+  .idrun { grid-column: 4; grid-row: 1; justify-content: flex-end; }
+  .idcell:not(.idmain) { grid-column: span 2; }
+  .idcell.idip { grid-column: 1 / -1; }
+  body:not([data-tab="location"]) .idcell:not(.idmain) { display: none; }
+  body:not([data-tab="location"]) .idstate { flex-direction: column; gap: 0; align-items: flex-end; }
+  .grid2 { grid-template-columns: minmax(0, 1fr); }
+  .motionrow { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .motionrow > .motionprofile, .motionrow > .motionloop { grid-column: 1 / -1; }
+  .motionnum { max-width: none; }
+  .row, .cardhead { flex-wrap: wrap; }
+  .card { padding: var(--sp-4); }
+  .rulehead, .schedhead { display: none; }
+  .rule, .sched { grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--sp-2); align-items: center; }
+  .rule > *, .sched > * { grid-column: 1 / -1; }
+  .rule > :first-child, .sched > :first-child { grid-column: 1; grid-row: 1; }
+  .rule > .del, .sched > .del { grid-column: 2; grid-row: 1; }
+  .logrow, .timerow { grid-template-columns: 1fr; gap: var(--sp-1); padding: var(--sp-2) var(--sp-3); }
+}
+
+/* Aynı katlama, bu kez genişliğe değil cihaza bağlı. Telefonda tarayıcı sayfayı
+   980 px genişlikte kurabiliyor; o durumda yukarıdaki sorgu tetiklenmiyor. */
+
+html.is-mobile body { display: block; min-width: 0; overflow: auto; padding-bottom: 76px; }
+html.is-mobile .side { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; flex-direction: row; align-items: center; gap: var(--sp-2); padding: var(--sp-1) var(--sp-2); background: var(--bar); backdrop-filter: blur(8px); border-right: 0; border-top: 1px solid var(--line); overflow: visible; }
+html.is-mobile .brandrow, html.is-mobile .sidefoot { display: none; }
+html.is-mobile .sidetabs { flex: 1 1 auto; flex-direction: row; flex-wrap: nowrap; gap: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+html.is-mobile .sidetabs::-webkit-scrollbar { display: none; }
+html.is-mobile .sidetabs button { flex: 0 0 auto; min-width: 64px; min-height: 0; white-space: nowrap; }
+html.is-mobile .side .seg { flex: 0 0 auto; margin: 0; }
+html.is-mobile .side .seg button { padding: 0 var(--sp-2); min-height: 0; height: var(--h-ctl); }
+html.is-mobile .content { height: auto; }
+html.is-mobile .page { padding: var(--sp-4); }
+html.is-mobile .topbar { position: static; padding: var(--sp-2) var(--sp-4); }
+html.is-mobile .idstrip { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2) var(--sp-3); padding: var(--sp-3) var(--sp-4); }
+html.is-mobile .idmain { grid-column: 1 / span 3; grid-row: 1; }
+html.is-mobile .idrun { grid-column: 4; grid-row: 1; justify-content: flex-end; }
+html.is-mobile .idcell:not(.idmain) { grid-column: span 2; }
+html.is-mobile .idcell.idip { grid-column: 1 / -1; }
+html.is-mobile body:not([data-tab="location"]) .idcell:not(.idmain) { display: none; }
+html.is-mobile body:not([data-tab="location"]) .idstate { flex-direction: column; gap: 0; align-items: flex-end; }
+html.is-mobile .maphero { display: flex; flex-direction: column; gap: var(--sp-3); }
+html.is-mobile .maphero .map { height: min(50vh, 380px); min-height: 300px; }
+html.is-mobile .mapover { position: static; flex-wrap: wrap; }
+html.is-mobile .mapover-top { order: -1; }
+html.is-mobile .mapover-top .searchbox { flex: 1 1 280px; width: auto; }
+html.is-mobile .mapover-top .seg { margin-left: 0; flex: 1 1 100%; }
+html.is-mobile .mapover-top .seg button { flex: 1; }
+html.is-mobile .mapover-bottom { flex-direction: column; align-items: stretch; }
+html.is-mobile .floatcard { width: auto; max-height: none; box-shadow: none; }
+html.is-mobile .maptools { margin-left: 0; border-radius: var(--r-md); justify-content: space-between; }
+html.is-mobile .bento > * { grid-column: 1 / -1; }
+html.is-mobile .grid2, html.is-mobile .grid4 { grid-template-columns: minmax(0, 1fr); }
+html.is-mobile .motionrow { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+html.is-mobile .motionrow > .motionprofile, html.is-mobile .motionrow > .motionloop { grid-column: 1 / -1; }
+html.is-mobile .motionnum { max-width: none; }
+html.is-mobile .row, html.is-mobile .cardhead { flex-wrap: wrap; }
+html.is-mobile .card { padding: var(--sp-4); }
+html.is-mobile .rulehead, html.is-mobile .schedhead { display: none; }
+html.is-mobile .rule, html.is-mobile .sched { grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--sp-2); align-items: center; }
+html.is-mobile .rule > *, html.is-mobile .sched > * { grid-column: 1 / -1; }
+html.is-mobile .rule > :first-child, html.is-mobile .sched > :first-child { grid-column: 1; grid-row: 1; }
+html.is-mobile .rule > .del, html.is-mobile .sched > .del { grid-column: 2; grid-row: 1; }
+html.is-mobile .logrow, html.is-mobile .timerow { grid-template-columns: 1fr; gap: var(--sp-1); padding: var(--sp-2) var(--sp-3); }
+
+/* Dokunma hedefleri. Parmakla 30 px'lik bir düğmeye isabet etmiyor. */
+html.is-mobile button,
+html.is-mobile select,
+html.is-mobile input[type="text"],
+html.is-mobile input[type="number"],
+html.is-mobile input[type="time"],
+html.is-mobile input[type="search"] {
+  min-height: 44px;
+  font-size: 16px;
+}
+
+html.is-mobile .check input[type="checkbox"],
+html.is-mobile .check input[type="radio"] {
+  width: 22px;
+  height: 22px;
+}
+
+html.is-mobile .check { margin-bottom: var(--sp-4); }
+html.is-mobile .seg button { padding: 0 var(--sp-2); }
+html.is-mobile .days button { min-width: 0; padding: 0; }
+html.is-mobile .power { width: 44px; height: 44px; }
+/* (?) ve (!) genel dugme kuralindan MUAF. 44 px'lik min-height 18 px'lik
+   halkayi hapa ceviriyordu, 16 px yazi da daireye sigmiyordu. Halka 18 px
+   kalir, dokunma hedefi seffaf ::before ile 44 px olur (16 + 14 + 14). */
+html.is-mobile .help,
+html.is-mobile .warnbadge { min-height: 0; font-size: var(--fs-xs); }
+html.is-mobile .help::before,
+html.is-mobile .warnbadge::before { inset: -14px; }
+
+html.is-mobile .toggle { min-height: 0; }
+html.is-mobile .domain button { min-height: 0; }
+html.is-mobile .del { min-height: 40px; }
+html.is-mobile .prefs { font-size: var(--fs-sm); }

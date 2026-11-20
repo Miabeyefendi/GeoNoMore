@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<!-- GeoNoMore, Miabeyefendi (Mustafa Ihsan Albayrak).
+     https://github.com/Miabeyefendi/GeoNoMore -->
+<html data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Miabeyefendi">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GeoNoMore</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/logo.svg">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <img class="logo" src="../assets/icons/logo.svg" alt="">
+    <span class="brand">GeoNoMore</span>
+    <button id="gear" class="gear" data-i18n-title="settings">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M2 4h7.25M12.75 4H14M2 8h2.25M7.75 8H14M2 12h8.25M13.75 12H14"/>
+        <circle cx="11" cy="4" r="1.75"/><circle cx="6" cy="8" r="1.75"/><circle cx="12" cy="12" r="1.75"/>
+      </svg>
+    </button>
+  </header>
+
+  <div class="warn" id="permWarn" hidden>
+    <p data-i18n="permNeeded"></p>
+    <button id="permBtn" data-i18n="permGrant"></button>
+  </div>
+
+  <!-- Bento, iki sutun. En ustte kimlik: sitelerin ne gordugu, calisiyor mu,
+       kac koruma acik. Altinda iki kutu (koordinat, saat ve dil), sonra
+       konum secimi ve bu site. Options'taki kimlik seridinin kucugu. -->
+  <main class="bento">
+    <section class="tile span-2 statustile" id="idTile">
+      <div class="idbox">
+        <span class="idk" data-i18n="sitesSee"></span>
+        <span class="idplace" id="idPlace"></span>
+        <span class="sub"><span class="state" id="state"></span> <span class="sep">·</span> <span id="idProt"></span></span>
+      </div>
+      <button id="power" class="power" aria-pressed="false"><i></i></button>
+    </section>
+
+    <section class="tile">
+      <label data-i18n="coordinates"></label>
+      <p class="field" id="latField"></p>
+      <p class="field" id="lonField"></p>
+    </section>
+    <section class="tile">
+      <label data-i18n="tzAndLocale"></label>
+      <p class="field" id="tzField"></p>
+      <p class="field" id="localeField"></p>
+    </section>
+
+    <section class="tile span-2">
+      <div class="boxhead">
+        <span data-i18n="locationTitle"></span>
+        <button class="link" id="more" data-i18n="moreSettings"></button>
+      </div>
+      <select id="country"></select>
+      <select id="city"></select>
+      <p class="sub" id="placePrivacy"></p>
+    </section>
+
+    <section class="tile span-2 sitetile" id="siteBar">
+      <span class="dot" id="siteDot"></span>
+      <span class="sitename" id="siteName"></span>
+      <select id="override" class="ovr"></select>
+    </section>
+  </main>
+
+  <script src="../core/store.js"></script>
+  <script src="../core/engine.js"></script>
+  <script src="../core/log.js"></script>
+  <script src="../core/ui.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

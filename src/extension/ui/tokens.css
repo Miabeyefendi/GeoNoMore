@@ -1,0 +1,75 @@
+/* GeoNoMore olcu sistemi. options.html ve popup.html ikisi de bunu okur;
+   renkler burada DEGIL, her sayfanin kendi tema blogunda (themes.js uretir).
+
+   Bilesenlerde sabit piksel yazilmaz, buradan okunur.
+   Bosluk 4'un katlari. Yazi dort kademe, kose uc deger, kontrol iki boy.
+   Istisnalar sekil: daire (50%), 18 px onay kutusunun 4 px kosesi,
+   haritanin ic cizimi, logo ve simge boylari. Mobilde 16 px giris yazisi
+   platform kisiti (iOS 16 altinda yakinlastiriyor), 44 px dokunma hedefi
+   de oyle. */
+:root {
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+  --sp-10: 40px;
+
+  --fs-xs: 11px;   /* etiket, sayac, ust bilgi */
+  --fs-sm: 13px;   /* govde, kontrol, ipucu */
+  --fs-md: 15px;   /* marka ve grup basligi */
+  --fs-lg: 20px;   /* sayfa basligi */
+
+  --r-sm: 6px;     /* kontrol, ic kutu, balon */
+  --r-md: 12px;    /* kart, akordeon, harita */
+  --r-full: 999px; /* hap, rozet */
+
+  --h-ctl: 36px;   /* giris, secim, dugme */
+  --h-sm: 28px;    /* satir ici kucuk kontrol, salt okunur alan */
+
+  /* Hareket. Dugme ustune gelince 1 px kalkar, basinca 1 px iner ve
+     .985'e kuculur. Yalniz transform ve renk; boy, kenar, bosluk asla. */
+  --m-in: 150ms;
+  --m-out: 120ms;
+  --m-press: 90ms;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+}
+
+/* Tarayiciya ozel oge: <html data-browser> core/ui.js'ten. Isaret yoksa
+   (betik yuklenmeden once) chromium sayiliyor; firefox ogesi gizli kaliyor. */
+html:not([data-browser="firefox"]) [data-only="firefox"],
+html[data-browser="firefox"] [data-only="chromium"] { display: none !important; }
+
+/* Tarayicinin kendi yuzeyleri de temadan: secim, imlec, kaydirma cubugu,
+   odak halkasi. Varsayilan turuncu halka hicbir temaya ait degildi.
+   Cizgi olan her yer --accentInk, dolgu olan her yer --accent. */
+::selection { background: var(--accent); color: var(--accentText); }
+:root { caret-color: var(--accentInk); scrollbar-color: var(--lineStrong) transparent; }
+:where(button, a, select, input, textarea):focus-visible {
+  outline: 2px solid var(--accentInk);
+  outline-offset: 2px;
+}
+
+/* Dugme hareketi, iki sayfada da ayni. :where() ozgulugu sifirliyor: ozel
+   dugmeler (?, !, anahtar, liste satiri) kendi sinifiyla bunu kolayca
+   kapatiyor. Yalniz fare: dokunmada hover yapiskan kaliyor. */
+:where(button) {
+  transition:
+    transform var(--m-out) var(--ease),
+    background-color var(--m-out) var(--ease),
+    border-color var(--m-out) var(--ease),
+    color var(--m-out) var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  :where(button:hover:not(:disabled)) {
+    transform: translateY(-1px);
+    transition-duration: var(--m-in);
+  }
+}
+:where(button:active:not(:disabled)) {
+  transform: translateY(1px) scale(.985);
+  transition-duration: var(--m-press);
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(button), :where(button:hover), :where(button:active) { transform: none; transition: none; }
+}

@@ -1,0 +1,762 @@
+/* Temalar. Bu blok ELLE DUZENLENMEZ, src/tools/themes.js uretiyor.
+
+   Paletin tamami bir cekirdekten turuyor: yuzeyler bir aciklik merdiveni,
+   metinler kontrast hedefinden, etkilesim renkleri kendi ciftiyle. Vantagraph
+   ile baslayanlar disaridan gelen paletler; renkleri korunuyor, yalniz esigi
+   tutmayanlar tonu bozulmadan aciliyor.
+
+   Her rolun KENDI esigi var, cunku isleri farkli:
+     --text --dim --blue --go --red --warn      4.5  metin
+     --faint                                    3.0  sus, tasiyici degil
+     --accent uzerinde --accentText             4.5  dolu dugme yazisi
+     --accentInk   vurgunun cizgisi, kartta     2.0  dolu dugmenin siniri
+     --lineStrong  giris kenarligi              3.0  arayuz bileseni
+     --line        ayrac                        1.5  yalnizca secilebilsin
+
+   Yuzeyler dort kademe: --bg zemin, --panel kart, --panel2 ic kart ve satir
+   vurgusu, --float katman. Koyu temada yukseklik golgeyle degil parlaklikla
+   anlatiliyor: yukseldikce aciliyor.
+
+   Olcumu src/tests/test-theme.js yapiyor, tutmayan bir deger yayini durdurur. */
+
+:root, :root[data-theme="ink"] {
+  --bg: #0e0e0e;
+  --panel: #181818;
+  --panel2: #222222;
+  --accentSoft: #313a17;
+  --washFrom: #0e0e0e;
+  --washTo: #151515;
+  --line: #4d4d4d;
+  --lineStrong: #6f6f6f;
+  --text: #e6e6e6;
+  --dim: #a8a8a8;
+  --faint: #858585;
+  --blue: #daff64;
+  --purple: #6f6f6f;
+  --accent: #b6ec13;
+  --accentText: #000000;
+  --accentInk: #b6ec13;
+  --accentHover: #bfee2f;
+  --orange: #f5b13d;
+  --red: #d88b83;
+  --go: #7dbf9c;
+  --warnbg: #40341f;
+}
+
+:root[data-theme="paper"] {
+  --bg: #f6f6f6;
+  --panel: #ffffff;
+  --panel2: #f1f1f1;
+  --accentSoft: #f8fde5;
+  --washFrom: #f6f6f6;
+  --washTo: #f1f1f1;
+  --line: #cccccc;
+  --lineStrong: #8b8b8b;
+  --text: #212121;
+  --dim: #5c5c5c;
+  --faint: #808080;
+  --blue: #141414;
+  --purple: #8b8b8b;
+  --accent: #c4f22a;
+  --accentText: #000000;
+  --accentInk: #141414;
+  --accentHover: #bbef0f;
+  --orange: #966208;
+  --red: #a33f33;
+  --go: #366d50;
+  --warnbg: #ece3d3;
+}
+
+:root[data-theme="slate"] {
+  --bg: #0c0f10;
+  --panel: #15191b;
+  --panel2: #1e2427;
+  --accentSoft: #202c31;
+  --washFrom: #0c0f10;
+  --washTo: #121718;
+  --line: #415058;
+  --lineStrong: #5a707c;
+  --text: #e4e6e7;
+  --dim: #96adba;
+  --faint: #6e8b9b;
+  --blue: #97bece;
+  --purple: #5a707c;
+  --accent: #5990a6;
+  --accentText: #000000;
+  --accentInk: #5990a6;
+  --accentHover: #6d9db1;
+  --orange: #5e93a9;
+  --red: #d88b83;
+  --go: #7dbf9c;
+  --warnbg: #222f35;
+}
+
+:root[data-theme="indigo"] {
+  --bg: #0c0b11;
+  --panel: #14131d;
+  --panel2: #1d1c29;
+  --accentSoft: #211e33;
+  --washFrom: #0c0b11;
+  --washTo: #12111a;
+  --line: #3e3a5f;
+  --lineStrong: #6b64a0;
+  --text: #e3e3e8;
+  --dim: #928dc4;
+  --faint: #6962a7;
+  --blue: #a097ce;
+  --purple: #6b64a0;
+  --accent: #6659a6;
+  --accentText: #ffffff;
+  --accentInk: #6659a6;
+  --accentHover: #786db1;
+  --orange: #8b81bb;
+  --red: #d88b83;
+  --go: #7dbf9c;
+  --warnbg: #292739;
+}
+
+:root[data-theme="brick"] {
+  --bg: #100d0c;
+  --panel: #1b1715;
+  --panel2: #27201e;
+  --accentSoft: #34221d;
+  --washFrom: #100d0c;
+  --washTo: #181412;
+  --line: #584741;
+  --lineStrong: #7f675f;
+  --text: #e7e5e4;
+  --dim: #b99f98;
+  --faint: #997a70;
+  --blue: #d9998c;
+  --purple: #7f675f;
+  --accent: #b55c4a;
+  --accentText: #000000;
+  --accentInk: #b55c4a;
+  --accentHover: #be7060;
+  --orange: #c07465;
+  --red: #d88b83;
+  --go: #7dbf9c;
+  --warnbg: #392823;
+}
+
+:root[data-theme="mist"] {
+  --bg: #f6f6f7;
+  --panel: #ffffff;
+  --panel2: #f0f1f2;
+  --accentSoft: #eaf1f5;
+  --washFrom: #f6f6f7;
+  --washTo: #f1f1f3;
+  --line: #c6ced2;
+  --lineStrong: #788c96;
+  --text: #1f2223;
+  --dim: #4d616a;
+  --faint: #6e8591;
+  --blue: #33627a;
+  --purple: #788c96;
+  --accent: #548eab;
+  --accentText: #000000;
+  --accentInk: #548eab;
+  --accentHover: #4a7d96;
+  --orange: #427087;
+  --red: #a33f33;
+  --go: #366d50;
+  --warnbg: #dde5e9;
+}
+
+:root[data-theme="carbon"] {
+  --bg: #f6f6f7;
+  --panel: #ffffff;
+  --panel2: #f0f1f2;
+  --accentSoft: #ecf0f4;
+  --washFrom: #f6f6f7;
+  --washTo: #f1f1f3;
+  --line: #c6ccd2;
+  --lineStrong: #7d8b99;
+  --text: #1f2123;
+  --dim: #4d5c6a;
+  --faint: #6e7f91;
+  --blue: #3c5972;
+  --purple: #7d8b99;
+  --accent: #5e82a1;
+  --accentText: #000000;
+  --accentInk: #5e82a1;
+  --accentHover: #53728e;
+  --orange: #506e89;
+  --red: #a33f33;
+  --go: #366d50;
+  --warnbg: #e0e5ea;
+}
+
+:root[data-theme="moss"] {
+  --bg: #f6f6f6;
+  --panel: #ffffff;
+  --panel2: #f0f2f1;
+  --accentSoft: #ebf4ef;
+  --washFrom: #f6f6f6;
+  --washTo: #f1f1f1;
+  --line: #c7d1cb;
+  --lineStrong: #788f81;
+  --text: #202221;
+  --dim: #506859;
+  --faint: #718e7c;
+  --blue: #357851;
+  --purple: #788f81;
+  --accent: #55a476;
+  --accentText: #000000;
+  --accentInk: #55a476;
+  --accentHover: #4b9067;
+  --orange: #3d7755;
+  --red: #a33f33;
+  --go: #366d50;
+  --warnbg: #dce7e0;
+}
+
+:root[data-theme="vcrimson"] {
+  --bg: #090e14;
+  --panel: #300c12;
+  --panel2: #44111a;
+  --accentSoft: #482118;
+  --washFrom: #090e14;
+  --washTo: #0d151e;
+  --line: #6e1d29;
+  --lineStrong: #c9344a;
+  --text: #f0e4e4;
+  --dim: #bf9098;
+  --faint: #bf9098;
+  --blue: #d9a040;
+  --purple: #c9344a;
+  --accent: #c8903a;
+  --accentText: #000000;
+  --accentInk: #c8903a;
+  --accentHover: #cf9d52;
+  --orange: #c8903a;
+  --red: #ff3e65;
+  --go: #c8903a;
+  --warnbg: #4b2419;
+}
+
+:root[data-theme="vgreenify"] {
+  --bg: #000000;
+  --panel: #121212;
+  --panel2: #1f1f1f;
+  --accentSoft: #14321e;
+  --washFrom: #000000;
+  --washTo: #070707;
+  --line: #343434;
+  --lineStrong: #696969;
+  --text: #ffffff;
+  --dim: #b3b3b3;
+  --faint: #b3b3b3;
+  --blue: #ffffff;
+  --purple: #696969;
+  --accent: #1ed760;
+  --accentText: #000000;
+  --accentInk: #1ed760;
+  --accentHover: #31e270;
+  --orange: #1ed760;
+  --red: #ff2f58;
+  --go: #13ec4d;
+  --warnbg: #143520;
+}
+
+:root[data-theme="volive"] {
+  --bg: #100818;
+  --panel: #131c05;
+  --panel2: #223209;
+  --accentSoft: #25340e;
+  --washFrom: #100818;
+  --washTo: #170c23;
+  --line: #2d410a;
+  --lineStrong: #5b8414;
+  --text: #f0ebe0;
+  --dim: #a8b878;
+  --faint: #a8b878;
+  --blue: #98c855;
+  --purple: #5b8414;
+  --accent: #81b040;
+  --accentText: #000000;
+  --accentInk: #81b040;
+  --accentHover: #90bf4f;
+  --orange: #81b040;
+  --red: #ff5d7d;
+  --go: #81b040;
+  --warnbg: #273710;
+}
+
+:root[data-theme="vteal"] {
+  --bg: #f2eef6;
+  --panel: #80c8a8;
+  --panel2: #f7f3fa;
+  --accentSoft: #82b399;
+  --washFrom: #f2eef6;
+  --washTo: #ede8f3;
+  --line: #50988a;
+  --lineStrong: #386b61;
+  --text: #081e14;
+  --dim: #26533c;
+  --faint: #285840;
+  --blue: #832833;
+  --purple: #386b61;
+  --accent: #901828;
+  --accentText: #ffffff;
+  --accentInk: #901828;
+  --accentHover: #761421;
+  --orange: #901828;
+  --red: #95001e;
+  --go: #901828;
+  --warnbg: #83a891;
+}
+
+:root[data-theme="vwhite"] {
+  --bg: #ffffff;
+  --panel: #f5f4f2;
+  --panel2: #eceae6;
+  --accentSoft: #dbdad8;
+  --washFrom: #ffffff;
+  --washTo: #fafafa;
+  --line: #cec9bf;
+  --lineStrong: #8f836d;
+  --text: #1a1a1a;
+  --dim: #6a6a6a;
+  --faint: #6e6e6e;
+  --blue: #3a3a3a;
+  --purple: #8f836d;
+  --accent: #1a1a1a;
+  --accentText: #ffffff;
+  --accentInk: #1a1a1a;
+  --accentHover: #0b0b0b;
+  --orange: #1a1a1a;
+  --red: #d2002a;
+  --go: #1a1a1a;
+  --warnbg: #cecdcb;
+}
+
+:root[data-theme="vlavender"] {
+  --bg: #f6f1e4;
+  --panel: #a8a0e0;
+  --panel2: #faf6ee;
+  --accentSoft: #a396c7;
+  --washFrom: #f6f1e4;
+  --washTo: #f4eddd;
+  --line: #7868b0;
+  --lineStrong: #5a4b90;
+  --text: #1a1830;
+  --dim: #38375b;
+  --faint: #4a4878;
+  --blue: #503316;
+  --purple: #5a4b90;
+  --accent: #7f4a0f;
+  --accentText: #ffffff;
+  --accentInk: #7f4a0f;
+  --accentHover: #643a0c;
+  --orange: #56320a;
+  --red: #7e0019;
+  --go: #5a340a;
+  --warnbg: #998cb9;
+}
+
+:root[data-theme="vmidnight"] {
+  --bg: #090c18;
+  --panel: #160b2a;
+  --panel2: #0d1c28;
+  --accentSoft: #1d1e46;
+  --washFrom: #090c18;
+  --washTo: #0d1122;
+  --line: #3f2373;
+  --lineStrong: #7a4eca;
+  --text: #f0eaf8;
+  --dim: #c8a850;
+  --faint: #c8a850;
+  --blue: #c8a850;
+  --purple: #7a4eca;
+  --accent: #4480d8;
+  --accentText: #000000;
+  --accentInk: #4480d8;
+  --accentHover: #5d91dd;
+  --orange: #4a84d9;
+  --red: #ff1846;
+  --go: #4a84d9;
+  --warnbg: #1f214a;
+}
+
+:root[data-theme="vrose"] {
+  --bg: #eef5eb;
+  --panel: #e8a0a0;
+  --panel2: #f4f9f2;
+  --accentSoft: #cf929a;
+  --washFrom: #eef5eb;
+  --washTo: #e9f2e5;
+  --line: #b87070;
+  --lineStrong: #934949;
+  --text: #182010;
+  --dim: #304821;
+  --faint: #3a5828;
+  --blue: #2e3c8b;
+  --purple: #934949;
+  --accent: #182870;
+  --accentText: #ffffff;
+  --accentInk: #182870;
+  --accentHover: #131f57;
+  --orange: #182870;
+  --red: #8d001c;
+  --go: #182870;
+  --warnbg: #c38a97;
+}
+
+:root[data-theme="vblack"] {
+  --bg: #040404;
+  --panel: #080808;
+  --panel2: #111111;
+  --accentSoft: #232423;
+  --washFrom: #040404;
+  --washTo: #0b0b0b;
+  --line: #333333;
+  --lineStrong: #616161;
+  --text: #f0f5f2;
+  --dim: #777e77;
+  --faint: #5d635d;
+  --blue: #9ea39e;
+  --purple: #616161;
+  --accent: #b0b5b0;
+  --accentText: #000000;
+  --accentInk: #b0b5b0;
+  --accentHover: #c0c4c0;
+  --orange: #b0b5b0;
+  --red: #ff1040;
+  --go: #b0b5b0;
+  --warnbg: #262726;
+}
+
+:root[data-theme="vindigo"] {
+  --bg: #f6eef2;
+  --panel: #8aaad0;
+  --panel2: #faf4f7;
+  --accentSoft: #8a98b8;
+  --washFrom: #f6eef2;
+  --washTo: #f3e8ed;
+  --line: #4868a0;
+  --lineStrong: #3c5786;
+  --text: #0c1828;
+  --dim: #263a65;
+  --faint: #2a4070;
+  --blue: #6f1e14;
+  --purple: #3c5786;
+  --accent: #8a1408;
+  --accentText: #ffffff;
+  --accentInk: #8a1408;
+  --accentHover: #6d1006;
+  --orange: #741107;
+  --red: #7e0019;
+  --go: #741107;
+  --warnbg: #868eac;
+}
+
+* { box-sizing: border-box; }
+
+/* 320 px: iki sutunlu bento 280'de sikisiyordu (kutu basina 120 px). */
+body {
+  width: 320px;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  background-image: linear-gradient(160deg, var(--washFrom), var(--washTo));
+  color: var(--text);
+  font: var(--fs-sm)/1.5 "Segoe UI", system-ui, sans-serif;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--line);
+}
+
+/* Logo dikey; genisligi yuksekligi belirlesin, ezilmesin */
+header .logo { flex: 0 0 auto; width: auto; height: 20px; }
+
+.brand { font-size: var(--fs-md); font-weight: 600; letter-spacing: .2px; }
+
+/* Guc dugmesiyle ayni kare. Onceden 17x15 px idi, 24 px hedefin altinda. */
+.gear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  width: var(--h-sm);
+  height: var(--h-sm);
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--r-sm);
+  color: var(--dim);
+  cursor: pointer;
+  font-size: var(--fs-md);
+  line-height: 1;
+}
+
+.gear:hover { color: var(--text); }
+
+/* --- bento ----------------------------------------------------------------
+   Iki sutun, aralik 8. Kutu iki sutunu (.span-2) ya da birini kaplar; her
+   satir dolu. Kutu: karttan tek kademe fark, ince kenarlik, golge yok. */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+}
+
+.span-2 { grid-column: 1 / -1; }
+
+.tile {
+  min-width: 0;
+  padding: var(--sp-3);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+/* Kimlik kutusu: sitelerin gordugu yer buyuk, altinda durum ve koruma
+   sayisi, dugme sagda. Durunca yer soluk: siteler gercek konumu goruyor. */
+.statustile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.idbox { display: flex; flex-direction: column; min-width: 0; }
+
+.idk {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+
+.idplace {
+  line-height: 28px;
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statustile.off .idplace { color: var(--faint); }
+.statustile .sub { margin-top: 0; }
+.statustile .sep { color: var(--faint); }
+.statustile .power { width: 44px; height: 44px; }
+
+.state { font-weight: 600; color: var(--dim); }
+
+.state.on { color: var(--go); }
+
+.field + .field { margin-top: 2px; }
+
+.boxhead {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: var(--sp-2);
+  font-size: var(--fs-xs);
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+
+.link {
+  margin-left: auto;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--blue);
+  cursor: pointer;
+  font: inherit;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.link:hover { text-decoration: underline; }
+
+label {
+  display: block;
+  margin: 0 0 var(--sp-1);
+  font-size: var(--fs-xs);
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Salt okunur deger kutunun icinde duz metin: giris kutusu gibi kenarligi
+   ve zemini yok, tiklanip yazilacak bir sey gibi durmuyor. */
+.field {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sub {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-xs);
+  color: var(--dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+select {
+  width: 100%;
+  height: var(--h-ctl);
+  padding: 0 var(--sp-2);
+  background: var(--panel2);
+  color: var(--text);
+  border: 1px solid var(--lineStrong);
+  border-radius: var(--r-sm);
+  font: inherit;
+}
+
+select:focus-visible { border-color: var(--accentInk); }
+.tile select + select { margin-top: var(--sp-2); }
+
+.power {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--h-ctl);
+  height: var(--h-ctl);
+  padding: 0;
+  background: var(--go);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.power[aria-pressed="true"] { background: var(--red); }
+
+/* Simgeler karakter değil, çizim. Yazı tipine bağlı kalınca boş kutu çıkıyordu. */
+.power i { display: block; box-sizing: border-box; }
+
+.power[aria-pressed="false"] i {
+  margin-left: 3px;
+  width: 0;
+  height: 0;
+  border-left: 9px solid #fff;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+
+.power[aria-pressed="true"] i {
+  width: 10px;
+  height: 11px;
+  border-left: 3px solid #fff;
+  border-right: 3px solid #fff;
+}
+.power:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+
+/* Bu site: nokta, alan adi, gecici izin secimi tek satir */
+.sitetile {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.dot {
+  flex: 0 0 var(--sp-2);
+  width: var(--sp-2);
+  height: var(--sp-2);
+  border-radius: 50%;
+  background: var(--dim);
+}
+
+.dot.on { background: var(--go); }
+
+.sitename {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--fs-xs);
+  color: var(--dim);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ovr {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 136px;
+  height: var(--h-sm);
+  padding: 0 var(--sp-1);
+  font-size: var(--fs-xs);
+}
+
+.warn {
+  margin: var(--sp-3) var(--sp-3) 0;
+  padding: var(--sp-3);
+  background: var(--warnbg);
+  border: 1px solid var(--orange);
+  border-radius: var(--r-md);
+}
+
+.warn p { margin: 0 0 var(--sp-2); font-size: var(--fs-sm); }
+
+.warn button {
+  width: 100%;
+  height: var(--h-ctl);
+  padding: 0 var(--sp-3);
+  background: var(--orange);
+  color: #fff;
+  border: 0;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+
+/* tokens.css'teki kalkma/basma hareketi metin baglantisinda yok */
+.link { transform: none; }
+
+/* --- mobil ---------------------------------------------------------------- */
+/* Firefox for Android'de popup ayrı bir sayfa gibi açılıyor, sabit genişlikli
+   gövde koca ekranın köşesinde küçücük kalıyordu. Kurallar YALNIZ .is-mobile
+   altında, masaüstü görünümüne hiç dokunmuyor. Ölçüler sabit değil: yüzlerce
+   farklı ekran genişliği var, hepsi oransal. */
+
+html.is-mobile body {
+  width: 100%;
+  min-width: 0;
+  font-size: 16px;
+}
+
+html.is-mobile header { padding: var(--sp-3) var(--sp-4); }
+html.is-mobile header .logo { height: 26px; }
+html.is-mobile .brand { font-size: 17px; }
+
+/* Dokunma hedefi en az 44 px, parmakla isabet edecek kadar */
+html.is-mobile .power,
+html.is-mobile .gear {
+  width: 44px;
+  height: 44px;
+}
+
+html.is-mobile .bento { gap: var(--sp-3); padding: var(--sp-4); }
+html.is-mobile .tile { padding: var(--sp-4); }
+
+html.is-mobile select,
+html.is-mobile input,
+html.is-mobile button {
+  min-height: 44px;
+  font-size: 16px;      /* 16'nın altı iOS ve bazı Android sürümlerinde sayfayı yakınlaştırıyor */
+}
+
+html.is-mobile .field { font-size: 16px; }
+html.is-mobile .ovr { min-height: 44px; }

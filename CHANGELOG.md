@@ -1,0 +1,67 @@
+<!--
+================================================================================
+CHANGELOG TEMPLATE - Miabeyefendi (https://github.com/Miabeyefendi)
+
+RULES
+  1. Newest release on top. Never rewrite a released entry.
+  2. Dates are ISO, YYYY-MM-DD, and are the real publish date.
+  3. Versions follow semantic versioning: MAJOR.MINOR.PATCH.
+       MAJOR - something that used to work now works differently
+       MINOR - new capability, nothing broken
+       PATCH - fix only
+  4. Only these six group headings, always in this order. Delete the empty ones.
+       Added · Changed · Fixed · Removed · Deprecated · Security
+  5. Write for the person using the software, not for the person who wrote it.
+     "Volume tooltip no longer sticks after a track change" beats
+     "refactor volume handler".
+  6. Single language. This file stays English, like commit messages.
+  7. Link each version number to its release page.
+================================================================================
+-->
+
+# Changelog
+
+All notable changes to **GeoNoMore** are recorded here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project uses
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+[English](./CHANGELOG.md) · [README](./README.md)
+
+---
+
+## [Unreleased]
+
+---
+
+## [5.1.0] - 2026-11-20
+
+### Added
+
+- New logo and toolbar icon: a hooded figure whose face is a location pin, readable at 16 px on light and dark toolbars.
+- Redesigned settings page: an icon sidebar, a "What sites see" strip that always shows the location, time zone and language sites get, and a larger map with its controls on top of it. The popup opens on the same summary.
+- IP check: one click shows where your real connection appears to be and whether it matches your fake location. Your IP is never stored or logged.
+- In countries with several time zones, such as the United States, Russia or Brazil, the time zone now follows the exact place you pick instead of the capital.
+- Tracking protection group: send Global Privacy Control, strip tracking parameters (utm_*, fbclid, gclid and similar) from links, block link click pings, and turn off DNS pre-resolving.
+- Chrome only: turn off Privacy Sandbox ad tracking (Topics, Protected Audience and ad measurement).
+- Firefox only: block tracking content in every window, not just private ones.
+- Protection inside web workers, so background scripts see the same time zone and language as the page.
+- Device details option: common values for processor cores, memory and touch points, one microphone, camera and speaker for sites without permission, and in Chrome a hidden connection speed and battery level.
+
+### Changed
+
+- In the light theme, lime buttons and checkboxes now have a dark outline, so they stay readable on white.
+- The keyboard layout and the list of speech voices no longer give away your real language.
+
+### Fixed
+
+- A page could read your real time zone and language through a frame it had just created. Frames now get the same values as the page.
+- In Chrome, scripts that ran in the very first moment of a page load could see your real time zone and language. They now see the fake ones from the start.
+- In Chrome, a page could detect that GeoNoMore was installed through a leftover marker. The marker is removed before any page script runs.
+- The newer Temporal date API no longer reveals your real time zone.
+
+---
+
+<!-- Keep this link block at the bottom and add one line per release. -->
+
+[Unreleased]: https://github.com/Miabeyefendi/GeoNoMore/compare/v5.1.0...HEAD
+[5.1.0]: https://github.com/Miabeyefendi/GeoNoMore/releases/tag/v5.1.0

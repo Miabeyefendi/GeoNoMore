@@ -1,0 +1,141 @@
+================================================================================
+NOTICE
+GeoNoMore - AUTHORSHIP, SUPPLEMENTAL TERMS AND DISCLAIMER
+================================================================================
+
+Author        : Mustafa Ihsan Albayrak
+Username      : Miabeyefendi (@miabeyefendi)
+Profile       : https://github.com/Miabeyefendi
+Contact       : mustafaihsanalbayrak@hotmail.com
+
+Copyright (c) 2026 Mustafa Ihsan Albayrak ("Miabeyefendi"). All rights reserved.
+
+--------------------------------------------------------------------------------
+PART A - ENGLISH
+--------------------------------------------------------------------------------
+
+1. LICENSE
+
+   GeoNoMore is licensed under the GeoNoMore License, Version 1.0. The complete
+   and authoritative text is in the LICENSE file next to this one. This NOTICE
+   adds context; where the two ever disagree, the LICENSE wins.
+
+   The source is public so it can be read, audited and improved. It is source
+   available, not open source. The difference matters and it is deliberate:
+
+   - You may read the code, audit it, change it on your own machine and send
+     changes back. Contributions are welcome.
+   - You may not publish it, mirror it, upload it to any store, or make money
+     from it in any way, directly or indirectly.
+   - GeoNoMore is published by its author and by nobody else.
+
+   Anything the license forbids can still be asked for. Write to the address
+   above and say what you want to do.
+
+2. REQUIRED ATTRIBUTION
+
+   The following attribution must be preserved, visible and unmodified, in every
+   copy of this project and in anything derived from it:
+
+     Miabeyefendi (Mustafa Ihsan Albayrak) - https://github.com/Miabeyefendi
+
+3. CONTRIBUTIONS
+
+   You keep the copyright in what you write. By submitting a contribution you
+   grant the author a perpetual, worldwide, irrevocable, royalty free right to
+   use, modify, publish and license it as part of GeoNoMore, under the current
+   license or a later one the author chooses. No copyright assignment, no
+   payment, no obligation on the author to accept it.
+
+4. WHAT THIS SOFTWARE IS
+
+   A browser extension that reports a location you choose to websites instead of
+   your real one, and keeps the time zone and language consistent with it.
+
+   It changes what the page is told. It does not change your IP address and it is
+   not a VPN, a proxy or a tunnel. A site that looks your location up on its own
+   server still sees where you really are.
+
+5. NO WARRANTY
+
+   Provided "as is", without warranty of any kind, express or implied, including
+   the warranties of merchantability, fitness for a particular purpose and
+   noninfringement. The author is not liable for any claim, damages or other
+   liability arising from the software or its use.
+
+   You are responsible for your own use of it, including the terms of service of
+   the sites you visit and the law that applies where you are. Third party names
+   and trademarks belong to their owners; none of them are affiliated with or
+   endorse this project.
+
+6. PRIVACY
+
+   No account, no telemetry, no tracking, no advertising. Settings, logs and
+   history stay in browser local storage on the device. The only outbound request
+   the extension makes is the optional address search, sent to OpenStreetMap
+   Nominatim when the user types into the search box. Full text in
+   docs/store/privacy-policy.md.
+
+--------------------------------------------------------------------------------
+PART B - TURKCE
+--------------------------------------------------------------------------------
+
+1. LISANS
+
+   GeoNoMore, GeoNoMore Lisansi Surum 1.0 ile lisanslanmistir. Tam ve baglayici
+   metin bu dosyanin yanindaki LICENSE dosyasindadir. Bu NOTICE aciklama ekler;
+   ikisi celisirse LICENSE gecerlidir.
+
+   Kaynak, okunabilsin, denetlenebilsin ve gelistirilebilsin diye acik. Kaynagi
+   acik bir yazilim, acik kaynak degil. Fark bilerek konuldu:
+
+   - Kodu okuyabilir, denetleyebilir, kendi makinende degistirebilir ve
+     degisikligi geri gonderebilirsin. Katki beklenir.
+   - Yayimlayamaz, kopyasini dagitamaz, bir magazaya koyamaz ve dogrudan ya da
+     dolayli olarak para kazanamazsin.
+   - GeoNoMore'u yazari yayimlar, baskasi degil.
+
+   Lisansin yasakladigi bir sey gerekiyorsa istenebilir. Yukaridaki adrese yaz,
+   ne yapmak istedigini anlat.
+
+2. ZORUNLU ATIF
+
+   Asagidaki atif, bu projenin her kopyasinda ve ondan turetilen her seyde
+   gorunur ve degistirilmeden korunmalidir:
+
+     Miabeyefendi (Mustafa Ihsan Albayrak) - https://github.com/Miabeyefendi
+
+3. KATKILAR
+
+   Yazdiginin telif hakki sende kalir. Katki gonderdiginde yazara, o katkiyi
+   GeoNoMore'un parcasi olarak kullanma, degistirme, yayimlama ve lisanslama
+   hakkini suresiz, dunya capinda, geri alinamaz ve bedelsiz olarak vermis
+   olursun. Telif devri yok, odeme yok, yazarin kabul etme zorunlulugu yok.
+
+4. BU YAZILIM NE YAPAR
+
+   Sitelere gercek konumun yerine senin sectigin konumu bildiren bir tarayici
+   uzantisi. Saat dilimini ve dili de onunla tutarli tutar.
+
+   Sayfaya soylenen seyi degistirir. IP adresini DEGISTIRMEZ; VPN, proxy ya da
+   tunel degildir. Konumu kendi sunucusunda IP'den bakan bir site gercekte nerede
+   oldugunu gormeye devam eder.
+
+5. GARANTI YOK
+
+   "Oldugu gibi" sunulur, acik ya da ortulu hicbir garanti verilmez. Yazar,
+   yazilimdan ya da kullanimindan dogan hicbir talep veya zarardan sorumlu
+   degildir.
+
+   Kullanimindan sen sorumlusun: ziyaret ettigin sitelerin kullanim sartlari ve
+   bulundugun yerin hukuku dahil. Ucuncu taraf isimleri ve markalari
+   sahiplerinindir, hicbiri bu projeyle bagli degildir ve onu desteklemez.
+
+6. GIZLILIK
+
+   Hesap yok, telemetri yok, izleme yok, reklam yok. Ayarlar, kayitlar ve gecmis
+   cihazdaki tarayici deposunda kalir. Uzantinin kendi basina yaptigi tek dis
+   istek, kullanici arama kutusuna bir sey yazdiginda OpenStreetMap Nominatim'e
+   giden adres aramasidir. Tam metin: docs/store/privacy-policy.md.
+
+================================================================================
