@@ -56,7 +56,7 @@
   "modeAll": "Her sitede",
   "modeOnly": "Yalnız aşağıdaki sitelerde",
   "modeExcept": "Aşağıdakiler dışında her sitede",
-  "siteListHint": "Her satıra bir alan adı. google.com alt alanlarını da kapsar. Çalışmadığı yerde sayfaya hiç kod girmez.",
+  "siteListHint": "Her satıra bir alan adı. google.com alt alanlarını da kapsar. Çalışmadığı yerde site gerçek değerlerini görür.",
   "siteListPlaceholder": "google.com\n*.ornek.com",
   "siteRules": "Siteye özel kurallar",
   "siteRulesHint": "Belirli bir site için farklı ayar kullan. Boş bıraktığın alanlar genel ayardan gelir. En uzun eşleşen desen kazanır.",

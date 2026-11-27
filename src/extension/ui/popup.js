@@ -129,7 +129,7 @@
   }
 
   function save(patch) {
-    GNM_LOG.add('ui', 'popup.set', Object.assign({ host: host || null }, patch));
+    GNM_LOG.add('ui', 'popup.set', { keys: Object.keys(patch) });
     gnmSet(patch, function (updated) {
       cfg = updated;
       render();
@@ -209,14 +209,14 @@
           // önce düzelt, yoksa çizim yarıda kalıyor
           var fix = gnmGeoFix(DATA, cfg);
           if (fix) {
-            GNM_LOG.add('ui', 'geo.repair', fix);
+            GNM_LOG.add('ui', 'geo.repair', { keys: Object.keys(fix) });
             Object.assign(cfg, fix);
             gnmSet(fix);
           }
           bind();
           checkPermission();
           readActiveTab(function () {
-            GNM_LOG.add('ui', 'popup.open', { host: host || null, enabled: cfg.enabled });
+            GNM_LOG.add('ui', 'popup.open', { enabled: cfg.enabled });
             render();
 
             // Hareket varken konum surekli degisiyor. Pencere zaten kisa omurlu,

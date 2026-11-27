@@ -56,7 +56,7 @@
   "modeAll": "En todos los sitios",
   "modeOnly": "Solo en los sitios de la lista",
   "modeExcept": "En todos menos en los de la lista",
-  "siteListHint": "Un dominio por línea. google.com incluye también sus subdominios. Donde no funciona, no se inyecta ningún código.",
+  "siteListHint": "Un dominio por línea. google.com incluye también sus subdominios. Donde no funciona, el sitio recibe tus valores reales.",
   "siteListPlaceholder": "google.com\n*.ejemplo.com",
   "siteRules": "Reglas por sitio",
   "siteRulesHint": "Usa otros ajustes para un sitio concreto. Los campos vacíos heredan el ajuste general. Gana el patrón más largo que coincida.",

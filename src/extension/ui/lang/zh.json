@@ -56,7 +56,7 @@
   "modeAll": "所有网站",
   "modeOnly": "仅下列网站",
   "modeExcept": "除下列网站外的所有网站",
-  "siteListHint": "每行一个域名。google.com 也包含其子域名。不运行的地方完全不会注入代码。",
+  "siteListHint": "每行一个域名。google.com 也包含其子域名。在不运行的地方，网站会得到你的真实数据。",
   "siteListPlaceholder": "google.com\n*.example.com",
   "siteRules": "按网站设置规则",
   "siteRulesHint": "为特定网站单独设置。留空的字段沿用全局设置。匹配到的最长规则优先。",

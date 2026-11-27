@@ -32,6 +32,7 @@ const chrome = {
   runtime: {
     lastError: null,
     getManifest: () => ({ version: '3.0.0' }),
+    getURL: p => 'chrome-extension://abcdefghijklmnopabcdefghijklmnop/' + p,
     onInstalled: { addListener: f => { listeners.installed = f; } },
     onStartup: { addListener: () => {} },
     onMessage: { addListener: f => { listeners.message = f; } }
@@ -39,7 +40,8 @@ const chrome = {
   storage: {
     local: {
       get: storageGet,
-      set: (o, cb) => { if ('log' in o) LOG = o.log; if (cb) cb(); }
+      set: (o, cb) => { if ('log' in o) LOG = o.log; if (cb) cb(); },
+      remove: (k, cb) => { (calls.removed = calls.removed || []).push(k); if ([].concat(k).indexOf('log') >= 0) LOG = []; if (cb) cb(); }
     },
     onChanged: { addListener: () => {} }
   },
@@ -360,5 +362,76 @@ const events = () => plain(LOG).map(e => e.e);
     delete W.adMeasurementEnabled; delete W.trackingProtectionMode;
   }
 
-  console.log('background: 13 kontrol gecti');
+  // 14. Gizli pencereden gelen kayit diske yazilmaz.
+  {
+    await settled();
+    LOG = []; CONFIG = cfg({ timeline: true });
+    listeners.message({ __gnmLog: [{ s: 'patch', e: 'geo.fake', d: { lat: 1, lon: 2, origin: 'https://gizli.example' } }] }, { tab: { incognito: true } });
+    await settled();
+    assert.deepStrictEqual(plain(LOG), [], 'gizli pencere kaydi yazilmamali');
+  }
+
+  // 15. Dil ve GPC basligi websocket, ping ve CSP raporunda da gitmeli.
+  const added = () => calls.rules.reduce((a, c) => a.concat(plain(c.addRules || [])), []);
+  const withHeader = h => added().filter(r => (r.action.requestHeaders || []).some(x => x.header === h));
+  {
+    sync(cfg({ gpc: true }));
+    ['Accept-Language', 'Sec-GPC'].forEach(h => {
+      const types = withHeader(h).reduce((a, r) => a.concat(r.condition.resourceTypes), []);
+      ['main_frame', 'sub_frame', 'xmlhttprequest', 'websocket', 'ping', 'csp_report', 'object', 'other']
+        .forEach(t => assert.ok(types.indexOf(t) >= 0, h + ' kuralinda eksik tur: ' + t));
+    });
+  }
+
+  // 16. Dil basligi site kipine uyar: sayfadaki dil ile baslik celismesin.
+  {
+    const split = () => {
+      const rs = withHeader('Accept-Language');
+      return {
+        nav: rs.find(r => r.condition.resourceTypes.indexOf('main_frame') >= 0),
+        sub: rs.find(r => r.condition.resourceTypes.indexOf('main_frame') < 0),
+        n: rs.length
+      };
+    };
+    sync(cfg({ siteMode: 'only', siteList: ['a.com', '*.b.org'] }));
+    let s = split();
+    assert.strictEqual(s.n, 2);
+    assert.deepStrictEqual(s.nav.condition.resourceTypes, ['main_frame', 'sub_frame']);
+    assert.deepStrictEqual(s.nav.condition.requestDomains, ['a.com', 'b.org'], 'gezinme hedefe gore');
+    assert.deepStrictEqual(s.sub.condition.initiatorDomains, ['a.com', 'b.org'], 'alt istekler isteyen sayfaya gore');
+    assert.strictEqual(s.sub.condition.requestDomains, undefined);
+
+    sync(cfg({ siteMode: 'except', siteList: ['a.com'] }));
+    s = split();
+    assert.deepStrictEqual(s.nav.condition.excludedRequestDomains, ['a.com']);
+    assert.deepStrictEqual(s.sub.condition.excludedInitiatorDomains, ['a.com']);
+
+    sync(cfg({ siteMode: 'only', siteList: [] }));
+    assert.strictEqual(withHeader('Accept-Language').length, 0, 'listede kimse yoksa baslik kurali yok');
+
+    sync(cfg());
+    s = split();
+    assert.ok(!s.nav.condition.requestDomains && !s.sub.condition.initiatorDomains, 'her site kipinde sinir yok');
+  }
+
+  // 17. Harita Referer kurali yalniz uzantinin KENDI isteklerine uygulanir:
+  // baska bir sitenin karo istegine GeoNoMore adresi eklenmemeli.
+  {
+    sync(cfg({ enabled: false }));
+    const tile = withHeader('Referer')[0];
+    assert.deepStrictEqual(tile.condition.initiatorDomains, ['abcdefghijklmnopabcdefghijklmnop']);
+  }
+
+  // 18. 5.1.2'den onceki kayitlar gercek adres ve konum iceriyor: guncellemede silinir.
+  {
+    const wipe = d => { calls.removed = []; CONFIG = cfg(); listeners.installed(d); return plain(calls.removed); };
+    assert.deepStrictEqual(wipe({ reason: 'update', previousVersion: '5.1.1' }), [['log', 'timeline']]);
+    assert.deepStrictEqual(wipe({ reason: 'update', previousVersion: '4.9.0' }), [['log', 'timeline']]);
+    assert.deepStrictEqual(wipe({ reason: 'update', previousVersion: '5.1.2' }), []);
+    assert.deepStrictEqual(wipe({ reason: 'update', previousVersion: '5.2.0' }), []);
+    assert.deepStrictEqual(wipe({ reason: 'update', previousVersion: '5.10.0' }), []);
+    assert.deepStrictEqual(wipe({ reason: 'install' }), []);
+  }
+
+  console.log('background: 18 kontrol gecti');
 })().catch(e => { console.error(e.message); process.exit(1); });

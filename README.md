@@ -38,7 +38,7 @@
 - **Leak protection** - WebRTC local IP, web workers, frames a page creates and IP lookups the page makes itself
 - **Tracking protection** - Global Privacy Control, tracking tags stripped from links, link pings and DNS pre-resolving off
 - **Built for each browser** - Privacy Sandbox ad tracking off in Chrome, tracking protection in every window in Firefox
-- **IP check and a full log** - see where your real connection appears, and every location handed to every site
+- **IP check and a full log** - see where your real connection appears, and the fake location handed to sites
 - **Private by design** - no account, no telemetry, settings stay in your browser
 
 ---
@@ -78,11 +78,11 @@ node src/tools/build.js
 
 Files attached to each release, built from this repository with `node src/tools/build.js`, plain JavaScript, not minified:
 
-| File | What it is | SHA-256 (5.1.1) |
+| File | What it is | SHA-256 (5.1.2) |
 |---|---|---|
-| `geonomore-chromium-5.1.1.zip` | Package for Chrome, Edge, Brave and Opera | `94160f432482d6da585ac31c5ffb97ec7450336d93cecb85dd122264efdc806c` |
-| `geonomore-firefox-5.1.1.zip` | Package for Firefox and Firefox for Android | `827dc68021697ceefea5b8e4e1da968ef3f46a7ecfd1bf0e8b984a0366540f27` |
-| `geonomore-5.1.1-source.zip` | Source package for store review, see [BUILD.md](./docs/guides/BUILD.md) | `2677dcae1769e1e18b9813399521f15e77363254c7139d67916ad7b607d8e5dd` |
+| `geonomore-chromium-5.1.2.zip` | Package for Chrome, Edge, Brave and Opera | `292e0b970c0340010dd059df28d6ff1398645b7d003ef4fd519cabcaca60979d` |
+| `geonomore-firefox-5.1.2.zip` | Package for Firefox and Firefox for Android | `e4c7ea38c872a51fa9d9671aa6aa6dcc3992a56cc57f4670b0584d607b21f9ec` |
+| `geonomore-5.1.2-source.zip` | Source package for store review, see [BUILD.md](./docs/guides/BUILD.md) | `d843b96a0a5b130768cb1365c4409b24fe23f240552b389e9369addcc6409da7` |
 
 </details>
 
@@ -167,7 +167,7 @@ No. Your IP address stays the same and no browser extension can change it. A sit
 <details>
 <summary><b>Does it collect any data?</b></summary>
 
-No. There is no account, no analytics and no server of mine. Settings stay in your browser. The only two network requests are the optional address search (OpenStreetMap) and the optional IP check, and both run only when you press their button. See the [privacy policy](./docs/store/privacy-policy.md).
+No. There is no account, no analytics and no server of mine. Settings stay in your browser. The extension's own network requests are the map pictures in the settings page (from the tile server you pick, OpenStreetMap by default), the optional address search (OpenStreetMap) and the optional IP check; the last two run only when you press their button. See the [privacy policy](./docs/store/privacy-policy.md).
 
 </details>
 

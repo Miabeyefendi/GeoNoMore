@@ -38,15 +38,22 @@ const FULL = {
   ] }
 };
 
-function bridge(config, origin) {
+function bridge(config, origin, opts) {
+  opts = opts || {};
   const sent = [];
+  // Gunluge gercekten giden her sey: koprunun kendi satirlari (acikken) ve
+  // arka plana yollananlar
+  const logged = [];
+  const relayed = [];
+  let logOn = true, realAsked = 0;
   const handlers = {};
   let open = 0;
   const ctx = vm.createContext({ console, setTimeout, clearTimeout, crypto: require('crypto').webcrypto });
   ctx.__gnmEngine = E;
-  ctx.GNM_LOG = { via() {}, add() {}, enable() {} };
-  ctx.location = { origin: origin, href: origin + '/x' };
-  ctx.navigator = { geolocation: { getCurrentPosition() {} } };
+  ctx.GNM_LOG = { via() {}, add(s, e, d) { if (logOn) logged.push({ e, d }); }, enable(v) { logOn = v !== false; } };
+  ctx.location = { origin: origin, href: (origin === 'null' ? 'about:blank' : origin + '/sayfa?token=GIZLI#parca') };
+  if (opts.windowOrigin) ctx.origin = opts.windowOrigin;
+  ctx.navigator = { geolocation: { getCurrentPosition() { realAsked++; } } };
   const attrs = { 'data-gnm-ok': 'KANAL' };
   ctx.document = {
     documentElement: {
@@ -61,14 +68,15 @@ function bridge(config, origin) {
   ctx.postMessage = () => { open++; };
   ctx.window = ctx;
   ctx.chrome = {
-    runtime: { sendMessage() {}, lastError: null },
+    runtime: { sendMessage(m) { relayed.push(m); }, lastError: null },
+    extension: { inIncognitoContext: !!opts.incognito },
     storage: {
       local: { get: (k, cb) => cb({ config: config }) },
       onChanged: { addListener() {} }
     }
   };
   vm.runInContext(read('content/bridge.js'), ctx, { filename: 'bridge.js' });
-  return { sent, handlers, attrs, open: () => open };
+  return { sent, handlers, attrs, logged, relayed, open: () => open, realAsked: () => realAsked };
 }
 
 const cfgOf = b => b.sent[b.sent.length - 1].msg.cfg;
@@ -146,6 +154,52 @@ const ok = () => { n++; };
   b.handlers['KANALp']({ detail: JSON.stringify({ __gnm: 0 }) });
   assert.strictEqual(b.sent.length, before + 1, 'kanaldan gelen selama ayar yollanmali');
   assert.doesNotThrow(() => b.handlers['KANALp']({ detail: 'bozuk{' }));
+  ok();
+}
+
+// 6. Gunluk: tam adres hicbir zaman yazilmaz; kapali, haric ve gizli
+// pencerede hicbir sey yazilmaz, sayfadan gelen kayit da iletilmez.
+{
+  const pageLog = JSON.stringify({ __gnm: 2, log: [{ s: 'patch', e: 'geo.watch.tick', d: { lat: 41.123, lon: 29.456 } }] });
+  const on = bridge(FULL, 'https://test.example');
+  on.handlers['KANALp']({ detail: pageLog });
+  assert.strictEqual(on.relayed.length, 1, 'acikken sayfa kaydi iletilir');
+  assert.ok(on.logged.length > 0);
+  assert.ok(!/GIZLI|parca|sayfa/.test(JSON.stringify(on.logged)), 'tam adres yazilmamali: ' + JSON.stringify(on.logged));
+  ok();
+  [
+    [Object.assign({}, FULL, { enabled: false }), {}],
+    [Object.assign({}, FULL, { siteMode: 'except', siteList: ['test.example'] }), {}],
+    [FULL, { incognito: true }]
+  ].forEach(([c, o]) => {
+    const b = bridge(c, 'https://test.example', o);
+    b.handlers['KANALp']({ detail: pageLog });
+    b.handlers['KANALp']({ detail: JSON.stringify({ __gnm: 3, id: 1 }) });
+    assert.deepStrictEqual(b.logged, [], 'kayit olmamali');
+    assert.deepStrictEqual(b.relayed, [], 'sayfa kaydi iletilmemeli');
+    ok();
+  });
+}
+
+// 7. about:blank / srcdoc: site kurali miras alinan adrese gore. location.origin
+// "null" iken "yalniz bu siteler" kipinde korunan sitenin cercevesi GERCEK
+// konumu aliyordu.
+{
+  const only = Object.assign({}, FULL, { siteMode: 'only', siteList: ['test.example'], schedule: { on: false } });
+  const b = bridge(only, 'null', { windowOrigin: 'https://test.example' });
+  assert.strictEqual(b.sent[b.sent.length - 1].msg.active, true, 'listedeki sitenin bos cercevesi acik olmali');
+  b.handlers['KANALp']({ detail: JSON.stringify({ __gnm: 3, id: 1 }) });
+  assert.strictEqual(b.realAsked(), 0, 'gercek konum istenmemeli');
+  assert.deepStrictEqual(b.sent[0].msg.cfg.siteProfiles.map(r => r.pattern), ['test.example']);
+  const ex = Object.assign({}, FULL, { siteMode: 'except', siteList: ['test.example'] });
+  assert.strictEqual(bridge(ex, 'null', { windowOrigin: 'https://test.example' }).sent.pop().msg.active, false, 'haric sitenin cercevesi de haric');
+  ok();
+  // Adres hic bilinemiyorsa (opak cerceve) gercek konum verilmez
+  const u = bridge(only, 'null', { windowOrigin: 'null' });
+  u.handlers['KANALp']({ detail: JSON.stringify({ __gnm: 3, id: 7 }) });
+  assert.strictEqual(u.realAsked(), 0, 'bilinmeyen adreste gercek konum istenmemeli');
+  const last = u.sent[u.sent.length - 1].msg;
+  assert.ok(last.__gnm === 4 && last.error && last.error.code === 1, 'izin yok cevabi');
   ok();
 }
 

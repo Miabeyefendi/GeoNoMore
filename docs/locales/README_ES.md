@@ -38,7 +38,7 @@
 - **Protección contra fugas** - IP local por WebRTC, web workers, marcos que crea la página y consultas de IP que hace la propia página
 - **Protección contra el rastreo** - Global Privacy Control, etiquetas de rastreo quitadas de los enlaces, pings de enlaces y resolución DNS anticipada desactivados
 - **Hecho para cada navegador** - rastreo publicitario de Privacy Sandbox desactivado en Chrome, protección contra el rastreo en todas las ventanas en Firefox
-- **Comprobación de IP y registro completo** - ves dónde aparece tu conexión real y cada ubicación entregada a cada sitio
+- **Comprobación de IP y registro completo** - ves dónde aparece tu conexión real y la ubicación falsa entregada a los sitios
 - **Privado por diseño** - sin cuenta, sin telemetría, los ajustes se quedan en tu navegador
 
 ---
@@ -78,11 +78,11 @@ node src/tools/build.js
 
 Archivos adjuntos a cada versión, compilados desde este repositorio con `node src/tools/build.js`, JavaScript plano, sin minificar:
 
-| Archivo | Qué es | SHA-256 (5.1.1) |
+| Archivo | Qué es | SHA-256 (5.1.2) |
 |---|---|---|
-| `geonomore-chromium-5.1.1.zip` | Paquete para Chrome, Edge, Brave y Opera | `94160f432482d6da585ac31c5ffb97ec7450336d93cecb85dd122264efdc806c` |
-| `geonomore-firefox-5.1.1.zip` | Paquete para Firefox y Firefox para Android | `827dc68021697ceefea5b8e4e1da968ef3f46a7ecfd1bf0e8b984a0366540f27` |
-| `geonomore-5.1.1-source.zip` | Paquete de código para la revisión de la tienda, ver [BUILD.md](../../docs/guides/BUILD.md) | `2677dcae1769e1e18b9813399521f15e77363254c7139d67916ad7b607d8e5dd` |
+| `geonomore-chromium-5.1.2.zip` | Paquete para Chrome, Edge, Brave y Opera | `292e0b970c0340010dd059df28d6ff1398645b7d003ef4fd519cabcaca60979d` |
+| `geonomore-firefox-5.1.2.zip` | Paquete para Firefox y Firefox para Android | `e4c7ea38c872a51fa9d9671aa6aa6dcc3992a56cc57f4670b0584d607b21f9ec` |
+| `geonomore-5.1.2-source.zip` | Paquete de código para la revisión de la tienda, ver [BUILD.md](../../docs/guides/BUILD.md) | `d843b96a0a5b130768cb1365c4409b24fe23f240552b389e9369addcc6409da7` |
 
 </details>
 
@@ -167,7 +167,7 @@ No. Tu dirección IP sigue igual y ninguna extensión de navegador puede cambiar
 <details>
 <summary><b>¿Recoge algún dato?</b></summary>
 
-No. No hay cuenta, ni analítica, ni servidor mío. Los ajustes se quedan en tu navegador. Las dos únicas solicitudes de red son la búsqueda de direcciones opcional (OpenStreetMap) y la comprobación de IP opcional, y solo se ejecutan al pulsar su botón. Ver la [política de privacidad](../../docs/store/privacy-policy.md).
+No. No hay cuenta, ni analítica, ni servidor mío. Los ajustes se quedan en tu navegador. Las solicitudes de red de la extensión son las imágenes del mapa en la página de ajustes (del servidor de teselas que elijas, OpenStreetMap por defecto), la búsqueda de direcciones opcional (OpenStreetMap) y la comprobación de IP opcional; las dos últimas solo se ejecutan al pulsar su botón. Ver la [política de privacidad](../../docs/store/privacy-policy.md).
 
 </details>
 

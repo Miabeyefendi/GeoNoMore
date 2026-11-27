@@ -28,7 +28,7 @@ One sheet per store, ready to copy into the submission form.
 - Title, summary and description: written once, in `chrome.md`
 - Author: Miabeyefendi - Mustafa Ihsan Albayrak
 - Contact mail: mustafaihsanalbayrak@hotmail.com
-- Version: 5.1.1
+- Version: 5.1.2
 
 ## What differs
 

@@ -15,6 +15,18 @@ function gnmInjected(makeEngine, tokenArg) {
 
   var E = makeEngine();
 
+  // Bu pencerenin SITE adresi. about:blank ve srcdoc cercevelerinde
+  // location.origin "null"; site kurallari ona gore karar verince korunan
+  // sitenin bos cercevesi korumasiz kaliyordu. bridge.js'te ayni sira.
+  var ORIGIN = (function () {
+    var list = [window.origin, location.origin];
+    var a = location.ancestorOrigins;
+    if (a) for (var i = 0; i < a.length; i++) list.push(a[i]);
+    try { list.push(window.parent.location.origin); } catch (e) { /* baska kaynak */ }
+    for (var j = 0; j < list.length; j++) if (list[j] && list[j] !== 'null') return list[j];
+    return '';
+  })();
+
   // --- ozel kanal ---------------------------------------------------------
   // Yama ile kopru ESKIDEN window.postMessage('*') ile konusuyordu: sayfadaki
   // HER betik (reklam, analitik dahil) 'message' dinleyip ayarin tamamini
@@ -131,7 +143,7 @@ function gnmInjected(makeEngine, tokenArg) {
   var GNM_HARD = typeof Symbol === 'function' ? Symbol['for']('gnm.hardened') : '__gnmHardened';
 
   LOG.add('patch', 'install', {
-    origin: location.origin,
+    origin: ORIGIN,
     frame: window.top !== window
   });
 
@@ -173,6 +185,24 @@ function gnmInjected(makeEngine, tokenArg) {
       }
     }
   } catch (e) { boot = null; }
+
+  // about:blank gibi cercevelerde Server-Timing yok ve ayar zaman uyumsuz:
+  // sayfa `window[0]` ile ayni anda gercek dilimi okuyordu. Ayni kaynakli ust
+  // pencere zaten yamali, onun verdigi deger gercekten farkliysa acilis degeri
+  // o. Baska kaynakli ust pencerede erisim hata veriyor.
+  if (!boot) {
+    try {
+      var up = window.parent;
+      if (up && up !== window) {
+        var upTz = up.Intl.DateTimeFormat().resolvedOptions().timeZone;
+        var upLang = up.navigator.language;
+        var ownTz = OrigDTF().resolvedOptions().timeZone;
+        var tzDiff = upTz && upTz !== ownTz ? upTz : null;
+        var langDiff = upLang && upLang !== origLanguage ? upLang : null;
+        if (tzDiff || langDiff) boot = { tz: tzDiff, locale: langDiff };
+      }
+    } catch (e) { /* baska kaynak */ }
+  }
 
   var cfg = null;
   var isActive = false;      // konum için: mesajı doğrudan izliyor
@@ -237,7 +267,7 @@ function gnmInjected(makeEngine, tokenArg) {
     // postMessage trafiği her sekmede yer kaplıyor.
     LOG.enable(!cfg || (cfg.logging !== false && !cfg.lowMemory));
     LOG.add('patch', 'ready', {
-      origin: location.origin,
+      origin: ORIGIN,
       active: isActive,
       frame: window.top !== window,
       queued: pending.length
@@ -265,7 +295,7 @@ function gnmInjected(makeEngine, tokenArg) {
   function prof() {
     var now = RealDate.now();
     if (!resolved || now >= resolvedUntil) {
-      resolved = E.resolve(cfg, now, location.origin);
+      resolved = E.resolve(cfg, now, ORIGIN);
       var ov = cfg && cfg.override;
       resolvedUntil = ov && ov.until !== 'browser' && ov.expiresAt > now
         ? ov.expiresAt : Infinity;
@@ -295,9 +325,9 @@ function gnmInjected(makeEngine, tokenArg) {
   // Konumu üret: açıksak burada hesaplanıyor, kapalıysak köprüden isteniyor.
   function getPosition(options, ok, fail) {
     if (isActive && cfg) {
-      var p = E.position(cfg, RealDate.now(), location.origin);
+      var p = E.position(cfg, RealDate.now(), ORIGIN);
       LOG.add('patch', 'geo.fake', {
-        origin: location.origin, lat: p.latitude, lon: p.longitude,
+        origin: ORIGIN, lat: p.latitude, lon: p.longitude,
         acc: p.accuracy, exact: !!prof().exact
       });
       ok(wrap(p));
@@ -307,7 +337,7 @@ function gnmInjected(makeEngine, tokenArg) {
     // "Kapaliyken gercek konumu da verme" secenegi. Sitenin gercek konumu
     // almasindansa izin reddedilmis gibi davranmasi.
     if (cfg && cfg.denyWhenOff) {
-      LOG.add('patch', 'geo.denied', { origin: location.origin });
+      LOG.add('patch', 'geo.denied', { origin: ORIGIN });
       if (fail) fail({ code: 1, message: 'User denied Geolocation', PERMISSION_DENIED: 1 });
       return;
     }
@@ -324,7 +354,7 @@ function gnmInjected(makeEngine, tokenArg) {
   var geo = {
     getCurrentPosition: function (success, error, options) {
       LOG.add('patch', 'geo.get.call', {
-        origin: location.origin,
+        origin: ORIGIN,
         active: isActive,
         highAccuracy: !!(options && options.enableHighAccuracy)
       });
@@ -336,7 +366,7 @@ function gnmInjected(makeEngine, tokenArg) {
 
     watchPosition: function (success, error, options) {
       var id = nextWatchId++;
-      LOG.add('patch', 'geo.watch.start', { origin: location.origin, id: id });
+      LOG.add('patch', 'geo.watch.start', { origin: ORIGIN, id: id });
       if (typeof success !== 'function') return id;
 
       whenReady(function () {
@@ -345,9 +375,10 @@ function gnmInjected(makeEngine, tokenArg) {
         var tick = function () {
           getPosition(options, function (pos) {
             ticks++;
-            if (ticks === 1 || (cfg && cfg.logVerbose && ticks <= 20)) {
+            // Yalniz sahte konum kaydediliyor: kapaliyken gelen GERCEK konum
+            if (isActive && (ticks === 1 || (cfg && cfg.logVerbose && ticks <= 20))) {
               LOG.add('patch', 'geo.watch.tick', {
-                origin: location.origin, id: id, n: ticks,
+                origin: ORIGIN, id: id, n: ticks,
                 lat: pos.coords.latitude, lon: pos.coords.longitude
               });
             }
@@ -367,7 +398,7 @@ function gnmInjected(makeEngine, tokenArg) {
     },
 
     clearWatch: function (id) {
-      LOG.add('patch', 'geo.watch.clear', { origin: location.origin, id: id });
+      LOG.add('patch', 'geo.watch.clear', { origin: ORIGIN, id: id });
       if (watches[id]) clearInterval(watches[id]);
       watches[id] = 0;
     }
@@ -400,7 +431,7 @@ function gnmInjected(makeEngine, tokenArg) {
     var origQuery = navigator.permissions.query.bind(navigator.permissions);
     var patchedQuery = function (desc) {
       if (isActive && desc && desc.name === 'geolocation') {
-        LOG.add('patch', 'perm.query', { origin: location.origin, answer: 'granted' });
+        LOG.add('patch', 'perm.query', { origin: ORIGIN, answer: 'granted' });
         return Promise.resolve({
           name: 'geolocation',
           state: 'granted',
@@ -432,7 +463,7 @@ function gnmInjected(makeEngine, tokenArg) {
     if (!cfg) return boot ? boot.tz : null;   // ayar gelene kadar acilis degeri
     if (!stickyActive) return null;
     var tz = prof().timeZone;
-    if (tz) note('tz', 'tz.read', { origin: location.origin, tz: tz });
+    if (tz) note('tz', 'tz.read', { origin: ORIGIN, tz: tz });
     return tz || null;
   }
 
@@ -471,10 +502,23 @@ function gnmInjected(makeEngine, tokenArg) {
     var hour = p.hour === '24' ? 0 : +p.hour;
     var asUTC = RealDate.UTC(+p.year, +p.month - 1, +p.day, hour, +p.minute, +p.second);
     v = Math.round((Math.floor(t / 1000) * 1000 - asUTC) / 60000);
+    if (!(Math.abs(v) <= 1440)) v = 0;   // milattan onceki yillar: bicim cag tasiyor
     if (offCount >= OFF_MAX) { offCache = Object.create(null); offCount = 0; }
     offCache[key] = v;
     offCount++;
     return v;
+  }
+
+  // Sarilan yapicinin yerine gecerken prototype.constructor da degismeli:
+  // `new (new Intl.DateTimeFormat().constructor)()` tek satirda ASIL yapiciyi,
+  // yani gercek saat dilimini ve dili veriyordu.
+  function adopt(Patched, Orig) {
+    Patched.prototype = Orig.prototype;
+    try {
+      Object.defineProperty(Orig.prototype, 'constructor', {
+        value: Patched, writable: true, configurable: true
+      });
+    } catch (e) { /* yoksay */ }
   }
 
   // Intl.DateTimeFormat: saat dilimi verilmemişse profilinkini koy.
@@ -488,7 +532,7 @@ function gnmInjected(makeEngine, tokenArg) {
     if (tz && !opts.timeZone) opts.timeZone = tz;
     return new OrigDTF(localeArg(locales), opts);
   }
-  PatchedDTF.prototype = OrigDTF.prototype;
+  adopt(PatchedDTF, OrigDTF);
   PatchedDTF.supportedLocalesOf = OrigDTF.supportedLocalesOf.bind(OrigDTF);
   Intl.DateTimeFormat = PatchedDTF;
 
@@ -649,7 +693,7 @@ function gnmInjected(makeEngine, tokenArg) {
     if (!cfg) return boot ? boot.locale : null;   // ayar gelene kadar acilis degeri
     if (!stickyActive || cfg.localeSpoof === false) return null;
     var l = prof().locale || null;
-    if (l) note('locale', 'locale.read', { origin: location.origin, locale: l });
+    if (l) note('locale', 'locale.read', { origin: ORIGIN, locale: l });
     return l;
   }
 
@@ -695,8 +739,8 @@ function gnmInjected(makeEngine, tokenArg) {
     return locales;
   }
 
-  function wrapIntl(name) {
-    var Orig = Intl[name];
+  function wrapIntl(G, name) {
+    var Orig = G.Intl && G.Intl[name];
     if (typeof Orig !== 'function') return;
 
     // new'siz de çağrılabiliyor (NumberFormat), sınıf olanlar new istiyor.
@@ -705,29 +749,38 @@ function gnmInjected(makeEngine, tokenArg) {
     function Patched(locales, options) {
       return new Orig(localeArg(locales), options);
     }
-    Patched.prototype = Orig.prototype;
+    adopt(Patched, Orig);
     if (Orig.supportedLocalesOf) {
       Patched.supportedLocalesOf = Orig.supportedLocalesOf.bind(Orig);
     }
     try { Object.defineProperty(Patched, 'name', { value: name, configurable: true }); }
     catch (e) { /* yoksay */ }
 
-    Intl[name] = Patched;
+    G.Intl[name] = Patched;
   }
 
-  ['NumberFormat', 'Collator', 'PluralRules', 'RelativeTimeFormat', 'ListFormat',
-    'DisplayNames', 'Segmenter', 'DurationFormat'].forEach(wrapIntl);
+  var INTL_NAMES = ['NumberFormat', 'Collator', 'PluralRules', 'RelativeTimeFormat', 'ListFormat',
+    'DisplayNames', 'Segmenter', 'DurationFormat'];
+  INTL_NAMES.forEach(function (n) { wrapIntl(window, n); });
 
-  // Aynı sızıntının Intl dışındaki üç kapısı
-  [[window.Number, 'toLocaleString'], [window.BigInt, 'toLocaleString'],
-    [window.String, 'localeCompare']].forEach(function (pair) {
-    var Ctor = pair[0], name = pair[1];
-    if (!Ctor || !Ctor.prototype || typeof Ctor.prototype[name] !== 'function') return;
-    var orig = Ctor.prototype[name];
-    Ctor.prototype[name] = name === 'localeCompare'
-      ? function (that, locales, options) { return orig.call(this, that, localeArg(locales), options); }
-      : function (locales, options) { return orig.call(this, localeArg(locales), options); };
-  });
+  // Aynı sızıntının Intl dışındaki kapıları. toLocaleUpperCase/LowerCase de
+  // sistem dilini kullaniyor: 'i' Turkce'de 'İ' oluyor.
+  function wrapLocaleMethods(G, mark) {
+    [['Number', 'toLocaleString'], ['BigInt', 'toLocaleString'], ['String', 'localeCompare'],
+      ['String', 'toLocaleUpperCase'], ['String', 'toLocaleLowerCase']].forEach(function (pair) {
+      var Ctor = G[pair[0]], name = pair[1];
+      if (!Ctor || !Ctor.prototype || typeof Ctor.prototype[name] !== 'function') return;
+      var orig = Ctor.prototype[name];
+      var made = name === 'localeCompare'
+        ? function (that, locales, options) { return orig.call(this, that, localeArg(locales), options); }
+        : name === 'toLocaleString'
+          ? function (locales, options) { return orig.call(this, localeArg(locales), options); }
+          : function () { return orig.call(this, localeArg(arguments[0])); };
+      Ctor.prototype[name] = made;
+      if (mark) mark(made, name);
+    });
+  }
+  wrapLocaleMethods(window);
 
   // --- WebRTC ---------------------------------------------------------------
   // Arka plan tarayıcı tercihini kuruyor ve o tercih hiçbir siteyi bozmuyor;
@@ -735,9 +788,16 @@ function gnmInjected(makeEngine, tokenArg) {
   // adayı hiç üretilmiyor, ama TURN sunucusu olmayan bir görüşme de hiç
   // kurulamıyor. O yüzden kendi düğmesinde ve varsayılan kapalı.
 
-  function wrapRTC(name) {
-    var Orig = window[name];
+  function wrapRTC(G, name, mark) {
+    var Orig = G[name];
     if (typeof Orig !== 'function') return;
+    // Chrome'da webkitRTCPeerConnection AYNI nesne: ikinci kez sarmak
+    // constructor'i ikinci sarmalayiciya cevirirdi
+    if (name !== 'RTCPeerConnection' && G.RTCPeerConnection &&
+        G.RTCPeerConnection.prototype === Orig.prototype) {
+      G[name] = G.RTCPeerConnection;
+      return;
+    }
     function PatchedRTC(config, constraints) {
       if (isActive && cfg && cfg.webrtcRelay) {
         config = Object.assign({}, config);
@@ -745,12 +805,16 @@ function gnmInjected(makeEngine, tokenArg) {
       }
       return new Orig(config, constraints);
     }
-    PatchedRTC.prototype = Orig.prototype;
+    adopt(PatchedRTC, Orig);
+    if (typeof Orig.generateCertificate === 'function') {
+      PatchedRTC.generateCertificate = Orig.generateCertificate.bind(Orig);
+    }
     try { Object.defineProperty(PatchedRTC, 'name', { value: name, configurable: true }); }
     catch (e) { /* yoksay */ }
-    window[name] = PatchedRTC;
+    G[name] = PatchedRTC;
+    if (mark) mark(PatchedRTC, name);
   }
-  ['RTCPeerConnection', 'webkitRTCPeerConnection'].forEach(wrapRTC);
+  ['RTCPeerConnection', 'webkitRTCPeerConnection'].forEach(function (n) { wrapRTC(window, n); });
 
   // --- IP tabanlı konum servisleri -----------------------------------------
   // Uzantı IP'yi DEĞİŞTİREMEZ; sunucu gerçek IP'yi ağ katmanında görür. Ama
@@ -782,7 +846,7 @@ function gnmInjected(makeEngine, tokenArg) {
   // Servisler farklı alan adları kullanıyor. Hepsinin üstünü birden dolduruyoruz;
   // hangi anahtarı okurlarsa okusun tutarlı cevap alsınlar.
   function ipGeoBody(kind) {
-    var p = E.position(cfg, RealDate.now(), location.origin);
+    var p = E.position(cfg, RealDate.now(), ORIGIN);
     var prf = prof();
     var cc = (prf.locale || 'en-US').split('-')[1] || 'US';
     var lang = (prf.locale || 'en-US').split('-')[0];
@@ -813,7 +877,7 @@ function gnmInjected(makeEngine, tokenArg) {
       var kind = ipGeoOn() ? ipGeoTarget(url) : null;
       if (!kind) return origFetch.apply(this, arguments);
 
-      LOG.add('patch', 'ipgeo.fetch', { origin: location.origin, url: String(url).slice(0, 120) });
+      LOG.add('patch', 'ipgeo.fetch', { origin: ORIGIN });
       var body = ipGeoBody(kind);
       return Promise.resolve(new Response(body, {
         status: 200,
@@ -836,7 +900,7 @@ function gnmInjected(makeEngine, tokenArg) {
       var xhr = this;
       if (!xhr.__gnmKind) return origSend.apply(this, arguments);
 
-      LOG.add('patch', 'ipgeo.xhr', { origin: location.origin });
+      LOG.add('patch', 'ipgeo.xhr', { origin: ORIGIN });
       var body = ipGeoBody(xhr.__gnmKind);
       setTimeout(function () {
         try {
@@ -892,6 +956,8 @@ function gnmInjected(makeEngine, tokenArg) {
   pretendNative(Number.prototype.toLocaleString, 'toLocaleString');
   if (window.BigInt) pretendNative(BigInt.prototype.toLocaleString, 'toLocaleString');
   pretendNative(String.prototype.localeCompare, 'localeCompare');
+  pretendNative(String.prototype.toLocaleUpperCase, 'toLocaleUpperCase');
+  pretendNative(String.prototype.toLocaleLowerCase, 'toLocaleLowerCase');
   try {
     pretendNative(Object.getOwnPropertyDescriptor(
       window.Document.prototype, 'lastModified').get, 'lastModified');
@@ -927,6 +993,11 @@ function gnmInjected(makeEngine, tokenArg) {
   // buradan gercek dilim okunuyordu. Bu dosyanin sonundaki gnmPatchTemporal
   // sayfa ve worker icin ayni.
   gnmPatchTemporal(window.Temporal, activeTz, deepTz, localeArg, pretendNative);
+
+  // --- Date yapicisi --------------------------------------------------------
+  // Getter ve metin yollari yukarida; Date(), new Date(yil, ay, gun),
+  // Date.parse ve setHours ailesi hala sistem dilimiyle calisiyordu.
+  gnmPatchDate(window, activeTz, offsetAt, origOffset, pretendNative);
 
   // --- GPC ------------------------------------------------------------------
   // Arka plan Sec-GPC: 1 başlığını yolluyor; sayfa navigator.globalPrivacyControl
@@ -1031,7 +1102,7 @@ function gnmInjected(makeEngine, tokenArg) {
       for (k = 0; k < keep.length && !pick; k++) if (keep[k].localService) pick = keep[k];
       chosenVoice = pick || keep[0];
     }
-    note('locale', 'voices.filter', { origin: location.origin, before: list.length, after: keep.length });
+    note('locale', 'voices.filter', { origin: ORIGIN, before: list.length, after: keep.length });
     return keep;
   };
 
@@ -1067,8 +1138,10 @@ function gnmInjected(makeEngine, tokenArg) {
   //   - ayar kapali, uzanti kapali ya da sahte dilim/dil yok
   //   - sayfanin CSP'si blob: worker'a izin vermiyor (deneme worker'i ile
   //     olculuyor; sonuc gelene kadar da yapmiyoruz, kirmaktansa sizdir)
-  //   - baska kaynakli adres (gercek yapici zaten reddediyor) ve data:
-  //     (gercekte kaynagi bos, bizimkinde sayfanin kaynagi olurdu)
+  //   - baska kaynakli adres (gercek yapici zaten reddediyor)
+  // data: worker yine data: olarak kuruluyor (blob'a cevirmek ona sayfanin
+  // kaynagini verirdi), yama metnin basina ekleniyor. Worker'in kendi actigi
+  // worker'lar da ayni yoldan geciyor.
   //   - Trusted Types blob adresini reddederse
   // SharedWorker ve ServiceWorker kapsam disi: blob adresi her sekmede farkli
   // oldugu icin SharedWorker paylasilmaz olurdu, ServiceWorker blob kabul etmiyor.
@@ -1102,7 +1175,7 @@ function gnmInjected(makeEngine, tokenArg) {
       blobWorkers = ok;
       try { if (w) w.terminate(); } catch (e) { /* yoksay */ }
       try { if (u) RealURL.revokeObjectURL(u); } catch (e) { /* yoksay */ }
-      LOG.add('patch', 'worker.probe', { origin: location.origin, ok: ok, why: why || null });
+      LOG.add('patch', 'worker.probe', { origin: ORIGIN, ok: ok, why: why || null });
     };
     try {
       u = blobUrl('postMessage(1)');
@@ -1128,52 +1201,24 @@ function gnmInjected(makeEngine, tokenArg) {
     }
   }
 
-  var headKey = null, headSrc = null;
-  function workerHead(o) {
-    var key = JSON.stringify(o);
-    if (headKey !== key) {
-      headKey = key;
-      headSrc = gnmPatchTemporal.toString() + '\n(' + gnmWorkerPrelude.toString() +
-        ')(' + key + ');\n';
-    }
-    return headSrc;
-  }
-
   function workerScript(win, url, options) {
-    if (blobWorkers !== true || !workerWanted()) return null;
+    if (!workerWanted()) return null;
     var href;
     try { href = new RealURL(String(url), win.location.href).href; } catch (e) { return null; }
-    var scheme = href.slice(0, href.indexOf(':'));
-    var module = !!(options && options.type === 'module');
-    var head = workerHead({
+    return gnmWorkerSource({
+      origin: win.origin && win.origin !== 'null' ? win.origin : win.location.origin,
+      blobs: blobWorkers === true,   // sayfanin CSP'si blob worker'a izin veriyor mu
+      make: blobUrl,
+      forget: forget,
+      read: readSync
+    }, href, !!(options && options.type === 'module'), {
       tz: activeTz(),
       locale: activeLocale(),
       intl: cfg.localeIntl !== false,
       deep: cfg.tzDeep !== false,
       mask: cfg.maskNative !== false,
-      href: href
+      origin: ORIGIN
     });
-    var hu;
-
-    if (scheme === 'http' || scheme === 'https') {
-      if (new RealURL(href).origin !== win.location.origin) return null;
-      if (!module) return blobUrl(head + 'importScripts(' + JSON.stringify(href) + ');\n');
-      // import'lar sirayla degerlendiriliyor: once yama modulu, sonra asil betik.
-      // Tek blob'a koymak olmazdi, import govdeden ONCE calisir.
-      hu = blobUrl(head);
-      forget(hu);
-      return blobUrl('import ' + JSON.stringify(hu) + ';\nimport ' + JSON.stringify(href) + ';\n');
-    }
-
-    if (scheme === 'blob') {
-      var body = readSync(href);
-      if (body === null) return null;
-      if (!module) return blobUrl(head + body);
-      hu = blobUrl(head);
-      forget(hu);
-      return blobUrl('import ' + JSON.stringify(hu) + ';\n' + body);
-    }
-    return null;
   }
 
   function wrapWorker(win) {
@@ -1190,7 +1235,7 @@ function gnmInjected(makeEngine, tokenArg) {
           var w = Reflect.construct(Orig, [src].concat(args.slice(1)), new.target);
           forget(src);
           note('worker', 'worker.wrap', {
-            origin: location.origin,
+            origin: ORIGIN,
             module: !!(args[1] && args[1].type === 'module')
           });
           return w;
@@ -1201,7 +1246,7 @@ function gnmInjected(makeEngine, tokenArg) {
       }
       return Reflect.construct(Orig, args, new.target);
     };
-    W.prototype = Orig.prototype;
+    adopt(W, Orig);
     try { Object.defineProperty(W, 'length', { value: 1 }); } catch (e) { /* yoksay */ }
     win.Worker = W;
     pretendNative(W, 'Worker');
@@ -1228,7 +1273,7 @@ function gnmInjected(makeEngine, tokenArg) {
     var bucket = period ? Math.floor(RealDate.now() / period) : 0;
     if (fpSeedValue === null || fpSeedAt !== bucket) {
       fpSeedAt = bucket;
-      fpSeedValue = E.hash(location.origin + '|fp|' + bucket);
+      fpSeedValue = E.hash(ORIGIN + '|fp|' + bucket);
     }
     return fpSeedValue;
   }
@@ -1658,7 +1703,7 @@ function gnmInjected(makeEngine, tokenArg) {
           });
         }
         hideBoot(win);
-        LOG.add('patch', 'frame.sync', { origin: location.origin });
+        LOG.add('patch', 'frame.sync', { origin: ORIGIN });
         return;
       }
 
@@ -1682,14 +1727,24 @@ function gnmInjected(makeEngine, tokenArg) {
         Object.defineProperty(wnp, 'languages', langsDesc);
       }
 
-      if (win.Intl) win.Intl.DateTimeFormat = Intl.DateTimeFormat;
+      if (win.Intl) {
+        win.Intl.DateTimeFormat = Intl.DateTimeFormat;
+        INTL_NAMES.forEach(function (n) { wrapIntl(win, n); pretendNative(win.Intl[n], n); });
+      }
+      wrapLocaleMethods(win, pretendNative);
+      ['RTCPeerConnection', 'webkitRTCPeerConnection'].forEach(function (n) { wrapRTC(win, n, pretendNative); });
 
       if (win.Date && win.Date.prototype) {
         win.Date.prototype.getTimezoneOffset = RealDate.prototype.getTimezoneOffset;
-        Object.keys(LOCAL_TO_UTC).forEach(function (k) {
+        Object.keys(LOCAL_TO_UTC).concat(['toString', 'toDateString', 'toTimeString',
+          'toLocaleString', 'toLocaleDateString', 'toLocaleTimeString']).forEach(function (k) {
           win.Date.prototype[k] = RealDate.prototype[k];
         });
+        gnmPatchDate(win, activeTz, offsetAt, origOffset, pretendNative);
       }
+      var wdp = win.Document && win.Document.prototype;
+      var lmNow = window.Document && Object.getOwnPropertyDescriptor(window.Document.prototype, 'lastModified');
+      if (wdp && lmNow) Object.defineProperty(wdp, 'lastModified', lmNow);
 
       if (typeof window.fetch === 'function') win.fetch = window.fetch;
       if (typeof XHR === 'function' && win.XMLHttpRequest) {
@@ -1711,10 +1766,7 @@ function gnmInjected(makeEngine, tokenArg) {
       patchDevice(win);
       hideBoot(win);
 
-      LOG.add('patch', 'frame.harden', {
-        origin: location.origin,
-        url: String(win.location && win.location.href || '').slice(0, 60)
-      });
+      LOG.add('patch', 'frame.harden', { origin: ORIGIN });
     } catch (e) {
       LOG.add('patch', 'frame.error', { message: String(e && e.message || e) });
     }
@@ -1810,9 +1862,188 @@ function gnmInjected(makeEngine, tokenArg) {
 
   try { watchFrames(); } catch (e) { LOG.add('patch', 'frame.error', { message: String(e) }); }
 
-  // --- kendi basina calisan iki parca --------------------------------------
-  // Asagidaki iki fonksiyon worker'a METIN olarak gidiyor (workerHead).
-  // Disaridaki hicbir degiskene bakmamali, yalniz parametrelerine.
+  // --- kendi basina calisan parcalar ---------------------------------------
+  // Asagidaki fonksiyonlar worker'a METIN olarak gidiyor (gnmWorkerHead).
+  // Disaridaki hicbir degiskene bakmamali: yalniz parametrelerine ve
+  // birbirlerine.
+
+  // Worker'in basina eklenen metin. Hepsi tek kapali kapsamda: worker'in
+  // global'inde hicbir yardimci adi gorunmuyor.
+  function gnmWorkerHead(o) {
+    return '(function(){\n' + [gnmWorkerHead, gnmWorkerSource, gnmPatchDate, gnmPatchTemporal,
+      gnmWorkerPrelude].join('\n') + '\ngnmWorkerPrelude(' + JSON.stringify(o) + ');\n})();\n';
+  }
+
+  // Worker'a verilecek yeni adres: once yama, sonra asil betik. Sayfa ve worker
+  // (ic ice worker) ayni yolu kullaniyor. Sarilamiyorsa null.
+  // io: { origin, blobs, make(metin) -> blob adresi, forget(adres), read(adres) }
+  function gnmWorkerSource(io, href, module, o) {
+    var scheme = href.slice(0, href.indexOf(':'));
+    var head = function (h) { return gnmWorkerHead(Object.assign({}, o, { href: h })); };
+    var hu;
+
+    if (scheme === 'data') {
+      var asData = function (src) {
+        return 'data:text/javascript;charset=utf-8,' + encodeURIComponent(src);
+      };
+      var comma = href.indexOf(',');
+      if (comma < 0) return null;
+      // Gecersiz % dizisi tarayicida oldugu gibi kaliyor
+      var text = href.slice(comma + 1).split('#')[0].replace(/(%[0-9a-f]{2})+/gi, function (run) {
+        try { return decodeURIComponent(run); } catch (e) { return run; }
+      });
+      if (/;\s*base64\s*$/i.test(href.slice(0, comma))) {
+        try {
+          var bin = atob(text.replace(/\s/g, ''));
+          var bytes = new Uint8Array(bin.length);
+          for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          text = new TextDecoder().decode(bytes);
+        } catch (e) { return null; }
+      }
+      if (!module) return asData(head(null) + text);
+      return asData('import ' + JSON.stringify(asData(head(null))) + ';\n' + text);
+    }
+
+    if (!io.blobs) return null;
+
+    if (scheme === 'http' || scheme === 'https') {
+      if (new URL(href).origin !== io.origin) return null;
+      if (!module) return io.make(head(href) + 'importScripts(' + JSON.stringify(href) + ');\n');
+      // import'lar sirayla degerlendiriliyor: once yama modulu, sonra asil betik.
+      // Tek blob'a koymak olmazdi, import govdeden ONCE calisir.
+      hu = io.make(head(href));
+      io.forget(hu);
+      return io.make('import ' + JSON.stringify(hu) + ';\nimport ' + JSON.stringify(href) + ';\n');
+    }
+
+    if (scheme === 'blob') {
+      var body = io.read(href);
+      if (body === null) return null;
+      if (!module) return io.make(head(href) + body);
+      hu = io.make(head(href));
+      io.forget(hu);
+      return io.make('import ' + JSON.stringify(hu) + ';\n' + body);
+    }
+    return null;
+  }
+
+  // Date'in dilim hesabi yapan kalan yollari: Date() metni, yerel parcali ve
+  // metinli yapici, Date.parse, setHours ailesi, getYear.
+  // G: pencere ya da worker. offs(t, tz): getTimezoneOffset isaretli dakika.
+  // sysOffset: tarayicinin ASIL getTimezoneOffset'i.
+  function gnmPatchDate(G, tzNow, offs, sysOffset, mark) {
+    var RD = G.Date;
+    var P = RD && RD.prototype;
+    if (!P || !P.setUTCHours || typeof Reflect === 'undefined') return;
+    var realParse = RD.parse, realUTC = RD.UTC, getTime = P.getTime, setTime = P.setTime;
+    var put = function (obj, name, fn, length) {
+      try {
+        if (length !== undefined) Object.defineProperty(fn, 'length', { value: length, configurable: true });
+        Object.defineProperty(obj, name, { value: fn, writable: true, enumerable: false, configurable: true });
+        if (mark) mark(fn, name);
+      } catch (e) { /* yoksay */ }
+    };
+
+    // Duvar saati (UTC gibi yazilmis milisaniye) -> gercek an. Yaz saati
+    // tekrarinda erken olan, boslugunda gecisten onceki fark: ECMAScript kurali
+    var toUtc = function (wall, tz) {
+      if (!isFinite(wall) || Math.abs(wall) > 8.64e15) return NaN;
+      var before = offs(wall - 86400000, tz), after = offs(wall + 86400000, tz);
+      if (!isFinite(before)) before = offs(wall, tz);
+      if (!isFinite(after)) after = before;
+      var a = wall + before * 60000;
+      if (before === after) return a;
+      var b = wall + after * 60000;
+      var aOk = offs(a, tz) === before, bOk = offs(b, tz) === after;
+      if (aOk && bOk) return Math.min(a, b);
+      return bOk ? b : a;
+    };
+
+    // Metin sistem diliminde mi yorumlaniyor: dilim yazmiyorsa ve yalniz ISO
+    // tarih degilse (o UTC sayiliyor)
+    var isLocal = function (text) {
+      var x = text.trim();
+      if (/^[+-]?\d{4,6}(-\d\d(-\d\d)?)?$/.test(x)) return false;
+      if (/\b(gmt|utc|ut|[ecmp][sd]t)\b/i.test(x)) return false;
+      x = x.replace(/\s*\([^)]*\)\s*$/, '');
+      return !/(\d:\d\d(:\d\d(\.\d+)?)?\s*([ap]\.?m\.?)?\s*(z|[+-]\d{1,2}(:?\d\d)?)|\s[+-]\d{4})$/i.test(x);
+    };
+    var parseIn = function (text, tz) {
+      var ms = realParse(text);
+      if (!isFinite(ms) || !isLocal(text)) return ms;
+      return toUtc(ms - sysOffset.call(new RD(ms)) * 60000, tz);
+    };
+
+    var D = function Date(year, month, day, hours, minutes, seconds, ms) {
+      if (!new.target) return P.toString.call(new RD());
+      var args = arguments;
+      var tz = args.length ? tzNow() : null;
+      if (tz && args.length === 1) {
+        var v = args[0];
+        if (v !== null && typeof v === 'object') {
+          try { v = getTime.call(v); } catch (e) {
+            var prim = typeof Symbol === 'function' ? v[Symbol.toPrimitive] : undefined;
+            if (prim) v = prim.call(v, 'default');
+            else {
+              var val = v.valueOf();
+              v = val !== null && (typeof val === 'object' || typeof val === 'function') ? String(v) : val;
+            }
+          }
+        }
+        args = [typeof v === 'string' ? parseIn(v, tz) : v];
+      } else if (tz) {
+        args = [toUtc(realUTC.apply(null, args), tz)];
+      }
+      return Reflect.construct(RD, args, new.target);
+    };
+    D.prototype = P;
+    put(D, 'now', RD.now);
+    put(D, 'UTC', realUTC);
+    put(D, 'parse', ({
+      parse(text) {
+        var tz = tzNow();
+        return tz ? parseIn(String(text), tz) : realParse(text);
+      }
+    }).parse);
+
+    ['Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Date', 'Month', 'FullYear'].forEach(function (k) {
+      var name = 'set' + k, orig = P[name], utc = P['setUTC' + k];
+      if (!orig || !utc) return;
+      put(P, name, ({
+        [name]() {
+          var tz = tzNow();
+          if (!tz) return orig.apply(this, arguments);
+          var t = getTime.call(this);
+          var wall = isFinite(t) ? t - offs(t, tz) * 60000 : (k === 'FullYear' ? 0 : NaN);
+          var tmp = new RD(wall);
+          utc.apply(tmp, arguments);
+          return setTime.call(this, toUtc(getTime.call(tmp), tz));
+        }
+      })[name], orig.length);
+    });
+
+    var oGetYear = P.getYear, oSetYear = P.setYear;
+    if (oGetYear) {
+      put(P, 'getYear', ({
+        getYear() { return tzNow() ? this.getFullYear() - 1900 : oGetYear.call(this); }
+      }).getYear);
+    }
+    if (oSetYear) {
+      put(P, 'setYear', ({
+        setYear(y) {
+          if (!tzNow()) return oSetYear.call(this, y);
+          var n = Number(y);
+          if (!isFinite(n)) return setTime.call(this, NaN);
+          n = Math.trunc(n);
+          return this.setFullYear(n >= 0 && n <= 99 ? 1900 + n : n);
+        }
+      }).setYear, 1);
+    }
+
+    put(P, 'constructor', D);
+    put(G, 'Date', D);
+    if (mark) mark(D, 'Date');
+  }
 
   // Temporal.Now'un dilim okuyan dort yolu ve toLocaleString'ler. Acikca
   // dilim verilmisse dokunulmuyor. tzNow: Now icin dilim, tzText: metin yollari
@@ -1888,6 +2119,54 @@ function gnmInjected(makeEngine, tokenArg) {
       try { Object.defineProperty(fn, 'name', { value: name, configurable: true }); } catch (e) { /* yoksay */ }
       return fn;
     };
+    var adopt = function (Patched, Orig) {
+      Patched.prototype = Orig.prototype;
+      try {
+        Object.defineProperty(Orig.prototype, 'constructor', { value: Patched, writable: true, configurable: true });
+      } catch (e) { /* yoksay */ }
+    };
+
+    // Worker'in kendi actigi worker'lar: ayni yama, ayni ayar. Asillar adresler
+    // asagida degistirilmeden once saklaniyor.
+    var OW = G.Worker, RB = G.Blob, RU = G.URL, RX = G.XMLHttpRequest;
+    if (typeof OW === 'function' && typeof Reflect !== 'undefined') {
+      var xOpen = RX && RX.prototype.open, xSend = RX && RX.prototype.send;
+      var inner = {
+        origin: o.origin,
+        blobs: !!(RB && RU && RU.createObjectURL),
+        make: function (src) { return RU.createObjectURL(new RB([src], { type: 'text/javascript' })); },
+        forget: function (u) {
+          setTimeout(function () { try { RU.revokeObjectURL(u); } catch (e) { /* yoksay */ } }, 30000);
+        },
+        read: function (u) {
+          try {
+            var x = new RX();
+            xOpen.call(x, 'GET', u, false);
+            xSend.call(x);
+            return x.status === 200 || x.status === 0 ? x.responseText : null;
+          } catch (e) { return null; }
+        }
+      };
+      var selfHref = o.href || (G.location && G.location.href);
+      var NW = function Worker(url) {
+        if (!new.target) return OW.apply(this, arguments);
+        var args = Array.prototype.slice.call(arguments), src = null;
+        try {
+          src = gnmWorkerSource(inner, new RU(String(args[0]), selfHref).href,
+            !!(args[1] && args[1].type === 'module'), o);
+        } catch (e) { src = null; }
+        if (src) {
+          try {
+            var w = Reflect.construct(OW, [src].concat(args.slice(1)), new.target);
+            inner.forget(src);
+            return w;
+          } catch (e) { /* asil yapiciya dus */ }
+        }
+        return Reflect.construct(OW, args, new.target);
+      };
+      adopt(NW, OW);
+      G.Worker = mark(NW, 'Worker');
+    }
 
     // Blob adresinde calisiyoruz. Goreli adresler blob'a gore cozulup
     // kirilmasin, self.location da sayfanin verdigi adresi gostersin.
@@ -1966,6 +2245,8 @@ function gnmInjected(makeEngine, tokenArg) {
       };
 
       var oOff = DP.getTimezoneOffset;
+      var zoneOff = function (t) { return off(t); };
+      var zoneNow = function () { return tz; };
       DP.getTimezoneOffset = mark(function getTimezoneOffset() {
         var v = off(this.getTime());
         return isFinite(v) ? v : oOff.call(this);
@@ -2032,7 +2313,7 @@ function gnmInjected(makeEngine, tokenArg) {
         if (tz && !op.timeZone) op.timeZone = tz;
         return new ODTF(locOf(locales), op);
       };
-      PD.prototype = ODTF.prototype;
+      adopt(PD, ODTF);
       PD.supportedLocalesOf = ODTF.supportedLocalesOf.bind(ODTF);
       Intl.DateTimeFormat = mark(PD, 'DateTimeFormat');
     }
@@ -2058,9 +2339,13 @@ function gnmInjected(makeEngine, tokenArg) {
           var Orig = Intl[name];
           if (typeof Orig !== 'function') return;
           var P = named(function (locales, options) { return new Orig(locOf(locales), options); }, name);
-          P.prototype = Orig.prototype;
+          adopt(P, Orig);
           if (Orig.supportedLocalesOf) P.supportedLocalesOf = Orig.supportedLocalesOf.bind(Orig);
           Intl[name] = mark(P, name);
+        });
+        [[G.String, 'toLocaleUpperCase'], [G.String, 'toLocaleLowerCase']].forEach(function (pair) {
+          var k = pair[1], orig = pair[0].prototype[k];
+          pair[0].prototype[k] = mark(named(function () { return orig.call(this, locOf(arguments[0])); }, k), k);
         });
         [[G.Number, 'toLocaleString'], [G.BigInt, 'toLocaleString'],
           [G.String, 'localeCompare']].forEach(function (pair) {
@@ -2072,6 +2357,10 @@ function gnmInjected(makeEngine, tokenArg) {
             : function () { return orig.call(this, locOf(arguments[0]), arguments[1]); }, k), k);
         });
       }
+    }
+
+    if (tz && typeof gnmPatchDate === 'function') {
+      gnmPatchDate(G, zoneNow, zoneOff, oOff, mark);
     }
 
     if (typeof gnmPatchTemporal === 'function') {

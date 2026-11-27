@@ -16,6 +16,25 @@
   var MAX_RELAY = 50;
   var cfg;   // undefined: storage'dan daha okunmadı
 
+  // Bu pencerenin SITE adresi. about:blank ve srcdoc cercevelerinde
+  // location.origin "null": site kurallari ona gore karar verince "yalniz bu
+  // siteler" kipinde korunan sitenin bos cercevesi GERCEK konumu aliyordu.
+  // window.origin miras alinan adresi veriyor; opak cercevelerde (sandbox,
+  // data:) ust pencerenin adresine bakiliyor. injected.js'te ayni sira.
+  function siteOrigin() {
+    var list = [window.origin, location.origin];
+    var a = location.ancestorOrigins;
+    if (a) for (var i = 0; i < a.length; i++) list.push(a[i]);
+    try { list.push(window.parent.location.origin); } catch (e) { /* baska kaynak */ }
+    for (var j = 0; j < list.length; j++) if (list[j] && list[j] !== 'null') return list[j];
+    return '';
+  }
+  var ORIGIN = siteOrigin();
+
+  // Gizli pencerede hicbir sey kaydedilmiyor
+  var PRIVATE = !!(chrome.extension && chrome.extension.inIncognitoContext);
+  var how = null;   // yama hangi yoldan girdi; ayar gelince kaydediliyor
+
   // Sayfa dunyasiyla ozel kanalin adi (rastgele, sayfa basina). Yamanin
   // aciklamasi injected.js basinda: window.postMessage herkese acikti.
   var token = null;
@@ -88,7 +107,7 @@
     // MAIN dunya betigi (manifest'teki ilk content_scripts girisi) zaten
     // calistiysa isimiz bitti. Bu yol sayfanin CSP'sine takilmiyor.
     if (patchLanded()) {
-      GNM_LOG.add('bridge', 'inject', { origin: location.origin, how: 'main' });
+      how = 'main';
       return;
     }
 
@@ -110,22 +129,30 @@
       el.setAttribute('data-gnm-k', token);
     });
     if (landed) {
-      GNM_LOG.add('bridge', 'inject', { origin: location.origin, how: 'src' });
+      how = 'src';
       return;
     }
 
     // Son care: satir ici. Buraya yalnizca ekleyecek bir dugum bulunamazsa
     // geliniyor.
-    GNM_LOG.add('bridge', 'inject.fallback', { origin: location.origin });
     var code = '(' + gnmInjected + ')(' + gnmEngineFactory + ',' + JSON.stringify(token) + ');';
     insertScript(function (el) { el.textContent = code; });
-    GNM_LOG.add('bridge', 'inject', { origin: location.origin, how: 'inline' });
+    how = 'inline';
   }
 
+  // Ayar okunana kadar kayit yok: bu sayfada kayit tutulup tutulmayacagi
+  // henuz bilinmiyor
+  GNM_LOG.enable(false);
   injectPatch();
 
   function active() {
-    return !!(E && E.activeFor(cfg, location.origin));
+    return !!(E && E.activeFor(cfg, ORIGIN));
+  }
+
+  // Yalniz uzantinin ACIK oldugu, gizli olmayan sayfalar kaydediliyor. Eskiden
+  // her sayfanin tam adresi (sorgu ve parca dahil) kapaliyken bile yaziliyordu.
+  function mayLog() {
+    return !PRIVATE && !!cfg && cfg.logging !== false && active();
   }
 
   // Sayfa dunyasina giden ayar. BEYAZ LISTE: burada acikca yazilmayan anahtar
@@ -160,7 +187,7 @@
       if (cfg[k] !== undefined) out[k] = cfg[k];
     }
 
-    var host = E.hostOf(location.origin);
+    var host = E.hostOf(ORIGIN);
 
     // En uzun desenli uyan kural kazaniyor (motordaki gibi); deseni ana makine
     // adiyla degistiriyoruz ki kullanicinin yazdigi desen sizmasin.
@@ -202,9 +229,10 @@
 
   chrome.storage.local.get('config', function (r) {
     cfg = (r && r.config) || null;
-    GNM_LOG.enable(!cfg || cfg.logging !== false);
+    GNM_LOG.enable(mayLog());
+    GNM_LOG.add('bridge', 'inject', { origin: ORIGIN, how: how });
     GNM_LOG.add('bridge', 'config.recv', {
-      url: location.href,
+      origin: ORIGIN,
       active: active(),
       enabled: !!(cfg && cfg.enabled),
       siteMode: cfg && cfg.siteMode,
@@ -219,8 +247,8 @@
   chrome.storage.onChanged.addListener(function (changes, area) {
     if (area !== 'local' || !changes.config) return;
     cfg = changes.config.newValue || null;
-    GNM_LOG.enable(!cfg || cfg.logging !== false);
-    GNM_LOG.add('bridge', 'config.update', { url: location.href, active: active() });
+    GNM_LOG.enable(mayLog());
+    GNM_LOG.add('bridge', 'config.update', { origin: ORIGIN, active: active() });
     push(false);
   });
 
@@ -244,7 +272,7 @@
     // Yamadan gelen kayıtlar. Bilinen sınır: sayfa da bu mesajı taklit edip log'a
     // sahte satır yazdırabilir. Zararı gürültü, o yüzden parti başına tavan var.
     if (d.__gnm === 2 && Array.isArray(d.log)) {
-      toBackground(d.log.slice(0, MAX_RELAY));
+      if (mayLog()) toBackground(d.log.slice(0, MAX_RELAY));
       return;
     }
 
@@ -252,11 +280,17 @@
     if (d.__gnm === 3) {
       if (active()) {
         // Sayfa "kapalıyım" diye uydurmuş olabilir. Açıksak yine sahte veriyoruz.
-        reply(d.id, { pos: E.position(cfg, Date.now(), location.origin) });
+        reply(d.id, { pos: E.position(cfg, Date.now(), ORIGIN) });
         return;
       }
 
-      GNM_LOG.add('bridge', 'geo.passthrough', { origin: location.origin });
+      // Adresi bilinmeyen opak cerceve ve siteye gore ayrilan bir kip: bu
+      // cercevenin korunan siteye ait olup olmadigi soylenemiyor, gercek konum
+      // verilmiyor
+      if (!ORIGIN && cfg && cfg.enabled && (cfg.siteMode || 'all') !== 'all') {
+        reply(d.id, { error: { code: 1, message: 'User denied Geolocation' } });
+        return;
+      }
       navigator.geolocation.getCurrentPosition(
         function (pos) {
           reply(d.id, {

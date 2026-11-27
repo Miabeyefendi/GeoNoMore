@@ -3,8 +3,8 @@
 Copy and paste sheet for the submission form. Fill it top to bottom, the order matches the form.
 
 - Store: https://chrome.google.com/webstore/devconsole
-- Package: `extensions/geonomore-chromium-5.1.1.zip` (`node src/tools/build.js chromium`)
-- Version: 5.1.1
+- Package: `extensions/geonomore-chromium-5.1.2.zip` (`node src/tools/build.js chromium`)
+- Version: 5.1.2
 - Author: Miabeyefendi - Mustafa Ihsan Albayrak
 - Contact mail: mustafaihsanalbayrak@hotmail.com
 - Website: https://geonomore.com   TODO: the domain is not live yet, put the real address here before submitting
@@ -93,7 +93,7 @@ Your IP address does not change and no browser extension can change it. A site t
 
 PRIVACY
 
-No account, no sign up, no telemetry, no tracking, no ads. Settings stay in your browser. The extension makes only two kinds of network request, both started by you: the optional address search, which goes to OpenStreetMap when you type in the search box, and the optional IP check, which asks a public IP service (geojs.io, then ipwho.is or freeipapi.com) where your connection appears to be when you press Check. The interface says so on the spot.
+No account, no sign up, no telemetry, no tracking, no ads. Settings stay in your browser. The extension itself only contacts map and lookup services: the map in the settings page loads its pictures from the tile server you picked (OpenStreetMap by default) when that page shows it, the optional address search goes to OpenStreetMap when you search, and the optional IP check asks a public IP service (geojs.io, then ipwho.is or freeipapi.com) where your connection appears to be when you press Check.
 ```
 
 **Category**: Tools. Second choice: Developer Tools.
@@ -124,7 +124,7 @@ Report a location the user has chosen to websites instead of the real one, and k
 | `storage` | Keeps your settings, presets, rules and log in the browser. Nothing leaves the machine. |
 | `privacy` | While the extension runs, turns on the browser WebRTC setting that stops a page from reading your local IP, and turns off DNS pre-resolving, link click pings and the Privacy Sandbox ad features (Topics, Protected Audience, ad measurement). Each can be switched off in Protection. All are cleared again when it stops. |
 | `declarativeNetRequestWithHostAccess` | Sets the Accept-Language request header so it matches the country you picked; without it the header would contradict the fake location. While the extension runs it also sends the Global Privacy Control header (Sec-GPC: 1) and removes tracking tags such as utm_* and fbclid from page addresses. Both can be switched off in Protection. It also adds a Server-Timing entry carrying only the chosen time zone and language to pages as they arrive, so the fake values apply before the page's own scripts run; the browser adds it locally and it is never sent to any server. |
-| `host_permissions: <all_urls>` | The location a site sees can only be changed on that site. The user decides where it runs from the Sites tab, and no code is injected where it is switched off. |
+| `host_permissions: <all_urls>` | Both content scripts load on every page, because the location a site sees can only be changed inside that page. The user decides in the Sites tab where the fake values apply; where the extension is off or the site is excluded, the page gets the real values and nothing about the chosen location is handed to it. |
 
 **Data usage**: tick nothing. Then the declaration:
 
@@ -132,7 +132,7 @@ We do not collect, transmit or sell any user data.
 
 - No analytics, no telemetry, no crash reporting, no ads, no accounts.
 - Settings, logs and movement history stay in browser local storage on the user device.
-- The extension makes two optional outbound requests, both started by the user. The address search is sent to the OpenStreetMap Nominatim service when the user types a query into the search box. The IP check asks a public IP service (geojs.io, falling back to ipwho.is and freeipapi.com) for the country and time zone of the connection when the user presses Check; the IP address is not stored or logged. The interface states both next to the control. Nothing is sent when neither is used.
+- The extension makes three kinds of outbound request. Map pictures are loaded from the selected tile server (OpenStreetMap, OpenStreetMap Germany, OpenTopoMap or an address the user enters) when the settings page shows the map; for OpenStreetMap the extension sends its store page as Referer on its own requests only, as the tile usage policy requires. The address search is sent to the OpenStreetMap Nominatim service when the user searches. The IP check asks a public IP service (geojs.io, falling back to ipwho.is and freeipapi.com) for the country and time zone of the connection when the user presses Check; the IP address is not stored or logged. The interface states the last two next to the control.
 
 **Privacy policy URL**: required, host `docs/store/privacy-policy.md` as a web page and link it here.
 

@@ -33,6 +33,25 @@ All notable changes to **GeoNoMore** are recorded here. The format follows
 
 ---
 
+## [5.1.2] - 2026-11-27
+
+### Changed
+
+- The privacy policy, store texts and the site list hint now describe what the extension really does: its scripts load on every page, and the map in the settings page loads pictures from the tile server you picked.
+- The settings export no longer includes the custom map address, because it can contain an API key. Importing a file keeps the address you already have.
+
+### Security
+
+- With "only these sites" selected, an empty frame on a protected site could get your real location. Empty and inline frames now follow the rule of the site they belong to; excluded sites keep real values in their frames too.
+- Pages could still read your real time zone and language in several ordinary ways: through the constructor of a date, number or worker object, through `Date()`, dates built from year and month, `Date.parse` and `setHours`, through a frame read the moment it was created, through `data:` workers and workers started by other workers, and through upper and lower case conversion. All of these now give the fake values.
+- WebSocket connections, beacons, link pings and security reports were sent with your real language header.
+- The language header was also sent to sites where the extension does not run. It now follows your site list.
+- The rule that identifies GeoNoMore to OpenStreetMap applied to every website's map requests. It now applies only to the extension's own map.
+- The log stored full page addresses, and real coordinates on pages where the extension was off. It now stores only the site name, and nothing for inactive pages or private windows. Logs and movement history from earlier versions are deleted when you update, and Reset now clears them too.
+- The log no longer stores setting values, searched addresses or the country your IP check found.
+
+---
+
 ## [5.1.1] - 2026-11-27
 
 ### Fixed
@@ -75,6 +94,7 @@ All notable changes to **GeoNoMore** are recorded here. The format follows
 
 <!-- Keep this link block at the bottom and add one line per release. -->
 
-[Unreleased]: https://github.com/Miabeyefendi/GeoNoMore/compare/v5.1.1...HEAD
+[Unreleased]: https://github.com/Miabeyefendi/GeoNoMore/compare/v5.1.2...HEAD
+[5.1.2]: https://github.com/Miabeyefendi/GeoNoMore/releases/tag/v5.1.2
 [5.1.1]: https://github.com/Miabeyefendi/GeoNoMore/releases/tag/v5.1.1
 [5.1.0]: https://github.com/Miabeyefendi/GeoNoMore/releases/tag/v5.1.0

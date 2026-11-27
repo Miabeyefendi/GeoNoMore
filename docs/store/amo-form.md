@@ -87,7 +87,7 @@ content/injected.js inside a single IIFE, with the comments kept. Both source fi
 also in the package. To reproduce the submitted zip from the attached source package:
 install Node.js 18 or newer, then from the package root run
   node src/tools/build.js firefox
-The output releases/extensions/geonomore-firefox-5.1.1.zip is byte identical to the
+The output releases/extensions/geonomore-firefox-5.1.2.zip is byte identical to the
 submitted file. Nothing is downloaded during the build. Full steps: docs/guides/BUILD.md.
 
 WHY THE PAGE PATCH RUNS IN THE PAGE
@@ -96,30 +96,39 @@ content script cannot do. content/fallback.js is registered as a world: "MAIN" c
 script. Where that does not run, content/bridge.js inserts the same packaged file from
 web_accessible_resources. No remote code is loaded at any point.
 
-NEW IN 5.1.1: SERVER-TIMING RULE
+SERVER-TIMING RULE (since 5.1.0)
 Besides Accept-Language, the Sec-GPC header and tracking tag removal, one dynamic
 declarativeNetRequest rule appends a response header to document responses:
   Server-Timing: gnm;desc="<time zone>|<language>"
 It carries only the fake time zone and language the user chose. The browser adds it
 locally, it is never sent to any server, and the page patch removes the entry from what
-page scripts can read. It lets the chosen time zone apply before the first page script
-runs. It is not added on sites where the extension is switched off or has its own rule.
+page scripts normally read. It lets the chosen time zone apply before the first page
+script runs. It is not added on sites where the extension is switched off or has its own rule.
 
 DATA
 The manifest declares no data collection. Settings, logs and movement history stay in
-local storage on the device. There are two optional outbound requests, both started by
-the user: the address search to OpenStreetMap Nominatim when the user presses Search,
-and the IP check (geojs.io, then ipwho.is or freeipapi.com) when the user presses
-Check. The IP address is not stored or logged. No server of ours, no account, no
-telemetry.
+local storage on the device. Nothing is recorded for sites where the extension is off
+or excluded, or for private windows. The extension's own outbound requests are: map
+tiles from the selected tile server when the settings page shows the map, the address
+search to OpenStreetMap Nominatim when the user presses Search, and the IP check
+(geojs.io, then ipwho.is or freeipapi.com) when the user presses Check. The IP address
+is not stored or logged. No server of ours, no account, no telemetry.
+
+WHAT CHANGED IN 5.1.2
+Privacy fixes. Real location, time zone or language could be read through about:blank
+frames under site rules, the constructor property of wrapped APIs, the Date
+constructor, new frames, data: and nested workers, and WebSocket or beacon headers.
+The log no longer stores page addresses or anything for inactive or private pages; logs
+from earlier versions are deleted on update. The tile Referer rule now applies only to
+the extension's own requests.
 
 PERMISSIONS
 storage: settings on the device. privacy: WebRTC IP handling, and turning off DNS
 pre-resolving and link click pings while the extension runs; tracking protection in
 every window only if the user opts in. All are cleared when it stops.
 declarativeNetRequestWithHostAccess: the headers above. Host access: the location can
-only be changed inside the page that asks for it; the user chooses where it runs in
-the Sites tab and no code is injected where it is switched off.
+only be changed inside the page that asks for it, so the scripts load on every page;
+the user chooses in the Sites tab where the fake values apply.
 
 HOW TO TEST
 Open the toolbar popup, pick a country, press Start, then open any https page and read

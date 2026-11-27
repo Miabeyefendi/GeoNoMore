@@ -27,7 +27,9 @@
   }
 
   function save(patch, redraw, center) {
-    GNM_LOG.add('ui', 'options.set', patch);
+    // Yalniz anahtar adlari: degerler arasinda harita adresi (API anahtariyla),
+    // site listeleri ve kayitli yerler var
+    GNM_LOG.add('ui', 'options.set', { keys: Object.keys(patch) });
     gnmSet(patch, function (updated) {
       cfg = updated;
       flashSaved();
@@ -259,7 +261,8 @@
             source: s.url.split('/')[2]
           };
           ipBusy = false;
-          GNM_LOG.add('ui', 'ip.check', { ok: true, source: ipInfo.source, country: ipInfo.country });
+          // Ulke yazilmiyor: kullanicinin GERCEK IP ulkesi
+          GNM_LOG.add('ui', 'ip.check', { ok: true, source: ipInfo.source });
           renderIp();
         })
         .catch(function () { clearTimeout(timer); next(); });
@@ -310,7 +313,7 @@
     if (cfg.tzAuto && ipInfo.tz && DATA.countries[ipInfo.country].tz.indexOf(ipInfo.tz) !== -1) {
       patch.timeZone = ipInfo.tz;
     }
-    GNM_LOG.add('ui', 'ip.match', { country: ipInfo.country });
+    GNM_LOG.add('ui', 'ip.match', {});
     save(patch, true, true);
   }
 
@@ -358,7 +361,11 @@
     });
 
     $('exportBtn').addEventListener('click', function () {
-      download(JSON.stringify(cfg, null, 2),
+      // Ozel harita adresi disarida: icinde API anahtari olabiliyor ve bu dosya
+      // paylasiliyor. Iceri alirken eldeki deger korunuyor.
+      var shared = Object.assign({}, cfg);
+      delete shared.tilesCustom;
+      download(JSON.stringify(shared, null, 2),
         'geonomore-settings-' + GNM_AUTHOR.toLowerCase() + '.json', 'application/json');
     });
 
@@ -392,8 +399,10 @@
 
     $('resetBtn').addEventListener('click', function () {
       if (!confirm(T('resetConfirm'))) return;
-      chrome.storage.local.set({ config: Object.assign({}, GNM_DEFAULTS) }, function () {
-        location.reload();
+      chrome.storage.local.remove(['log', 'timeline'], function () {
+        chrome.storage.local.set({ config: Object.assign({}, GNM_DEFAULTS) }, function () {
+          location.reload();
+        });
       });
     });
   }
@@ -524,7 +533,7 @@
 
     $('searchMsg').textContent = T('searchWorking');
     $('searchResults').hidden = true;
-    GNM_LOG.add('ui', 'search', { q: q });
+    GNM_LOG.add('ui', 'search', {});
 
     gnmGeoSearch(q, function (err, rows) {
       if (err) {
@@ -1395,7 +1404,7 @@
     // Grup seciliyse yeni adres de hemen listeye girsin, yoksa yarim kalir
     if (groupOn(name)) patch.siteList = (cfg.siteList || []).concat([d]);
 
-    GNM_LOG.add('ui', 'group.add', { group: name, domain: d });
+    GNM_LOG.add('ui', 'group.add', { group: name });
     save(patch, true);
     return true;
   }
@@ -1405,7 +1414,7 @@
     extras[name] = (extras[name] || []).filter(function (x) { return x !== d; });
     if (!extras[name].length) delete extras[name];
 
-    GNM_LOG.add('ui', 'group.remove', { group: name, domain: d });
+    GNM_LOG.add('ui', 'group.remove', { group: name });
     save({
       groupExtras: extras,
       siteList: (cfg.siteList || []).filter(function (x) { return x !== d; })
@@ -1882,7 +1891,7 @@
           // önce düzelt, yoksa çizim yarıda kalıyor
           var fix = gnmGeoFix(DATA, cfg);
           if (fix) {
-            GNM_LOG.add('ui', 'geo.repair', fix);
+            GNM_LOG.add('ui', 'geo.repair', { keys: Object.keys(fix) });
             Object.assign(cfg, fix);
             gnmSet(fix);
           }

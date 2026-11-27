@@ -38,7 +38,7 @@
 - **防泄露** - WebRTC 本地 IP、Web Worker、页面创建的框架，以及页面自己发起的 IP 查询
 - **防追踪** - Global Privacy Control、清除链接中的追踪参数、关闭链接 ping 和 DNS 预解析
 - **针对每个浏览器** - 在 Chrome 中关闭 Privacy Sandbox 广告追踪，在 Firefox 中所有窗口都启用追踪保护
-- **IP 检测与完整日志** - 查看真实连接显示在哪里，以及交给每个网站的每个位置
+- **IP 检测与完整日志** - 查看真实连接显示在哪里，以及交给网站的伪造位置
 - **隐私优先的设计** - 无需账号，没有遥测，设置只保存在你的浏览器中
 
 ---
@@ -78,11 +78,11 @@ node src/tools/build.js
 
 每个发行版附带的文件，由本仓库通过 `node src/tools/build.js` 构建，纯 JavaScript，未压缩混淆:
 
-| 文件 | 说明 | SHA-256 (5.1.1) |
+| 文件 | 说明 | SHA-256 (5.1.2) |
 |---|---|---|
-| `geonomore-chromium-5.1.1.zip` | Chrome、Edge、Brave 和 Opera 安装包 | `94160f432482d6da585ac31c5ffb97ec7450336d93cecb85dd122264efdc806c` |
-| `geonomore-firefox-5.1.1.zip` | Firefox 与 Android 版 Firefox 安装包 | `827dc68021697ceefea5b8e4e1da968ef3f46a7ecfd1bf0e8b984a0366540f27` |
-| `geonomore-5.1.1-source.zip` | 供商店审核的源码包，见 [BUILD.md](../../docs/guides/BUILD.md) | `2677dcae1769e1e18b9813399521f15e77363254c7139d67916ad7b607d8e5dd` |
+| `geonomore-chromium-5.1.2.zip` | Chrome、Edge、Brave 和 Opera 安装包 | `292e0b970c0340010dd059df28d6ff1398645b7d003ef4fd519cabcaca60979d` |
+| `geonomore-firefox-5.1.2.zip` | Firefox 与 Android 版 Firefox 安装包 | `e4c7ea38c872a51fa9d9671aa6aa6dcc3992a56cc57f4670b0584d607b21f9ec` |
+| `geonomore-5.1.2-source.zip` | 供商店审核的源码包，见 [BUILD.md](../../docs/guides/BUILD.md) | `d843b96a0a5b130768cb1365c4409b24fe23f240552b389e9369addcc6409da7` |
 
 </details>
 
@@ -167,7 +167,7 @@ node src/tools/build.js
 <details>
 <summary><b>它会收集数据吗？</b></summary>
 
-不会。没有账号，没有统计分析，也没有我的服务器。设置保存在你的浏览器中。仅有的两个网络请求是可选的地址搜索（OpenStreetMap）和可选的 IP 检测，两者都只在你按下对应按钮时运行。见 [隐私政策](../../docs/store/privacy-policy.md)。
+不会。没有账号，没有统计分析，也没有我的服务器。设置保存在你的浏览器中。扩展自身发出的网络请求包括：设置页面中的地图图片（来自你选择的瓦片服务器，默认 OpenStreetMap）、可选的地址搜索（OpenStreetMap）和可选的 IP 检测；后两者只在你按下对应按钮时运行。见 [隐私政策](../../docs/store/privacy-policy.md)。
 
 </details>
 

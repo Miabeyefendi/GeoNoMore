@@ -56,7 +56,7 @@
   "modeAll": "Every site",
   "modeOnly": "Only the sites listed below",
   "modeExcept": "Every site except those listed below",
-  "siteListHint": "One domain per line. google.com also covers its subdomains. Where it does not run, no code is injected at all.",
+  "siteListHint": "One domain per line. google.com also covers its subdomains. Where it does not run, sites get your real values.",
   "siteListPlaceholder": "google.com\n*.example.com",
   "siteRules": "Per-site rules",
   "siteRulesHint": "Use a different setting for a specific site. Empty fields fall back to the global setting. The longest matching pattern wins.",

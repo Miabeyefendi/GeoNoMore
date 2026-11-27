@@ -17,6 +17,7 @@ var GNM_GPC_RULE_ID = 3;
 // ayni cagridaki GPC kurali da onunla dusuyordu. Adlar 7'lik gruplara bolunuyor
 // (gercek tarayicida 9'a kadar sigdi, pay birakildi). 4..7 bu kurallara ayrik.
 var GNM_BOOT_RULE_ID = 8;   // Server-Timing acilis degeri, bkz. gnmBootRule
+var GNM_LANG_SUB_RULE_ID = 9;   // dil basligi, alt istekler (site kipine gore ayri)
 var GNM_STRIP_RULE_ID = 4;
 var GNM_STRIP_CHUNK = 7;
 var GNM_STRIP_RULE_MAX = 4;
@@ -41,6 +42,18 @@ var GNM_TRACK_PARAMS = [
 var GNM_TILE_HOSTS = ['tile.openstreetmap.org', 'tile.openstreetmap.de'];
 var GNM_TILE_REFERER = 'https://addons.mozilla.org/firefox/addon/geonomore/';
 var GNM_LOG_MAX_DETAIL = 500;
+// Bu surumden onceki kayitlar tam adres ve kapaliyken gercek konum icerebiliyor;
+// guncellemede kayit ve hareket gecmisi siliniyor.
+var GNM_CLEAN_LOG_SINCE = '5.1.2';
+
+function gnmOlder(a, b) {
+  var x = String(a || '0').split('.'), y = String(b).split('.');
+  for (var i = 0; i < 3; i++) {
+    var d = (+x[i] || 0) - (+y[i] || 0);
+    if (d) return d < 0;
+  }
+  return false;
+}
 
 function gnmSwallow() {
   // Kayıtlı olmayanı kaldırmak, desteklenmeyen API'yi çağırmak hata döndürür.
@@ -138,6 +151,7 @@ function gnmTimeline(entries) {
 
 chrome.runtime.onMessage.addListener(function (msg, sender) {
   if (!msg || !Array.isArray(msg.__gnmLog)) return;
+  if (sender && sender.tab && sender.tab.incognito) return;   // gizli pencere
   var entries = msg.__gnmLog.slice(0, 50);
   gnmAppendLog(entries);
   gnmTimeline(entries);
@@ -162,7 +176,54 @@ function gnmLanguageHeader(locale) {
   return parts.join(',');
 }
 
+// Istek turleri. websocket, ping (sendBeacon, <a ping>), csp_report ve object
+// listede yoktu: onlar GERCEK Accept-Language ile gidiyordu. webtransport ve
+// webbundle yalniz tarayici taniyorsa ekleniyor (Firefox tanimiyor, tek
+// bilinmeyen tur butun cagriyi dusurur).
+var GNM_NAV_TYPES = ['main_frame', 'sub_frame'];
+function gnmSubTypes() {
+  var types = ['xmlhttprequest', 'script', 'stylesheet', 'image', 'font', 'media',
+    'websocket', 'ping', 'csp_report', 'object', 'other'];
+  var known = chrome.declarativeNetRequest && chrome.declarativeNetRequest.ResourceType;
+  if (known) {
+    if (known.WEBTRANSPORT) types.push('webtransport');
+    if (known.WEBBUNDLE) types.push('webbundle');
+  }
+  return types;
+}
+
+// Dil basligi sayfadaki dille ayni siteye gitmeli: haric tutulan sitede sayfa
+// gercek dili gorurken baslik sahte dili soyluyordu. Gezinme hedef adrese,
+// alt istekler istegi yapan sayfaya gore ayriliyor.
+function gnmLanguageRules(cfg, value) {
+  var mode = (cfg && cfg.siteMode) || 'all';
+  var listed = (cfg.siteList || []).map(gnmDomain).filter(Boolean);
+  if (mode === 'only' && !listed.length) return [];
+  var make = function (id, types, key) {
+    var condition = { urlFilter: '*', resourceTypes: types };
+    if (mode === 'only') condition[key] = listed.slice();
+    else if (mode === 'except' && listed.length) {
+      condition['excluded' + key.charAt(0).toUpperCase() + key.slice(1)] = listed.slice();
+    }
+    return {
+      id: id,
+      priority: 1,
+      action: {
+        type: 'modifyHeaders',
+        requestHeaders: [{ header: 'Accept-Language', operation: 'set', value: value }]
+      },
+      condition: condition
+    };
+  };
+  return [
+    make(GNM_LANG_RULE_ID, GNM_NAV_TYPES.slice(), 'requestDomains'),
+    make(GNM_LANG_SUB_RULE_ID, gnmSubTypes(), 'initiatorDomains')
+  ];
+}
+
 // Karo kuralı ayarlardan bağımsız: harita uzantı kapalıyken de çiziliyor.
+// YALNIZ uzantinin kendi sayfalarindan giden isteklere: sinir yokken herhangi
+// bir sitenin OSM karosuna GeoNoMore adresi Referer olarak ekleniyordu.
 function gnmTileRule() {
   return {
     id: GNM_TILE_RULE_ID,
@@ -173,6 +234,7 @@ function gnmTileRule() {
     },
     condition: {
       requestDomains: GNM_TILE_HOSTS,
+      initiatorDomains: [chrome.runtime.getURL('').split('/')[2]],
       resourceTypes: ['image']
     }
   };
@@ -187,28 +249,13 @@ function gnmSyncLanguage(cfg) {
   }
 
   var value = cfg && cfg.enabled && cfg.acceptLanguage ? gnmLanguageHeader(cfg.locale) : null;
-  var rules = [];
-  if (value) {
-    rules.push({
-      id: GNM_LANG_RULE_ID,
-      priority: 1,
-      action: {
-        type: 'modifyHeaders',
-        requestHeaders: [{ header: 'Accept-Language', operation: 'set', value: value }]
-      },
-      condition: {
-        urlFilter: '*',
-        resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'script',
-          'stylesheet', 'image', 'font', 'media', 'other']
-      }
-    });
-  }
+  var rules = value ? gnmLanguageRules(cfg, value) : [];
 
   try {
     rules.push(gnmTileRule());
 
     chrome.declarativeNetRequest.updateDynamicRules(
-      { removeRuleIds: [GNM_LANG_RULE_ID, GNM_TILE_RULE_ID], addRules: rules },
+      { removeRuleIds: [GNM_LANG_RULE_ID, GNM_TILE_RULE_ID, GNM_LANG_SUB_RULE_ID], addRules: rules },
       function () {
         var err = chrome.runtime.lastError;
         gnmLog(value ? 'dnr.set' : 'dnr.clear', {
@@ -356,7 +403,13 @@ var GNM_BOOT_TZ = /^[A-Za-z0-9_+\-\/]{1,64}$/;
 var GNM_BOOT_LOCALE = /^[A-Za-z0-9\-]{2,35}$/;
 
 function gnmDomain(p) {
-  return String(p || '').trim().toLowerCase().replace(/^\*\./, '').replace(/[:/].*$/, '');
+  var d = String(p || '').trim().toLowerCase().replace(/^\*\./, '').replace(/[:/].*$/, '');
+  // DNR yalniz ASCII ana makine adi kabul ediyor, tek bozuk kayit butun cagriyi
+  // dusurur: uluslararasi adlar punycode'a, gecersizler disariya
+  if (/[^a-z0-9.\-]/.test(d)) {
+    try { d = new URL('http://' + d).hostname; } catch (e) { d = ''; }
+  }
+  return /^[a-z0-9.\-]+$/.test(d) ? d : '';
 }
 
 function gnmBootRule(cfg, now) {
@@ -415,8 +468,7 @@ function gnmSyncTracking(cfg) {
       },
       condition: {
         urlFilter: '*',
-        resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'script',
-          'stylesheet', 'image', 'font', 'media', 'ping', 'other']
+        resourceTypes: GNM_NAV_TYPES.concat(gnmSubTypes())
       }
     });
   }
@@ -473,8 +525,15 @@ function gnmSync(reason) {
 }
 
 chrome.runtime.onInstalled.addListener(function (d) {
-  gnmLog('installed', { reason: d && d.reason, version: chrome.runtime.getManifest().version });
-  gnmSync('installed');
+  var start = function () {
+    gnmLog('installed', { reason: d && d.reason, version: chrome.runtime.getManifest().version });
+    gnmSync('installed');
+  };
+  if (d && d.reason === 'update' && gnmOlder(d.previousVersion, GNM_CLEAN_LOG_SINCE)) {
+    chrome.storage.local.remove(['log', 'timeline'], function () { gnmSwallow(); start(); });
+    return;
+  }
+  start();
 });
 
 chrome.runtime.onStartup.addListener(function () {
