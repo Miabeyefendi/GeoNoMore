@@ -33,6 +33,18 @@ All notable changes to **GeoNoMore** are recorded here. The format follows
 
 ---
 
+## [5.1.1] - 2026-11-27
+
+### Fixed
+
+- In Russia, places in the UTC+4 region (Samara, Izhevsk, Saratov, Astrakhan, Ulyanovsk) and on Sakhalin showed a time one hour off. They now get their own time zone, and Novosibirsk, Tomsk, Barnaul, Chita, Kirov and Anadyr use their own zone names.
+
+### Security
+
+- Any script on a web page could read your GeoNoMore settings, including saved places, per site rules, a custom map address with its key and the log, even when the extension was switched off. Settings now travel through a private channel, and a page only receives what is needed to fake the location on that page. Nothing about your location is sent where GeoNoMore is off or the site is excluded.
+
+---
+
 ## [5.1.0] - 2026-11-20
 
 ### Added
@@ -63,5 +75,6 @@ All notable changes to **GeoNoMore** are recorded here. The format follows
 
 <!-- Keep this link block at the bottom and add one line per release. -->
 
-[Unreleased]: https://github.com/Miabeyefendi/GeoNoMore/compare/v5.1.0...HEAD
+[Unreleased]: https://github.com/Miabeyefendi/GeoNoMore/compare/v5.1.1...HEAD
+[5.1.1]: https://github.com/Miabeyefendi/GeoNoMore/releases/tag/v5.1.1
 [5.1.0]: https://github.com/Miabeyefendi/GeoNoMore/releases/tag/v5.1.0

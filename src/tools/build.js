@@ -21,7 +21,7 @@ const SRC = path.join(ROOT, 'src', 'extension');
 const OUT = path.join(ROOT, 'releases', 'extensions');
 const DIST = OUT;
 
-const VERSION = '5.1.0';
+const VERSION = '5.1.1';
 const GECKO_ID = 'geonomore@miabeyefendi.dev';
 
 // İzinler hedef başına. Kaynak tek, ama Chrome ile Firefox ayrı tasarlanıyor:

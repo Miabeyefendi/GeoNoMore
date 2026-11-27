@@ -10,12 +10,65 @@
 // Dışarıdan hiçbir değişkene bakmamalı: gömüldüğünde etrafında hiçbir şey yok.
 // Motor ve kayıt tamponu bu yüzden içeride kuruluyor.
 
-function gnmInjected(makeEngine) {
+function gnmInjected(makeEngine, tokenArg) {
   'use strict';
 
   var E = makeEngine();
 
-  // Sayfa dünyasında chrome API'si yok. Kayıtlar köprüye postMessage ile gidiyor.
+  // --- ozel kanal ---------------------------------------------------------
+  // Yama ile kopru ESKIDEN window.postMessage('*') ile konusuyordu: sayfadaki
+  // HER betik (reklam, analitik dahil) 'message' dinleyip ayarin tamamini
+  // okuyabiliyor, kapaliyken bile "buradayim" diyerek ayari istetebiliyordu.
+  // Simdi iki yon icin sayfa basina RASTGELE adli iki olay var (ad+'p' sayfa
+  // dunyasindan koprue, ad+'b' kopruden sayfa dunyasina). Ad, sayfa betikleri
+  // calismadan once el degistiriyor ve sayfa onu hic goremiyor:
+  //   - MAIN dunya betigi (birincil): yama adi uretir, kok elemana gecici
+  //     `data-gnm-ok` olarak koyar, kopru okur okumaz siler.
+  //   - kopru betik sokarsa (yedek): adi o uretir, betik elemaninin
+  //     `data-gnm-k` ozniteligiyle (harici) ya da kod argumani olarak (satir ici) verir.
+  // Olay yuku JSON metni: iki dunya arasinda nesne gecisi tarayiciya gore degisiyor.
+  // Yama yuklenirken pencerenin dinleme ve gonderme fonksiyonlari saklaniyor.
+  var addL = window.addEventListener;
+  var sendEv = window.dispatchEvent;
+  var CustomEv = window.CustomEvent;
+  // Sayfa sonradan JSON.parse ya da CustomEvent.prototype.detail'i degistirirse,
+  // yama onlari cagirirken veriyi sayfaya vermis olurdu; asillari saklaniyor.
+  // Gonderirken ic nesne prototipsiz: yoksa tarayici bubbles/composed gibi
+  // alanlari Object.prototype'tan okurken sayfanin getter'i nesneyi gorur.
+  // Sinir: sayfa dunyasinda calisan kod hedefli bir saldirgandan tam korunamaz,
+  // bu yuzden kopru sayfaya zaten en az veriyi gonderiyor (bridge.js).
+  var jParse = JSON.parse, jString = JSON.stringify, objCreate = Object.create;
+  var detailDesc = CustomEv && CustomEv.prototype &&
+    Object.getOwnPropertyDescriptor(CustomEv.prototype, 'detail');
+  var detailGet = detailDesc && detailDesc.get;
+
+  var CH = null, handoff = false;
+  try {
+    var cs = typeof document !== 'undefined' && document.currentScript;
+    CH = tokenArg || (cs && cs.getAttribute && cs.getAttribute('data-gnm-k')) || null;
+  } catch (e) { CH = null; }
+  if (!CH) {
+    handoff = true;
+    var rnd = '';
+    try {
+      var rb = new Uint32Array(4);
+      crypto.getRandomValues(rb);
+      for (var ri = 0; ri < rb.length; ri++) rnd += rb[ri].toString(36);
+    } catch (e) { rnd = ''; }
+    // Tarayicida crypto her zaman var; sinama ortami icin yedek
+    CH = 'g' + rnd + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+  CH = String(CH);
+
+  function toBridge(msg) {
+    try {
+      var init = objCreate(null);
+      init.detail = jString(msg);
+      sendEv.call(window, new CustomEv(CH + 'p', init));
+    } catch (e) { /* yoksay */ }
+  }
+
+  // Sayfa dunyasinda chrome API'si yok. Kayitlar koprue ozel kanaldan gidiyor.
   var LOG = (function () {
     var buf = [], timer = 0, on = true;
     function flush() {
@@ -23,7 +76,7 @@ function gnmInjected(makeEngine) {
       if (!buf.length) return;
       var batch = buf;
       buf = [];
-      try { window.postMessage({ __gnm: 2, log: batch }, '*'); } catch (e) { /* yoksay */ }
+      toBridge({ __gnm: 2, log: batch });
     }
     return {
       enable: function (v) { on = v !== false; if (!on) buf = []; },
@@ -52,15 +105,18 @@ function gnmInjected(makeEngine) {
   // Sayfa betigi arada calisamiyor: ikisi de document_start'ta, arka arkaya.
   // Kopru <script> ile soktuysa (currentScript dolu) isaret konmuyor, onu
   // okuyacak kimse kalmadi. Kok eleman yoksa eski yol (Firefox Xray okuyabiliyor).
-  try {
-    var okRoot = typeof document !== 'undefined' && document.documentElement;
-    if (okRoot && !document.currentScript) okRoot.setAttribute('data-gnm-ok', '');
-    else if (!okRoot) {
-      Object.defineProperty(window, '__gnmOK', {
-        value: 1, configurable: true, enumerable: false, writable: true
-      });
-    }
-  } catch (e) { /* yoksay */ }
+  // Isaretin degeri kanal adi (yukaridaki aciklama). Yalniz MAIN yolunda konur.
+  if (handoff) {
+    try {
+      var okRoot = typeof document !== 'undefined' && document.documentElement;
+      if (okRoot) okRoot.setAttribute('data-gnm-ok', CH);
+      else {
+        Object.defineProperty(window, '__gnmOK', {
+          value: 1, configurable: true, enumerable: false, writable: true
+        });
+      }
+    } catch (e) { /* yoksay */ }
+  }
 
   // "Bu pencereye yama girdi" işareti. __gnmOK silindikten sonra da gerekiyor:
   // yedek harici betik ikinci kez çalışırsa her şeyi tekrar yamalamasın.
@@ -81,7 +137,7 @@ function gnmInjected(makeEngine) {
 
   // "Buradayım, ayarı yolla." Satır içi yolda köprü zaten yolluyor ama harici
   // yedek yolda yama geç yükleniyor ve ilk yollamayı kaçırıyor.
-  try { window.postMessage({ __gnm: 0 }, '*'); } catch (e) { /* yoksay */ }
+  toBridge({ __gnm: 0 });
 
   var RealDate = Date;
   var OrigDTF = Intl.DateTimeFormat;
@@ -139,7 +195,7 @@ function gnmInjected(makeEngine) {
   function askBridge(options, done) {
     var id = nextReq++;
     waiting[id] = done;
-    window.postMessage({ __gnm: 3, id: id, options: options || null }, '*');
+    toBridge({ __gnm: 3, id: id, options: options || null });
 
     // Köprü cevap vermezse sayfanın çağrısı sonsuza kadar asılı kalmasın
     setTimeout(function () {
@@ -149,9 +205,9 @@ function gnmInjected(makeEngine) {
     }, 20000);
   }
 
-  window.addEventListener('message', function (e) {
-    if (e.source !== window) return;
-    var d = e.data;
+  addL.call(window, CH + 'b', function (e) {
+    var d;
+    try { d = jParse(detailGet ? detailGet.call(e) : e.detail); } catch (x) { return; }
     if (!d) return;
 
     if (d.__gnm === 4) {

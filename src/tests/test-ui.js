@@ -215,7 +215,16 @@ const with_ = p => Object.assign({}, base, p);
   const tzAt = (cc, lat, lon) => call('gnmGeoTz', DATA, cc, lon, null, lat);
   const cases = [
     ['RU', 54.71, 20.51, 'Europe/Kaliningrad'],
-    ['RU', 55.03, 82.92, 'Asia/Krasnoyarsk'],
+    ['RU', 55.03, 82.92, 'Asia/Novosibirsk'],
+    // UTC+4 bolgesi ve Sahalin listede yoktu, bir saat yanlis cikiyordu
+    ['RU', 53.20, 50.15, 'Europe/Samara'],
+    ['RU', 56.85, 53.20, 'Europe/Samara'],
+    ['RU', 51.53, 46.03, 'Europe/Saratov'],
+    ['RU', 46.35, 48.04, 'Europe/Astrakhan'],
+    ['RU', 54.32, 48.39, 'Europe/Ulyanovsk'],
+    ['RU', 46.96, 142.73, 'Asia/Sakhalin'],
+    ['RU', 55.79, 49.11, 'Europe/Moscow'],
+    ['RU', 54.74, 55.97, 'Asia/Yekaterinburg'],
     ['RU', 43.12, 131.89, 'Asia/Vladivostok'],
     ['ES', 28.10, -15.40, 'Atlantic/Canary'],
     ['ES', 41.39, 2.17, 'Europe/Madrid'],

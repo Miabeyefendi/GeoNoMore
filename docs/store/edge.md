@@ -4,7 +4,7 @@ Copy and paste sheet for the submission form. Fill it top to bottom, the order m
 
 - Store: https://partner.microsoft.com/dashboard/microsoftedge
 - Package: `extensions/geonomore-microsoft-5.0.0.zip` (`node src/tools/build.js microsoft`)
-- Version: 5.1.0
+- Version: 5.1.1
 - Author: Miabeyefendi - Mustafa Ihsan Albayrak
 - Contact mail: mustafaihsanalbayrak@hotmail.com
 - Website: https://geonomore.com   TODO: the domain is not live yet, put the real address here before submitting

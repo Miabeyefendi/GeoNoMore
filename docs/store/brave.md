@@ -3,8 +3,8 @@
 Copy and paste sheet for the submission form. Fill it top to bottom, the order matches the form.
 
 - Store: https://chrome.google.com/webstore/devconsole
-- Package: `extensions/geonomore-chromium-5.1.0.zip` (`node src/tools/build.js chromium`)
-- Version: 5.1.0
+- Package: `extensions/geonomore-chromium-5.1.1.zip` (`node src/tools/build.js chromium`)
+- Version: 5.1.1
 - Author: Miabeyefendi - Mustafa Ihsan Albayrak
 - Contact mail: mustafaihsanalbayrak@hotmail.com
 - Website: https://geonomore.com   TODO: the domain is not live yet, put the real address here before submitting
@@ -13,7 +13,7 @@ Copy and paste sheet for the submission form. Fill it top to bottom, the order m
 
 Brave has no extension store of its own. It reads the Chrome Web Store, and a listing published there is installable in Brave without any extra step. So there is nothing separate to submit.
 
-`extensions/chromium/` and `extensions/geonomore-chromium-5.1.0.zip` exist for two reasons: loading the unpacked build in Brave while testing, and handing the file to someone directly. The manifest is identical to the Chrome one.
+`extensions/chromium/` and `extensions/geonomore-chromium-5.1.1.zip` exist for two reasons: loading the unpacked build in Brave while testing, and handing the file to someone directly. The manifest is identical to the Chrome one.
 
 ## What to do
 

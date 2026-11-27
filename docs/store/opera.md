@@ -3,8 +3,8 @@
 Copy and paste sheet for the submission form. Fill it top to bottom, the order matches the form.
 
 - Store: https://addons.opera.com/developer/
-- Package: `extensions/geonomore-chromium-5.1.0.zip` (`node src/tools/build.js chromium`)
-- Version: 5.1.0
+- Package: `extensions/geonomore-chromium-5.1.1.zip` (`node src/tools/build.js chromium`)
+- Version: 5.1.1
 - Author: Miabeyefendi - Mustafa Ihsan Albayrak
 - Contact mail: mustafaihsanalbayrak@hotmail.com
 - Website: https://geonomore.com   TODO: the domain is not live yet, put the real address here before submitting

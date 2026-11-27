@@ -78,11 +78,11 @@ node src/tools/build.js
 
 Файлы, прикреплённые к каждому релизу, собраны из этого репозитория командой `node src/tools/build.js`, обычный JavaScript без минификации:
 
-| Файл | Что это | SHA-256 (5.1.0) |
+| Файл | Что это | SHA-256 (5.1.1) |
 |---|---|---|
-| `geonomore-chromium-5.1.0.zip` | Пакет для Chrome, Edge, Brave и Opera | `57865ff86b4efce22d2edf4523074570c70984ad8e6cb7c084473d6b8b930410` |
-| `geonomore-firefox-5.1.0.zip` | Пакет для Firefox и Firefox для Android | `58fe7958c2350a611258125103568823ce485cb3a726b02ab91e8ad6bea5d61d` |
-| `geonomore-5.1.0-source.zip` | Пакет исходников для проверки в магазине, см. [BUILD.md](../../docs/guides/BUILD.md) | `60fa1a431d6a3f247d1d69c0d4edaea07cb136d4c3109090ab29d4017b250558` |
+| `geonomore-chromium-5.1.1.zip` | Пакет для Chrome, Edge, Brave и Opera | `94160f432482d6da585ac31c5ffb97ec7450336d93cecb85dd122264efdc806c` |
+| `geonomore-firefox-5.1.1.zip` | Пакет для Firefox и Firefox для Android | `827dc68021697ceefea5b8e4e1da968ef3f46a7ecfd1bf0e8b984a0366540f27` |
+| `geonomore-5.1.1-source.zip` | Пакет исходников для проверки в магазине, см. [BUILD.md](../../docs/guides/BUILD.md) | `2677dcae1769e1e18b9813399521f15e77363254c7139d67916ad7b607d8e5dd` |
 
 </details>
 

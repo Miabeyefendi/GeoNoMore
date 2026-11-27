@@ -13,7 +13,8 @@ const http = require('http');
 const { spawn } = require('child_process');
 
 const ROOT = path.join(__dirname, '..', '..');
-const EXT = path.join(ROOT, 'releases', 'extensions', 'chromium');
+// GNM_EXT: baska bir paket klasorunu denetle (orn. yayindaki eski surumu)
+const EXT = process.env.GNM_EXT || path.join(ROOT, 'releases', 'extensions', 'chromium');
 const PORT = 9334, WEB = 8199;
 const WANT = { tz: 'Asia/Tokyo', lang: 'ja', lat: 35.6, lon: 139.6 };
 
@@ -72,6 +73,15 @@ const WORKER = `
   try { r.temporal = typeof Temporal !== 'undefined' ? Temporal.Now.timeZoneId() : null; } catch (e) { r.temporal = 'ERR'; }
   const out = r;`;
 const PAGE = `<!doctype html><meta charset="utf-8"><title>leak</title><script>
+// Dinleyen sayfa: ilk betikte kuruluyor, kopru ayari ondan SONRA yolluyor.
+// message olaylari (arkadasin konsola yazdigi tek satir), sonradan degistirilmis
+// JSON.parse ve CustomEvent.detail. Hicbiri ayari gormemeli.
+const spy = window.__spy = { msg: [], parse: [], detail: [] };
+addEventListener('message', function (e) { try { spy.msg.push(String(JSON.stringify(e.data))); } catch (x) {} });
+const realParse = JSON.parse;
+JSON.parse = function (s) { if (/__gnm|"timeZone"|"lat"/.test(String(s))) spy.parse.push(String(s).slice(0, 80)); return realParse.apply(this, arguments); };
+const dd = Object.getOwnPropertyDescriptor(CustomEvent.prototype, 'detail');
+Object.defineProperty(CustomEvent.prototype, 'detail', { configurable: true, get: function () { const v = dd.get.call(this); if (/__gnm|"timeZone"/.test(String(v))) spy.detail.push(String(v).slice(0, 80)); return v; } });
 window.__r = (async () => {
   const R = {};
   const step = async (k, f) => { try { R[k] = await f(); } catch (e) { R[k] = 'ERR ' + (e && e.message || e); } };
@@ -131,6 +141,13 @@ window.__r = (async () => {
     const w = f.contentWindow; res({ tz: w.Intl.DateTimeFormat().resolvedOptions().timeZone, lang: w.navigator.language,
       offset: new w.Date(2026, 0, 15).getTimezoneOffset() });
   }));
+  // Eski yolu dene: "buradayim" deyip ayari istetmek
+  await step('spy', async () => {
+    postMessage({ __gnm: 0 }, '*');
+    await new Promise(r => setTimeout(r, 1500));
+    return { msg: spy.msg.filter(function (m) { return /cfg|timeZone|"lat"|"log"/.test(m); }).map(function (m) { return m.slice(0, 80); }),
+      parse: spy.parse, detail: spy.detail };
+  });
   return R;
 })();
 </script>`;
@@ -162,6 +179,10 @@ function judge(R) {
   ctx('main', R.main);
   add('trace', R.trace === false, R.trace);
   add('bootBypass', R.bootBypass === false, R.bootBypass);
+  const sp = R.spy || {};
+  add('spy.message', Array.isArray(sp.msg) && !sp.msg.length, sp.msg || sp);
+  add('spy.jsonParse', Array.isArray(sp.parse) && !sp.parse.length, sp.parse);
+  add('spy.eventDetail', Array.isArray(sp.detail) && !sp.detail.length, sp.detail);
   add('dateString', /GMT\+0900/.test(R.dateString), R.dateString);
   add('geo', Array.isArray(R.geo) && Math.abs(R.geo[0] - WANT.lat) < 1 && Math.abs(R.geo[1] - WANT.lon) < 1, R.geo);
   for (const k of ['worker', 'workerUrl', 'workerModule', 'shared']) ctx(k, R[k]);

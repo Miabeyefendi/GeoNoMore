@@ -29,13 +29,25 @@ const ctx = vm.createContext({
 
 vm.runInContext(`
   globalThis.window = globalThis;
+  // Yama ile kopru ozel olaylarla konusuyor: ad+'p' yamadan koprue, ad+'b'
+  // kopruden yamaya. Test kanal adini kendisi veriyor (TESTCH).
   globalThis.__handlers = [];
+  globalThis.__pageSaw = [];   // ad bilinmeden sayfanin gorebilecegi her sey
   globalThis.addEventListener = function (type, fn) {
-    if (type === 'message') __handlers.push(fn);
+    if (type === 'TESTCHb') __handlers.push(fn);
+    else __pageSaw.push(type);
+  };
+  globalThis.CustomEvent = function CustomEvent(type, init) {
+    this.type = type; this.detail = init && init.detail;
+  };
+  globalThis.__posted = [];
+  globalThis.dispatchEvent = function (ev) {
+    if (ev.type === 'TESTCHp') __posted.push(JSON.parse(ev.detail));
+    else __pageSaw.push('dispatch:' + ev.type);
   };
   globalThis.location = { origin: 'https://test.example', href: 'https://test.example/sayfa' };
-  globalThis.__posted = [];
-  globalThis.postMessage = function (msg) { __posted.push(msg); };
+  // Eski acik yol: bu cagrildiysa sayfa her seyi duyabilirdi
+  globalThis.postMessage = function () { __pageSaw.push('postMessage'); };
   globalThis.Response = function (body, init) {
     this.__body = body;
     this.status = (init && init.status) || 200;
@@ -216,7 +228,7 @@ vm.runInContext(read('content/injected.js'), ctx, { filename: 'injected.js' });
 // Sayfaya nasıl giriyorsa öyle çalıştır: kaynağı metne çevirip yeniden kur.
 // Böylece "gömülünce dışarıdaki bir değişkene bakıyor" hatası da yakalanır.
 vm.runInContext('(' + vm.runInContext('gnmInjected', ctx) + ')(' +
-  vm.runInContext('gnmEngineFactory', ctx) + ');', ctx, { filename: 'injected-inline.js' });
+  vm.runInContext('gnmEngineFactory', ctx) + ', "TESTCH");', ctx, { filename: 'injected-inline.js' });
 
 // patch.js kayıtları postMessage ile gönderiyor, hepsini toplayalım
 function logged() {
@@ -231,8 +243,8 @@ function applyConfig(cfg, active) {
   ctx.__cfg = cfg;
   ctx.__active = active !== false;
   vm.runInContext(
-    '__handlers.forEach(function (f) { f({ source: window, data: ' +
-    '{ __gnm: 1, cfg: __cfg, active: __active } }); })',
+    '__handlers.forEach(function (f) { f({ detail: JSON.stringify(' +
+    '{ __gnm: 1, cfg: __cfg, active: __active }) }); })',
     ctx
   );
 }
@@ -244,7 +256,7 @@ function requests() {
 }
 function answer(id, pos) {
   ctx.__reply = { __gnm: 4, id: id, pos: pos };
-  vm.runInContext('__handlers.forEach(function (f) { f({ source: window, data: __reply }); })', ctx);
+  vm.runInContext('__handlers.forEach(function (f) { f({ detail: JSON.stringify(__reply) }); })', ctx);
 }
 
 const CFG = {
@@ -396,7 +408,11 @@ const tick = (ms) => new Promise(r => setTimeout(r, ms || 5));
     vm.runInContext(`
       globalThis.window = globalThis;
       globalThis.__posted = [];
-      globalThis.postMessage = function (m) { __posted.push(m); };
+      globalThis.__names = [];
+      globalThis.__open = 0;
+      globalThis.postMessage = function () { __open++; };
+      globalThis.CustomEvent = function (type, init) { this.type = type; this.detail = init && init.detail; };
+      globalThis.dispatchEvent = function (ev) { __names.push(ev.type); __posted.push(JSON.parse(ev.detail)); };
       globalThis.addEventListener = function () {};
       globalThis.location = { origin: 'https://temiz.test', href: 'https://temiz.test/' };
       globalThis.navigator = {
@@ -414,6 +430,9 @@ const tick = (ms) => new Promise(r => setTimeout(r, ms || 5));
       'köprünün baktığı işaret konmalı, yoksa CSP yedeğine boşuna düşer');
     assert.strictEqual(vm.runInContext('JSON.stringify(__posted[0])', clean), '{"__gnm":0}',
       'yama yüklendiğini duyurmalı, yoksa geç yüklenince ayarı hiç alamaz');
+    assert.strictEqual(vm.runInContext('__open', clean), 0, 'herkese acik postMessage kullanilmamali');
+    assert.ok(/^g[a-z0-9]{12,}p$/.test(vm.runInContext('__names[0]', clean)),
+      'kanal adi rastgele olmali, gelen: ' + vm.runInContext('__names[0]', clean));
     assert.notStrictEqual(
       vm.runInContext('navigator.geolocation.getCurrentPosition.toString()', clean).indexOf('native code'),
       1, 'konum API si gerçekten yamalanmalı');
@@ -697,9 +716,14 @@ const tick = (ms) => new Promise(r => setTimeout(r, ms || 5));
     assert.strictEqual(ctx.__keys.length, 0,
       'window numaralandirmasinda uzanti izi kalmamali, gelen: ' + JSON.stringify(ctx.__keys));
 
-    // Isaret duruyor ama gizli: kopru adiyla okuyabilmeli
-    run("globalThis.__okVar = window.__gnmOK;");
-    assert.strictEqual(ctx.__okVar, 1, 'kopru isareti okuyabilmeli');
+    // Kanal adi disaridan geldiginde (kopru betik sokarken) isaret konmuyor
+    assert.strictEqual(run("'__gnmOK' in window"), false, 'kanal adi verildiyse isaret kalmamali');
+
+    // Sayfanin duyabilecegi hicbir yol kullanilmamali: postMessage yok, bilinen
+    // adli olay yok, 'message' dinleyicisi yok. Butun test boyunca biriken kayit.
+    const saw = JSON.parse(run('JSON.stringify(__pageSaw)'));
+    assert.deepStrictEqual(saw.filter(t => t === 'postMessage' || t === 'message' || /^dispatch:/.test(t)), [],
+      'ayar ve kayitlar herkese acik kanaldan gitmemeli, gelen: ' + JSON.stringify(saw));
   }
 
   // 30. Intl.DateTimeFormat de sahte dili kullanmali. Oteki Intl yapicilari

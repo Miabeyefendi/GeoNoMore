@@ -19,7 +19,7 @@ node src/tools/build.js firefox
 That is the whole build. It produces:
 
 - `releases/extensions/firefox/`, the unpacked add-on
-- `releases/extensions/geonomore-firefox-5.1.0.zip`, the exact file that was submitted
+- `releases/extensions/geonomore-firefox-5.1.1.zip`, the exact file that was submitted
 
 Run `node src/tools/build.js` with no argument to build the Chromium package as
 well.
@@ -55,5 +55,5 @@ detectable by any site. The single wrapped file avoids that.
 node src/tools/build.js firefox
 ```
 
-Then compare `releases/extensions/geonomore-firefox-5.1.0.zip` against the submitted
+Then compare `releases/extensions/geonomore-firefox-5.1.1.zip` against the submitted
 file. They are identical.

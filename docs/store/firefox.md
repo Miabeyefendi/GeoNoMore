@@ -3,8 +3,8 @@
 Copy and paste sheet for the submission form. Fill it top to bottom, the order matches the form.
 
 - Store: https://addons.mozilla.org/developers/
-- Package: `extensions/geonomore-firefox-5.1.0.zip` (`node src/tools/build.js firefox`)
-- Version: 5.1.0
+- Package: `extensions/geonomore-firefox-5.1.1.zip` (`node src/tools/build.js firefox`)
+- Version: 5.1.1
 - Author: Miabeyefendi - Mustafa Ihsan Albayrak
 - Contact mail: mustafaihsanalbayrak@hotmail.com
 - Website: https://geonomore.com   TODO: the domain is not live yet, put the real address here before submitting
@@ -13,7 +13,7 @@ Copy and paste sheet for the submission form. Fill it top to bottom, the order m
 
 Free. A Mozilla account is enough. No compiling and no signing on your side: you upload the zip and AMO signs it into an xpi itself. Self distribution outside AMO is the only case that needs the signing API, and it is not needed here.
 
-The package must carry `browser_specific_settings.gecko.id`, and `extensions/geonomore-firefox-5.1.0.zip` already does. Also note Firefox runs the background as a script list rather than a service worker, which `src/tools/build.js` handles.
+The package must carry `browser_specific_settings.gecko.id`, and `extensions/geonomore-firefox-5.1.1.zip` already does. Also note Firefox runs the background as a script list rather than a service worker, which `src/tools/build.js` handles.
 
 Two things AMO validation rejects if they are missing or wrong:
 

@@ -87,7 +87,7 @@ content/injected.js inside a single IIFE, with the comments kept. Both source fi
 also in the package. To reproduce the submitted zip from the attached source package:
 install Node.js 18 or newer, then from the package root run
   node src/tools/build.js firefox
-The output releases/extensions/geonomore-firefox-5.1.0.zip is byte identical to the
+The output releases/extensions/geonomore-firefox-5.1.1.zip is byte identical to the
 submitted file. Nothing is downloaded during the build. Full steps: docs/guides/BUILD.md.
 
 WHY THE PAGE PATCH RUNS IN THE PAGE
@@ -96,7 +96,7 @@ content script cannot do. content/fallback.js is registered as a world: "MAIN" c
 script. Where that does not run, content/bridge.js inserts the same packaged file from
 web_accessible_resources. No remote code is loaded at any point.
 
-NEW IN 5.1.0: SERVER-TIMING RULE
+NEW IN 5.1.1: SERVER-TIMING RULE
 Besides Accept-Language, the Sec-GPC header and tracking tag removal, one dynamic
 declarativeNetRequest rule appends a response header to document responses:
   Server-Timing: gnm;desc="<time zone>|<language>"

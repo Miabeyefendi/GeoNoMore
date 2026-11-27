@@ -1298,7 +1298,19 @@
     "Asia/Yakutsk",
     "Asia/Vladivostok",
     "Asia/Magadan",
-    "Asia/Kamchatka"
+    "Asia/Kamchatka",
+    "Europe/Samara",
+    "Europe/Saratov",
+    "Europe/Ulyanovsk",
+    "Europe/Astrakhan",
+    "Europe/Kirov",
+    "Asia/Novosibirsk",
+    "Asia/Tomsk",
+    "Asia/Barnaul",
+    "Asia/Novokuznetsk",
+    "Asia/Chita",
+    "Asia/Sakhalin",
+    "Asia/Anadyr"
    ]
   },
   "RW": {
@@ -2153,7 +2165,7 @@
     "Novosibirsk",
     55.0084,
     82.9357,
-    "Asia/Krasnoyarsk"
+    "Asia/Novosibirsk"
    ],
    [
     "Yekaterinburg",
@@ -2866,12 +2878,12 @@
     92.89
    ],
    [
-    "Asia/Krasnoyarsk",
+    "Asia/Novosibirsk",
     55.03,
     82.92
    ],
    [
-    "Asia/Krasnoyarsk",
+    "Asia/Novokuznetsk",
     55.35,
     86.09
    ],
@@ -2896,7 +2908,7 @@
     129.73
    ],
    [
-    "Asia/Yakutsk",
+    "Asia/Chita",
     52.03,
     113.5
    ],
@@ -2926,9 +2938,74 @@
     158.65
    ],
    [
-    "Asia/Kamchatka",
+    "Asia/Anadyr",
     64.73,
     177.5
+   ],
+   [
+    "Europe/Samara",
+    53.2,
+    50.15
+   ],
+   [
+    "Europe/Samara",
+    56.85,
+    53.2
+   ],
+   [
+    "Europe/Saratov",
+    51.53,
+    46.03
+   ],
+   [
+    "Europe/Ulyanovsk",
+    54.32,
+    48.39
+   ],
+   [
+    "Europe/Astrakhan",
+    46.35,
+    48.04
+   ],
+   [
+    "Europe/Kirov",
+    58.6,
+    49.66
+   ],
+   [
+    "Europe/Moscow",
+    53.2,
+    45.0
+   ],
+   [
+    "Europe/Moscow",
+    56.33,
+    44.0
+   ],
+   [
+    "Asia/Yekaterinburg",
+    51.77,
+    55.1
+   ],
+   [
+    "Asia/Yekaterinburg",
+    54.74,
+    55.97
+   ],
+   [
+    "Asia/Tomsk",
+    56.5,
+    84.97
+   ],
+   [
+    "Asia/Barnaul",
+    53.36,
+    83.76
+   ],
+   [
+    "Asia/Sakhalin",
+    46.96,
+    142.73
    ]
   ],
   "KZ": [
